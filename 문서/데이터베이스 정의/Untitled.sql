@@ -1,17 +1,17 @@
 CREATE TABLE `users` (
   `user_id` integer PRIMARY KEY AUTO_INCREMENT,
   `user_nickname` varchar(10) UNIQUE NOT NULL,
-  `email` varchar(255) UNIQUE NOT NULL,
-  `hashed_password` varchar(200) NOT NULL
+  `email` varchar(30) UNIQUE NOT NULL,
+  `hashed_password` varchar(50) NOT NULL
 );
 
 CREATE TABLE `posts` (
   `post_id` integer PRIMARY KEY AUTO_INCREMENT,
-  `title` varchar(30) NOT NULL,
+  `title` varchar(100) NOT NULL,
   `content` varchar(500) NOT NULL,
   `views` integer,
   `user_id` integer NOT NULL,
-  `category_id` integer NOT NULL,
+  `category_id` varchar(50) NOT NULL,
   `created_at` timestamp,
   `updated_at` timestamp
 );
@@ -19,8 +19,8 @@ CREATE TABLE `posts` (
 CREATE TABLE `files` (
   `files_id` integer PRIMARY KEY AUTO_INCREMENT,
   `post_id` integer NOT NULL,
-  `file_originalname` varchar(255) NOT NULL,
-  `url` text NOT NULL,
+  `file_original_name` varchar(255) NOT NULL,
+  `url` varchar(255) NOT NULL,
   `file_size` integer,
   `created_at` timestamp
 );
@@ -52,10 +52,10 @@ CREATE TABLE `post_likes` (
   PRIMARY KEY (`post_id`, `user_id`)
 );
 
-CREATE TABLE `file_role` (
+CREATE TABLE `file_rule` (
   `file_max_num` integer NOT NULL,
   `file_size` integer NOT NULL,
-  `file_type` varchar(20) NOT NULL
+  `file_type` varchar(20)
 );
 
 ALTER TABLE `posts` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);

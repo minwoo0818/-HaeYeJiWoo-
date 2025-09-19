@@ -1,0 +1,153 @@
+-- extension for email regex convenience (선택)
+-- CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+
+
+CREATE TABLE users (
+id SERIAL PRIMARY KEY,
+user_id VARCHAR(10) NOT NULL UNIQUE,
+email VARCHAR(255) NOT NULL UNIQUE,
+hashed_password VARCHAR(200) NOT NULL,
+created_at TIMESTAMPTZ DEFAULT now(),
+updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+
+-- 카테고리 테이블 (사전 정의된 카테고리 사용 권장)
+CREATE TABLE categories (
+id SERIAL PRIMARY KEY,
+name VARCHAR(50) NOT NULL UNIQUE
+);
+
+
+CREATE TABLE posts (
+id SERIAL PRIMARY KEY,
+title VARCHAR(30) NOT NULL,
+content VARCHAR(500) NOT NULL,
+views INTEGER DEFAULT 0,
+author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+category_id INTEGER NOT NULL REFERENCES categories(id),
+created_at TIMESTAMPTZ DEFAULT now(),
+updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+
+CREATE TABLE files (
+id SERIAL PRIMARY KEY,
+post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+filename VARCHAR(255) NOT NULL,
+url TEXT NOT NULL,
+mime_type VARCHAR(100),
+file_type VARCHAR(20) NOT NULL, -- 'image','video','document'
+file_size INTEGER,
+created_at TIMESTAMPTZ DEFAULT now()
+);
+
+
+CREATE TABLE hashtags (
+id SERIAL PRIMARY KEY,
+tag VARCHAR(100) NOT NULL UNIQUE
+);
+
+
+CREATE TABLE post_hashtags (
+post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+hashtag_id INTEGER NOT NULL REFERENCES hashtags(id) ON DELETE CASCADE,
+PRIMARY KEY (post_id, hashtag_id)
+);
+
+
+CREATE TABLE comments (
+id SERIAL PRIMARY KEY,
+post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+author_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+content VARCHAR(1000) NOT NULL,
+parent_comment_id INTEGER REFERENCES comments(id) ON DELETE CASCADE,
+created_at TIMESTAMPTZ DEFAULT now(),
+updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+
+-- 좋아요: 한 유저가 한 게시글에 한 번만 좋아요 가능
+CREATE TABLE post_likes (
+
+
+
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+Table users {
+  user_id integer [primary key]
+  user_nickname varchar(10) [unique, not null]
+  email varchar(255) [unique, not null]
+  hashed_password varchar(200) [not null]
+  /*created_at timestamp
+  updated_at timestamp*/
+}
+
+Table categories {
+  category_id integer [primary key]
+  name varchar(50) [unique, not null]
+}
+
+Table posts {
+  post_id integer [primary key]
+  title varchar(30) [not null]
+  content varchar(500) [not null]
+  views integer
+  user_id integer [not null]
+  category_id integer [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table files {
+  files_id integer [primary key]
+  post_id integer [not null]
+  filename varchar(255) [not null]
+  url text [not null]
+  /*mime_type varchar(100)*/
+  file_type varchar(20) [not null]
+  file_size integer
+  created_at timestamp
+}
+
+Table hashtags {
+  hashtags_id integer [primary key]
+  tag varchar(100) [unique, not null]
+}
+
+Table post_hashtags {
+  post_id integer [not null]
+  hashtag_id integer [not null]
+  indexes {
+    (post_id, hashtag_id) [pk]
+  }
+}
+
+Table comments {
+  comments_id integer [primary key]
+  post_id integer [not null]
+  user_nickname integer [not null]
+  content varchar(1000) [not null]
+  parent_comment_id integer
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table post_likes {
+  post_id integer [not null]
+  user_id integer [not null]
+  indexes {
+    (post_id, user_id) [pk]
+  }
+}
+
+Ref: posts.user_id > users.user_id
+Ref: posts.category_id - categories.category_id
+Ref: files.post_id > posts.post_id
+Ref: post_hashtags.post_id > posts.post_id
+Ref: post_hashtags.hashtag_id > hashtags.hashtags_id
+Ref: comments.post_id > posts.post_id
+Ref: comments.user_nickname > users.user_id
+Ref: comments.parent_comment_id > comments.comments_id
+Ref: post_likes.post_id > posts.post_id
+Ref: post_likes.user_id > users.user_id
