@@ -27,7 +27,7 @@ public class PostHashtags {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostHashtagsId implements Serializable {
-        private Posts post;
-        private Hashtags hashtag;
+        private Long post;
+        private Long hashtag;
     }
 }
