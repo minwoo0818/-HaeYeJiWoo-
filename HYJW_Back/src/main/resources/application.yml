@@ -1,0 +1,17 @@
+itemImgLocation: C:/-HaYeJiWoo-/images
+uploadPath: file:///C:/-HaYeJiWoo-/images
+
+spring:
+  application:
+    name: HYJW_Back
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/hyjwdb
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
