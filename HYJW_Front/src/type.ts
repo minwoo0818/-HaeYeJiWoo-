@@ -21,3 +21,5 @@ export type PostType = {
   hashtags: string;
   files: string;
 }
+
+export type AddCommentPayload = Omit<Comment, 'id' | 'nickname' | 'userId' | 'createAt' | 'updateAt'>;

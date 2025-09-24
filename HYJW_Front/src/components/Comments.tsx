@@ -1,42 +1,47 @@
-import { useState } from "react";
+import {  useState } from "react";
 import type { Comment } from "../type";
 import '../PostDetail.css'
-import { addComment } from "../postDetailApi";
+import { addComment
+  
+ } from "../postDetailApi";
 
 
 export default function Comments() {
     // 댓글 목록 (대댓글 예시 포함)
     const [comments, setComments] = useState<Comment[]>([
-      { 
-        id: 1, 
-        nickname: "사용자 1", 
-        content: "첫 번째 댓글입니다.", 
-        postId: 1, 
-        userId: 1, 
-        createAt: "2025-09-23T01:30:00", 
-        updateAt: "2025-09-23T01:30:00" 
-      },
-      { 
-       id: 2, 
-       nickname: "사용자 2", 
-       content: "두 번째 댓글입니다.", 
-       postId: 1, 
-       userId: 2, 
-       createAt: "2025-09-23T01:35:00", 
-       updateAt: "2025-09-23T01:35:00" 
-      },
-      { 
-        id: 3, 
-        nickname: "사용자 1", 
-        content: "첫 번째 댓글에 대한 대댓글입니다.", 
-        postId: 1, 
-        userId: 1, 
-        parentCommentId: 1,
-        createAt: "2025-09-23T01:40:00", 
-        updateAt: "2025-09-23T01:40:00" 
-       }
+    
+  
+      // { 
+      //   id: 1, 
+      //   nickname: "사용자 1", 
+      //   content: "첫 번째 댓글입니다.", 
+      //   postId: 1, 
+      //   userId: 1, 
+      //   createAt: "2025-09-23T01:30:00", 
+      //   updateAt: "2025-09-23T01:30:00" 
+      // },
+      // { 
+      //  id: 2, 
+      //  nickname: "사용자 2", 
+      //  content: "두 번째 댓글입니다.", 
+      //  postId: 1, 
+      //  userId: 2, 
+      //  createAt: "2025-09-23T01:35:00", 
+      //  updateAt: "2025-09-23T01:35:00" 
+      // },
+      // { 
+      //   id: 3, 
+      //   nickname: "사용자 1", 
+      //   content: "첫 번째 댓글에 대한 대댓글입니다.", 
+      //   postId: 1, 
+      //   userId: 1, 
+      //   parentCommentId: 1,
+      //   createAt: "2025-09-23T01:40:00", 
+      //   updateAt: "2025-09-23T01:40:00" 
+      //  }
     ]);
 
+    
     // 새 댓글 입력 상태
     const [newComment, setNewComment] = useState("");
 

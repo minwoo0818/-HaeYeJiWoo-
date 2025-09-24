@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime; // Import LocalDateTime
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,5 +58,22 @@ public class CommentsService {
                 .createAt(savedComment.getCreatedAt().toLocalDateTime()) // Convert Timestamp to LocalDateTime
                 .updateAt(savedComment.getUpdatedAt() != null ? savedComment.getUpdatedAt().toLocalDateTime() : null) // Convert Timestamp to LocalDateTime
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentResponseDto> getCommentsByPostId(Long postId) {
+        List<Comments> comments = commentsRepository.findByPostId(postId);
+        return comments.stream()
+                .map(comment -> CommentResponseDto.builder()
+                        .id(comment.getCommentsId())
+                        .nickname(comment.getUser().getUserNickname())
+                        .postId(comment.getPost().getPostId())
+                        .userId(comment.getUser().getUserId())
+                        .content(comment.getContent())
+                        .parentCommentId(comment.getParentComment() != null ? comment.getParentComment().getCommentsId() : null)
+                        .createAt(comment.getCreatedAt().toLocalDateTime())
+                        .updateAt(comment.getUpdatedAt() != null ? comment.getUpdatedAt().toLocalDateTime() : null)
+                        .build())
+                .collect(Collectors.toList());
     }
 }

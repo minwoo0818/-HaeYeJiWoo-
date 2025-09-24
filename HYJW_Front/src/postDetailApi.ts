@@ -10,6 +10,11 @@ export const getPostDetail = async (id: number): Promise<Post> => {
     return response.data;
 }
 
+export const getCommentsByPostId = async (postId: number): Promise<Comment[]> => {
+    const response = await axios.get(`${BASE_URL}/posts/${postId}/comments`);
+    return response.data;
+};
+
 
 
                                                                                                                                                                                                                         
