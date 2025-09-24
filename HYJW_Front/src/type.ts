@@ -1,6 +1,6 @@
 export type Comment = {
   id: number;
-  nickname: string;
+  userNickname: string;
   postId: number;
   userId: number;
   content: string;
@@ -15,7 +15,7 @@ export type PostType = {
   likesCount: number;
   title: string;
   userId: number;
-  nickname: string;
+  userNickname: string;
   createdAt: string;
   content: string;
   hashtags: string;
