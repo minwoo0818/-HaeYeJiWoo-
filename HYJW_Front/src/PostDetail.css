@@ -7,7 +7,7 @@ body {
 }
 
 .pd-container {
-  width: 100vh;              /* 뷰포트 전체 너비 */
+  width: 50vw;              /* 뷰포트 전체 너비 */
   min-height: 100vh;         /* 필요 시 전체 높이도 */
   box-sizing: border-box;    /* padding 포함해서 계산 */
   padding: 40px 24px;
@@ -45,6 +45,7 @@ body {
 .pd-post-num {
   margin-right: auto;
 }
+
 
 .pd-post-info {
   display: flex;
@@ -145,4 +146,8 @@ body {
 .pd-reply-write {
   margin-left: 20px;
   margin-bottom: 10px;
+}
+
+.postupdate {
+  margin-right: 10px;
 }
