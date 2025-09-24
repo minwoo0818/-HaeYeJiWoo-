@@ -4,6 +4,7 @@ import com.hyjw_back.dto.PostCreateDto;
 import com.hyjw_back.dto.PostDetailDto;
 import com.hyjw_back.dto.PostCardDto;
 import com.hyjw_back.service.PostsService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,12 @@ public class PostController {
 
         PostDetailDto newPost = postsService.createPost(postCreateDto, userId);
         return new ResponseEntity<>(newPost, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
+        postsService.deletePost(postId);
+        return ResponseEntity.noContent().build();
     }
 
     // getAllPosts, getPostDetail 등 다른 메서드는 기존과 동일
