@@ -37,11 +37,11 @@ function ResponsiveAppBar() {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#474747" }}>
+    <AppBar position="static" sx={{ backgroundColor: "#474747", width: "95vw" }}>
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
-          sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center" }}
+          sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center"  }}
         >
           {/* 햄버거 메뉴 */}
           <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>

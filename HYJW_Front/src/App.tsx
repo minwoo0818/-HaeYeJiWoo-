@@ -1,5 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-import "./App.css";
 import ResponsiveAppBar from "./components/Header";
 import Login from "./pages/Login";
 import MyPage from "./pages/MyPage";
