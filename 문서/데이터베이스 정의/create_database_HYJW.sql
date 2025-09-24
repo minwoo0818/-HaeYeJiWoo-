@@ -1,5 +1,3 @@
-create database HYJW;
-
 CREATE TABLE `users` (
   `user_id` integer PRIMARY KEY AUTO_INCREMENT,
   `user_nickname` varchar(10) UNIQUE NOT NULL,
@@ -13,7 +11,7 @@ CREATE TABLE `posts` (
   `content` varchar(500) NOT NULL,
   `views` integer,
   `user_id` integer NOT NULL,
-  `category_id` varchar(50) NOT NULL,
+  `category_id` varchar(20) NOT NULL,
   `created_at` timestamp,
   `updated_at` timestamp
 );

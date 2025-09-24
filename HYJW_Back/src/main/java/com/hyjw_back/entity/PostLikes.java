@@ -27,7 +27,7 @@ public class PostLikes {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostLikesId implements Serializable {
-        private Posts post;
-        private Users user;
+        private Long post;
+        private Long user;
     }
 }

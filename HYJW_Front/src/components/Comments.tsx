@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Comment } from "../type";
 import '../PostDetail.css'
+import { addComment } from "../postDetailApi";
 
 
 export default function Comments() {
@@ -46,42 +47,40 @@ export default function Comments() {
     const [showReplyInput, setShowReplyInput] = useState<{[key: number]: boolean}>({});
 
     // 새로운 댓글 등록
-    const handleAddComment = () => {
+    const handleAddComment = async () => {
       if(!newComment.trim()) return;
-      const nextId = comments.length > 0 ? Math.max(...comments.map(c => c.id)) + 1 : 1;
-      const newCommentObject: Comment = {
-        id: nextId,
-        nickname: "새로운 유저", // 임시값
-        content: newComment,
-        postId: 1, //  임시값
-        userId: 3, // 임시값
-        createAt: new Date().toISOString(),
-        updateAt: new Date().toISOString(),
-      };
-      setComments([...comments, newCommentObject]);
-      setNewComment("");
+      
+      try {
+        const createdComment = await addComment({
+            content: newComment,
+            postId: 1, // TODO: 현재 게시물 ID를 동적으로 전달해야 합니다.
+        });
+        setComments([...comments, createdComment]);
+        setNewComment("");
+      } catch (error) {
+        console.error("댓글 등록 실패:", error);
+        alert("댓글을 등록하는 중 오류가 발생했습니다.");
+      }
     }
 
     // 대댓글 등록
-    const handleAddReply = (parentId: number) => {
+    const handleAddReply = async (parentId: number) => {
       const replyContent = replyInputs[parentId];
       if(!replyContent?.trim()) return;
 
-      const replyNextId = comments.length > 0? Math.max(...comments.map((c) => c.id)) + 1 : 1;
-      const reply: Comment = {
-        id: replyNextId,
-        nickname: "대댓글 유저", // 임시값
-        content: replyContent,
-        postId: 1, // 임시값
-        userId: 99, // 임시값
-        parentCommentId: parentId,
-        createAt: new Date().toISOString(),
-        updateAt: new Date().toISOString(),
-      };
-
-      setComments([...comments, reply]);
-      setReplyInputs({...replyInputs, [parentId]: ""});
-      setShowReplyInput({...showReplyInput, [parentId]: false});
+      try {
+        const createdReply = await addComment({
+            content: replyContent,
+            postId: 1, // TODO: 현재 게시물 ID를 동적으로 전달해야 합니다.
+            parentCommentId: parentId,
+        });
+        setComments([...comments, createdReply]);
+        setReplyInputs({...replyInputs, [parentId]: ""});
+        setShowReplyInput({...showReplyInput, [parentId]: false});
+      } catch (error) {
+        console.error("대댓글 등록 실패:", error);
+        alert("대댓글을 등록하는 중 오류가 발생했습니다.");
+      }
     };
 
     // 대댓글 입력창 토글
@@ -91,7 +90,7 @@ export default function Comments() {
 
     // 재귀적으로 댓글과 대댓글을 렌더링하는 함수
     const renderComments = (parentId: number | null = null) => {
-      const filteredComments = comments.filter(comment => parentId === null ? comment.parentCommentId === undefined : comment.parentCommentId === parentId);
+      const filteredComments = comments.filter(comment => parentId === null ? (comment.parentCommentId === undefined || comment.parentCommentId === null) : comment.parentCommentId === parentId);
       
       return filteredComments.map(comment => (
         <div key={comment.id} className={parentId !== null ? "pd-reply-comment" : ""}>

@@ -1,5 +1,6 @@
 package com.hyjw_back.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Timestamp;
@@ -16,10 +17,12 @@ public class Comments {
     @Column(name = "comments_id")
     private Long commentsId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", referencedColumnName = "post_id", nullable = false)
     private Posts post;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private Users user;
@@ -27,6 +30,7 @@ public class Comments {
     @Column(name = "content", nullable = false, length = 1000)
     private String content;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comments_id", referencedColumnName = "comments_id")
     private Comments parentComment;

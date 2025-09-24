@@ -8,3 +8,16 @@ export type Comment = {
   createAt: string;
   updateAt: string;
 };
+
+export type PostType = {
+  id: number;
+  views: number;
+  likesCount: number;
+  title: string;
+  userId: number;
+  nickname: string;
+  createdAt: string;
+  content: string;
+  hashtags: string;
+  files: string;
+}

@@ -1,7 +1,14 @@
+import { useEffect } from "react";
 import Comments from "../components/Comments";
 import '../PostDetail.css'
 
+
 export default function PostDetail () {
+  useEffect(() => {
+    // getPostDetail();
+  }, []);
+
+
     return (
     <>
       <div className="pd-container">
@@ -20,7 +27,7 @@ export default function PostDetail () {
           <div className="pd-post-title-bt">
             <div className="pd-post-title"><h2>게시글 제목 입니다.</h2></div>
             <div className="action-buttons">
-                <button>수정</button>
+                <button className="postupdate">수정</button>
                 <button>삭제</button>
             </div>
           </div> 
@@ -51,7 +58,6 @@ export default function PostDetail () {
         <Comments/>
 
        </div>  {/* 맨 바깥상자 */}
-
     </>
     );
 
