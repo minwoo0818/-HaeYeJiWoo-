@@ -5,6 +5,7 @@ import MyPage from "./pages/MyPage";
 import SignUp from "./pages/SignUp";
 import PostDetail from "./pages/PostDetail";
 import PostListApp from "./PostListApp";
+import AddPosts from "./pages/AddPosts";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/category/mypage" element={<MyPage />} />
         <Route path="/postdetail" element={<PostDetail />} />
         <Route path="/postlistapp" element={<PostListApp />} />
+        <Route path="/addposts" element={<AddPosts />} />
       </Routes>
     </>
   );

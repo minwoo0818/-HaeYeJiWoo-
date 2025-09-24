@@ -3,8 +3,10 @@ import { useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Select, MenuItem, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function SearchBar() {
+  const navigate = useNavigate();
   // 검색 조건 상태: 제목, 내용, 작성자, 해시태그 중 선택
   const [searchType, setSearchType] = useState("title");
 
@@ -20,7 +22,7 @@ export default function SearchBar() {
   // 글쓰기 버튼 클릭 시 실행되는 함수
   const handleWrite = () => {
     console.log("글쓰기 버튼 클릭");
-    // 글쓰기 페이지로 이동하거나 모달을 띄우는 로직 추가 가능
+    navigate("/addposts");
   };
 
   return (
