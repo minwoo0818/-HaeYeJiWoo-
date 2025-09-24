@@ -1,5 +1,6 @@
 package com.hyjw_back.dto;
 
+import com.hyjw_back.constant.CategoryId;
 import lombok.Data;
 import java.sql.Timestamp;
 import java.util.List;
@@ -10,7 +11,7 @@ public class PostCardDto {
     private String title;
     private String userNickname;
     private String url;
-    private String categoryId;
+    private CategoryId categoryId;
     private Timestamp createdAt;
     private Integer views;
     private List<String> hashtags;

@@ -1,5 +1,6 @@
 package com.hyjw_back;
 
+import com.hyjw_back.constant.CategoryId;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +69,7 @@ public class HyjwBackApplication implements CommandLineRunner {
         post1.setTitle("첫 번째 게시글 제목");
         post1.setContent("첫 번째 게시글 본문입니다.");
         post1.setUser(user1);
-        post1.setCategoryId("tech");
+        post1.setCategoryId(CategoryId.DAILY_LIFE);
         post1.setUrl("https://image.com/post1.jpg");
         post1.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         postRepository.save(post1);
@@ -77,7 +78,7 @@ public class HyjwBackApplication implements CommandLineRunner {
         post2.setTitle("두 번째 게시글 제목");
         post2.setContent("두 번째 게시글 본문입니다.");
         post2.setUser(user1);
-        post2.setCategoryId("daily");
+        post2.setCategoryId(CategoryId.GAME);
         post2.setUrl("https://image.com/post2.png");
         post2.setCreatedAt(new Timestamp(System.currentTimeMillis() - 86400000));
         postRepository.save(post2);

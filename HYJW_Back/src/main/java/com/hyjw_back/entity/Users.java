@@ -1,7 +1,9 @@
 package com.hyjw_back.entity;
 
+import com.hyjw_back.constant.ADMIN;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "users")
@@ -24,5 +26,9 @@ public class Users {
 
     @Column(name = "hashed_password", nullable = false, length = 50)
     private String hashedPassword;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_role", nullable = false)
+    private ADMIN userRole = ADMIN.USER;
 
 }
