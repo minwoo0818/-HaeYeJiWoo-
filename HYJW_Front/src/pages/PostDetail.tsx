@@ -1,13 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Comments from "../components/Comments";
 import '../PostDetail.css'
-
+import { useParams } from "react-router-dom";
+import { getPostDetail } from "../postDetailApi";
+import type { Post } from "../PostType";
 
 export default function PostDetail () {
-  useEffect(() => {
-    // getPostDetail();
-  }, []);
+  const { id } = useParams<{ id: string }>();
+  const [post, setPost] = useState<Post | null>(null);
 
+  useEffect(() => {
+    if (id) {
+      const postId = parseInt(id);
+      getPostDetail(postId).then(setPost);
+    }
+  }, [id]);
+
+  if (!post) {
+    return <div>게시글을 불러오는 중...</div>;
+  }
 
     return (
     <>
@@ -15,9 +26,9 @@ export default function PostDetail () {
         <div className="pd-post-header">
           <div className="pd-header">메인 바 / 카테고리</div>
           <div className="pd-post-meta">
-            <div className="pd-post-num">  글 번호: * </div>
-            <div className="view-count">조회수 10</div>     
-            <div><button className="pd-like">♡</button>좋아요 7</div>
+            <div className="pd-post-num">  글 번호: {post.id} </div>
+            <div className="view-count">조회수 {post.views}</div>     
+            <div><button className="pd-like">♡</button>좋아요 {post.likes}</div>
           </div>
         </div>
       <hr/>
@@ -25,7 +36,7 @@ export default function PostDetail () {
         <div className="pd-post-content"> 
 
           <div className="pd-post-title-bt">
-            <div className="pd-post-title"><h2>게시글 제목 입니다.</h2></div>
+            <div className="pd-post-title"><h2>{post.title}</h2></div>
             <div className="action-buttons">
                 <button className="postupdate">수정</button>
                 <button>삭제</button>
@@ -33,16 +44,16 @@ export default function PostDetail () {
           </div> 
         
           <div className="pd-post-info">
-            <span className="author"><h3>작성자: 홍길동</h3></span>
-            <span className="date">2025.09.21</span>
+            <span className="author"><h3>작성자: {post.author}</h3></span>
+            <span className="date">{post.date}</span>
           </div>
 
           <div className="pd-post-body">
-            본문
+            {post.content}
           </div>
 
           <div className="pd-hashtags">
-            #해시태그 #게시판
+            {post.hashtags.map((tag: string) => `#${tag} `)}
           </div>
           
           <hr/>

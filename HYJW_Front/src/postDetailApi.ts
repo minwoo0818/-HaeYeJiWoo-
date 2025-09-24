@@ -5,9 +5,36 @@ import type { Comment } from "./type";
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const getPostDetail = async (id: number): Promise<Post> => {
-    const response = await axios.get(`${BASE_URL}/posts/?id=${id}`);
+    const response = await axios.get(`${BASE_URL}/posts/${id}`);
     console.log(response);
-    return response.data;
+    const backendPost = response.data;
+    return {
+        id: backendPost.postId,
+        title: backendPost.title,
+        author: backendPost.userNickname,
+        image: backendPost.url,
+        category: backendPost.categoryId,
+        date: backendPost.createdAt,
+        views: backendPost.views,
+        hashtags: backendPost.hashtags,
+        likes: backendPost.likesCount,
+    };
+}
+
+export const getAllPosts = async (): Promise<Post[]> => {
+    const response = await axios.get(`${BASE_URL}/posts`);
+    console.log(response);
+    return response.data.map((backendPost: any) => ({
+        id: backendPost.postId,
+        title: backendPost.title,
+        author: backendPost.userNickname,
+        image: backendPost.url,
+        category: backendPost.categoryId,
+        date: backendPost.createdAt,
+        views: backendPost.views,
+        hashtags: backendPost.hashtags,
+        likes: backendPost.likesCount,
+    }));
 }
 
 export const getCommentsByPostId = async (postId: number): Promise<Comment[]> => {

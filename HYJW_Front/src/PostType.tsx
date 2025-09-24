@@ -7,4 +7,5 @@ export interface Post {
   date: string;
   views: number;
   hashtags: string[];
+  likes: number;
 }

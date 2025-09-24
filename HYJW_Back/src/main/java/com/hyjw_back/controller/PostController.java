@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class PostController {
 
     @Autowired
@@ -37,6 +37,16 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailDto> getPostDetail(@PathVariable Long postId) {
         PostDetailDto postDetail = postsService.getPostDetail(postId);
+        if (postDetail != null) {
+            return new ResponseEntity<>(postDetail, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping(params = "id")
+    public ResponseEntity<PostDetailDto> getPostDetailByRequestParam(@RequestParam Long id) {
+        PostDetailDto postDetail = postsService.getPostDetail(id);
         if (postDetail != null) {
             return new ResponseEntity<>(postDetail, HttpStatus.OK);
         } else {
