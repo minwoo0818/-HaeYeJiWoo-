@@ -28,7 +28,7 @@ public class PostController {
     }
 
     // getAllPosts, getPostDetail 등 다른 메서드는 기존과 동일
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<PostCardDto>> getAllPosts() {
         List<PostCardDto> posts = postsService.getAllPosts();
         return new ResponseEntity<>(posts, HttpStatus.OK);

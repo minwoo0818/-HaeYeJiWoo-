@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import ResponsiveAppBar from "./components/Header";
 import Login from "./pages/Login";
 import MyPage from "./pages/MyPage";
@@ -12,12 +12,12 @@ function App() {
     <>
       <ResponsiveAppBar />
       <Routes>
-        <Route path="/" element={<PostListApp />} />
+        <Route path="/" element={<Navigate to="/posts/all" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/category/mypage" element={<MyPage />} />
         <Route path="/postdetail" element={<PostDetail />} />
-        <Route path="/postlistapp" element={<PostListApp />} />
+        <Route path="/posts/:type" element={<PostListApp />} />
         <Route path="/addposts" element={<AddPosts />} />
       </Routes>
     </>

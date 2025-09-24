@@ -77,7 +77,7 @@ public class HyjwBackApplication implements CommandLineRunner {
         post1.setContent("첫 번째 게시글 본문입니다.");
         post1.setUser(user1);
         post1.setCategoryId(CategoryId.DAILY_LIFE);
-        post1.setUrl("https://image.com/post1.jpg");
+        post1.setUrl("/images/메인페이지.png");  // 로컬 URL로 수정
         post1.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         postRepository.save(post1);
 
@@ -86,19 +86,20 @@ public class HyjwBackApplication implements CommandLineRunner {
         post2.setContent("두 번째 게시글 본문입니다.");
         post2.setUser(user1);
         post2.setCategoryId(CategoryId.GAME);
-        post2.setUrl("https://image.com/post2.png");
+        post2.setUrl("/images/메인페이지.png");  // 로컬 URL로 수정
         post2.setCreatedAt(new Timestamp(System.currentTimeMillis() - 86400000));
         postRepository.save(post2);
 
-        // Files 더미 데이터
+// Files 더미 데이터
         Files file1 = new Files();
         file1.setPost(post1);
-        file1.setFileOriginalName("photo.jpg");
-        file1.setUrl("https://storage.com/file_post1_photo.jpg");
+        file1.setFileOriginalName("메인페이지.png");
+        file1.setUrl("/images/메인페이지.png");  // 로컬 URL로 수정
         file1.setFileType("image/jpeg");
         file1.setFileSize(500);
         file1.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         fileRepository.save(file1);
+
 
         // Hashtags 더미 데이터
         Hashtags tag1 = new Hashtags();
