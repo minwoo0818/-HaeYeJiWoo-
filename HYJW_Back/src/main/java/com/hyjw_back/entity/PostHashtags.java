@@ -13,12 +13,12 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class PostHashtags {
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "post_id", referencedColumnName = "post_id", nullable = false)
     private Posts post;
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "hashtags_id", referencedColumnName = "hashtags_id", nullable = false)
     private Hashtags hashtag;
 

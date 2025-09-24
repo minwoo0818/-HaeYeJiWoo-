@@ -13,12 +13,12 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class PostLikes {
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "post_id", referencedColumnName = "post_id", nullable = false)
     private Posts post;
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private Users user;
 
@@ -27,7 +27,7 @@ public class PostLikes {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class PostLikesId implements Serializable {
-        private Posts post;
-        private Users user;
+        private Long post;
+        private Long user;
     }
 }
