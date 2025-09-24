@@ -4,6 +4,7 @@ import ResponsiveAppBar from './components/Header'
 import Login from './pages/Login'
 import MyPage from './pages/MyPage'
 import SignUp from './pages/SignUp'
+import PostDetail from './pages/PostDetail'
 
 function App() {
 
@@ -15,7 +16,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/category/mypage" element={<MyPage />} />
+        <Route path="/postdetail" element={<PostDetail/>}/>
       </Routes>
+       
       </>
   )
 }

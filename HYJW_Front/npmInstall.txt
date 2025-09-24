@@ -1,0 +1,14 @@
+npm install react react-dom
+
+npm install react-router-dom
+
+npm install zustand
+
+npm install styled-components
+
+npm install axios
+
+npm install @mui/material @emotion/react @emotion/styled
+
+npm install @mui/x-data-grid @mui/material @emotion/react @emotion/styled
+
