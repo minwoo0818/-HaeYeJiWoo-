@@ -1,5 +1,6 @@
 package com.hyjw_back.entity;
 
+import com.hyjw_back.constant.CategoryId;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -31,8 +32,9 @@ public class Posts {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private Users user;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "category_id", nullable = false, length = 20)
-    private String categoryId;
+    private CategoryId categoryId;
 
     // url 컬럼을 Posts 엔티티에 직접 복구
     @Column(name = "url", length = 250)
@@ -43,4 +45,5 @@ public class Posts {
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
+
 }

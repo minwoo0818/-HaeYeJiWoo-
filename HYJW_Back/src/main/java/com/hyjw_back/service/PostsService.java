@@ -1,5 +1,6 @@
 package com.hyjw_back.service;
 
+import com.hyjw_back.constant.CategoryId;
 import com.hyjw_back.dto.*;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
