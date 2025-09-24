@@ -31,7 +31,7 @@ export default function PostDetail () {
           </div>
 
           <div className="pd-post-body">
-            본문
+            
           </div>
 
           <div className="pd-hashtags">

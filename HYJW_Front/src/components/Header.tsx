@@ -10,6 +10,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuIcon from "@mui/icons-material/Menu";
+// import "../Header.css";
 
 const navItems = [
   { name: "게임", path: "/category/game" },
