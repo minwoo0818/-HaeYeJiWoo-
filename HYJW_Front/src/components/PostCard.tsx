@@ -7,46 +7,47 @@ import axios from "axios";
 
 interface PostCardProps {
   post: Post;
-  onDelete: (id: number) => void;   //삭제후 부모 (postlist) 상태 갱신 콜백
+  onDelete: (id: number) => void;   // 삭제 후 부모 (postlist) 상태 갱신 콜백
 }
 
 export function PostCard({ post, onDelete }: PostCardProps) {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
 
-  // 좋아요 상태를 토글하는 함수
-  const handleLikeToggle = () => {
-    setLiked((prev) => !prev);
-  };
+  // 좋아요 상태 토글
+const handleLikeToggle = (e: React.MouseEvent) => {
+  e.stopPropagation(); // 카드 클릭 이벤트 방지
+  setLiked((prev) => !prev);
+};
 
+  // 카드 클릭 시 상세 페이지로 이동
   const handleCardClick = () => {
     navigate(`/postdetail/${post.id}`);
-  }
-  // 삭제 버튼 클릭
-  const handleDelete = async () => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
-
-    try {
-      const res = await axios.delete(`/api/posts/${post.id}`);
-      // const res = await fetch(`http://localhost:8080/posts/${post.id}`, {
-      //   method: "DELETE",
-      // });
-
-      // if (!res.ok) {
-      //   throw new Error("삭제 실패");
-      // }
-
-      // 삭제 성공 → 부모(PostList) 상태 갱신
-      onDelete(post.id);
-    } catch (err) {
-      console.error(err);
-      alert("삭제 중 오류가 발생했습니다.");
-    }
   };
+
+  // 삭제 버튼 클릭
+const handleDelete = async (e: React.MouseEvent) => {
+  e.stopPropagation(); // 카드 클릭 이벤트 방지
+  if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+  try {
+    await axios.delete(`/api/posts/${post.id}`);
+    onDelete(post.id); // 부모 상태 갱신
+  } catch (err) {
+    console.error(err);
+    alert("삭제 중 오류가 발생했습니다.");
+  }
+};
   
+// 수정 버튼 클릭
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    navigate(`/edit/${post.id}`);
+  };
+
   return (
     <div
-      // onClick={handleCardClick}
+      onClick={handleCardClick}
       style={{
         border: "3px solid #ccc",
         borderRadius: "12px",
@@ -134,8 +135,6 @@ export function PostCard({ post, onDelete }: PostCardProps) {
         >
           삭제
         </button>
-
-        
       </div>
     </div>
   );
