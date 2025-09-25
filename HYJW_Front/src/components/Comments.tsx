@@ -1,42 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Comment } from "../type";
 import '../PostDetail.css'
-import { addComment } from "../postDetailApi";
+import { addComment, deleteComment
+  
+ } from "../postDetailApi";
 
+interface CommentsProps {
+  postId: number;
+  comments: Comment[];
+  setComments: (comments: Comment[]) => void;
+}
 
-export default function Comments() {
-    // 댓글 목록 (대댓글 예시 포함)
-    const [comments, setComments] = useState<Comment[]>([
-      { 
-        id: 1, 
-        nickname: "사용자 1", 
-        content: "첫 번째 댓글입니다.", 
-        postId: 1, 
-        userId: 1, 
-        createAt: "2025-09-23T01:30:00", 
-        updateAt: "2025-09-23T01:30:00" 
-      },
-      { 
-       id: 2, 
-       nickname: "사용자 2", 
-       content: "두 번째 댓글입니다.", 
-       postId: 1, 
-       userId: 2, 
-       createAt: "2025-09-23T01:35:00", 
-       updateAt: "2025-09-23T01:35:00" 
-      },
-      { 
-        id: 3, 
-        nickname: "사용자 1", 
-        content: "첫 번째 댓글에 대한 대댓글입니다.", 
-        postId: 1, 
-        userId: 1, 
-        parentCommentId: 1,
-        createAt: "2025-09-23T01:40:00", 
-        updateAt: "2025-09-23T01:40:00" 
-       }
-    ]);
-
+export default function Comments({ postId, comments, setComments }: CommentsProps) {
     // 새 댓글 입력 상태
     const [newComment, setNewComment] = useState("");
 
@@ -53,7 +28,7 @@ export default function Comments() {
       try {
         const createdComment = await addComment({
             content: newComment,
-            postId: 1, // TODO: 현재 게시물 ID를 동적으로 전달해야 합니다.
+            postId: postId, // Use postId from props
         });
         setComments([...comments, createdComment]);
         setNewComment("");
@@ -71,7 +46,7 @@ export default function Comments() {
       try {
         const createdReply = await addComment({
             content: replyContent,
-            postId: 1, // TODO: 현재 게시물 ID를 동적으로 전달해야 합니다.
+            postId: postId, // Use postId from props
             parentCommentId: parentId,
         });
         setComments([...comments, createdReply]);
@@ -80,6 +55,20 @@ export default function Comments() {
       } catch (error) {
         console.error("대댓글 등록 실패:", error);
         alert("대댓글을 등록하는 중 오류가 발생했습니다.");
+      }
+    };
+
+    // 댓글 삭제
+    const handleDeleteComment = async (commentId: number) => {
+      if (!window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+        return;
+      }
+      try {
+        await deleteComment(commentId);
+        setComments(comments.filter(comment => comment.id !== commentId && comment.parentCommentId !== commentId));
+      } catch (error) {
+        console.error("댓글 삭제 실패:", error);
+        alert("댓글을 삭제하는 중 오류가 발생했습니다.");
       }
     };
 
@@ -104,7 +93,7 @@ export default function Comments() {
               <p>{comment.content}</p>
               <div className="comment-actions">
                 <button>수정</button>
-                <button>삭제</button>
+                <button onClick={() => handleDeleteComment(comment.id)}>삭제</button>
               </div>
             </div>
             <hr/>

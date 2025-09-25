@@ -1,4 +1,7 @@
+// React의 useState 훅을 불러옵니다
 import { useEffect, useState } from "react";
+
+// 게시글을 카드 형태로 보여주는 컴포넌트
 import { PostCard } from "../components/PostCard";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
@@ -6,14 +9,19 @@ import type { Post } from "../types/PostType";
 import { GetPosts } from "../api/PostApi";
 import { useParams } from "react-router-dom";
 
+
+// 한 페이지에 보여줄 게시글 수
 const POSTS_PER_PAGE = 6;
 
 export default function PostList() {
   const { type } = useParams();
+  const [posts, setPosts] = useState<Post[]>([]);
+  // 현재 페이지 번호 상태 (0부터 시작)
   const [currentPage, setCurrentPage] = useState(0);
   const [postData, setPostData] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+ 
   // 현재 페이지에 보여줄 게시글 인덱스 범위 계산
   const startIndex = currentPage * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;

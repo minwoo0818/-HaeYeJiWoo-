@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Post } from "../types/PostType";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { useNavigate } from "react-router-dom";
 
 interface PostCardProps {
   post: Post;
@@ -9,14 +10,20 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   const [liked, setLiked] = useState(false);
+  const navigate = useNavigate();
 
   // 좋아요 상태를 토글하는 함수
   const handleLikeToggle = () => {
     setLiked((prev) => !prev);
   };
 
+  const handleCardClick = () => {
+    navigate(`/postdetail/${post.id}`);
+  };
+
   return (
     <div
+      onClick={handleCardClick}
       style={{
         border: "3px solid #ccc",
         borderRadius: "12px",

@@ -1,16 +1,15 @@
 package com.hyjw_back.controller;
 
 import com.hyjw_back.dto.CommentCreateDto;
-import com.hyjw_back.dto.CommentResponseDto; // Import the new DTO
+import com.hyjw_back.dto.CommentResponseDto;
 import com.hyjw_back.service.CommentsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/comments")
@@ -19,7 +18,7 @@ public class CommentController {
 
     private final CommentsService commentsService;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<CommentResponseDto> createComment(@RequestBody CommentCreateDto commentCreateDto, Principal principal) { // Changed return type
         String userEmail;
         if (principal != null) {
@@ -31,5 +30,17 @@ public class CommentController {
         }
         CommentResponseDto createdCommentResponse = commentsService.createComment(commentCreateDto, userEmail); // Changed variable name
         return ResponseEntity.ok(createdCommentResponse); // Return the DTO
+    }
+
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(@PathVariable Long postId) {
+        List<CommentResponseDto> comments = commentsService.getCommentsByPostId(postId);
+        return new ResponseEntity<>(comments, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+        commentsService.deleteComment(commentId);
+        return ResponseEntity.noContent().build();
     }
 }

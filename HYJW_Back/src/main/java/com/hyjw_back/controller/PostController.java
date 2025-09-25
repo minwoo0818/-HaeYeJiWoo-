@@ -4,6 +4,8 @@ import com.hyjw_back.constant.CategoryId;
 import com.hyjw_back.dto.PostCreateDto;
 import com.hyjw_back.dto.PostDetailDto;
 import com.hyjw_back.dto.PostCardDto;
+import com.hyjw_back.dto.CommentResponseDto;
+import com.hyjw_back.service.CommentsService;
 import com.hyjw_back.service.PostsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,9 @@ public class PostController {
 
     @Autowired
     private PostsService postsService;
+
+    @Autowired
+    private CommentsService commentsService;
 
     @PostMapping("/{userId}")
     public ResponseEntity<PostDetailDto> createPost(
@@ -40,13 +45,34 @@ public class PostController {
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
-//    @GetMapping("/{postId}")
-//    public ResponseEntity<PostDetailDto> getPostDetail(@PathVariable Long postId) {
-//        PostDetailDto postDetail = postsService.getPostDetail(postId);
+    //수정해야할수도 있음 
+//    @GetMapping(params = "id")
+//    public ResponseEntity<PostDetailDto> getPostDetailByRequestParam(@RequestParam Long id) {
+//        PostDetailDto postDetail = postsService.getPostDetail(id);
 //        if (postDetail != null) {
 //            return new ResponseEntity<>(postDetail, HttpStatus.OK);
 //        } else {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 //        }
 //    }
+//
+
+
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<PostDetailDto> getPostDetail(@PathVariable Long id) {
+        PostDetailDto postDetail = postsService.getPostDetail(id);
+        if (postDetail != null) {
+            return new ResponseEntity<>(postDetail, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(@PathVariable Long postId) {
+        List<CommentResponseDto> comments = commentsService.getCommentsByPostId(postId);
+        return ResponseEntity.ok(comments);
+    }
 }
