@@ -117,7 +117,8 @@ export function PostCard({ post, onDelete }: PostCardProps) {
             borderRadius: "4px",
             padding: "6px 12px",
             cursor: "pointer",
-          }} onClick={handleDelete}
+          }} 
+          onClick={handleDelete}
         >
           삭제
         </button>

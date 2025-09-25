@@ -20,7 +20,7 @@ function App() {
         <Route path="/postdetail" element={<PostDetail />} />
         <Route path="/posts/:type" element={<PostListApp />} />
         <Route path="/addposts" element={<AddPosts />} />
-        <Route path="/adminppostlist" element={<AdminPostList />} />
+        <Route path="/adminpostlist" element={<AdminPostList />} />
       </Routes>
     </>
   );

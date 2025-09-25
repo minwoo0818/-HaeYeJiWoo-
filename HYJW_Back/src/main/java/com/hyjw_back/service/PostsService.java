@@ -182,7 +182,7 @@ public class PostsService {
     }
 
 
-    //유저 : 소프트 삭제 (isDelete = true) & 관리자 : 하드 삭제 (DB에서 완전히 삭제) 로직
+    //유저 : 소프트 삭제 (isDelete = true)
     @Transactional
     public void softDeletePost(Long postId) {
         Posts post = postsRepository.findById(postId)
@@ -191,12 +191,23 @@ public class PostsService {
         postsRepository.save(post);
     }
 
+    // 관리자 : 하드 삭제 (DB에서 완전히 삭제) 로직
     @Transactional
     public void hardDeletePost(Long postId) {
         Posts post = postsRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        // 1. 좋아요 삭제
+        postLikesRepository.deleteByPost(post);
+
+        // 2. 해시태그 삭제
+        postHashtagRepository.deleteByPost(post);
+
+        // 3. 게시글 삭제
         postsRepository.delete(post);
     }
+
+
 
     @Transactional(readOnly = true)
     public List<PostCardDto> getDeletedPosts() {

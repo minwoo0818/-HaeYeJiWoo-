@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import Comments from "../components/Comments";
 import '../PostDetail.css'
+import { useNavigate } from "react-router-dom";
 
 
 export default function PostDetail () {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     // getPostDetail();
   }, []);

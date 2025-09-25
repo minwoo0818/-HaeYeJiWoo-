@@ -8,6 +8,7 @@ import {
   Typography,
   Stack
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const navItems = [
   { name: "게임", id: "GAME" },
@@ -17,6 +18,7 @@ const navItems = [
 ];
 
 export default function AddPosts() {
+  const navigate = useNavigate();   // 이동 훅
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -61,7 +63,10 @@ export default function AddPosts() {
       const res = await axios.post(`/api/posts/${userId}`, payload);
       console.log("게시글 등록 성공:", res.data);
       alert("게시글이 등록되었습니다!");
-      // 초기화하거나 이동 처리 등 추가 가능
+      
+      //작성 완료 후 PostList로 이동ㄴ
+      navigate("/posts/all");
+
     } catch (err) { 
       console.error("게시글 등록 실패:", err);
       alert("등록에 실패했습니다.");
