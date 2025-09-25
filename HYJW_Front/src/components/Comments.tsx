@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Comment } from "../type";
 import '../PostDetail.css'
-import { addComment
+import { addComment, deleteComment
   
  } from "../postDetailApi";
 
@@ -58,6 +58,20 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
       }
     };
 
+    // 댓글 삭제
+    const handleDeleteComment = async (commentId: number) => {
+      if (!window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+        return;
+      }
+      try {
+        await deleteComment(commentId);
+        setComments(comments.filter(comment => comment.id !== commentId && comment.parentCommentId !== commentId));
+      } catch (error) {
+        console.error("댓글 삭제 실패:", error);
+        alert("댓글을 삭제하는 중 오류가 발생했습니다.");
+      }
+    };
+
     // 대댓글 입력창 토글
     const toggleReplyInput = (commentId: number) => {
         setShowReplyInput(prev => ({...prev, [commentId]: !prev[commentId]}));
@@ -79,7 +93,7 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
               <p>{comment.content}</p>
               <div className="comment-actions">
                 <button>수정</button>
-                <button>삭제</button>
+                <button onClick={() => handleDeleteComment(comment.id)}>삭제</button>
               </div>
             </div>
             <hr/>

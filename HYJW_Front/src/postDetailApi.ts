@@ -71,3 +71,7 @@ export const getCommentsByPostId = async (postId: number): Promise<Comment[]> =>
           console.log(payload);
             return response.data;
          };    
+
+export const deleteComment = async (commentId: number): Promise<void> => {
+    await axios.delete(`${BASE_URL}/comments/${commentId}`);
+};

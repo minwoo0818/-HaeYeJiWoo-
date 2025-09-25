@@ -12,13 +12,13 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/comments")
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentsService commentsService;
 
-    @PostMapping("/comments")
+    @PostMapping("")
     public ResponseEntity<CommentResponseDto> createComment(@RequestBody CommentCreateDto commentCreateDto, Principal principal) { // Changed return type
         String userEmail;
         if (principal != null) {
@@ -32,9 +32,15 @@ public class CommentController {
         return ResponseEntity.ok(createdCommentResponse); // Return the DTO
     }
 
-    @GetMapping("/posts/{postId}/comments")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(@PathVariable Long postId) {
         List<CommentResponseDto> comments = commentsService.getCommentsByPostId(postId);
         return new ResponseEntity<>(comments, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+        commentsService.deleteComment(commentId);
+        return ResponseEntity.noContent().build();
     }
 }

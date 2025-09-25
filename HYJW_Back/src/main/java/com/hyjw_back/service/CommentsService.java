@@ -76,4 +76,9 @@ public class CommentsService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public void deleteComment(Long commentId) {
+        commentsRepository.deleteById(commentId);
+    }
 }
