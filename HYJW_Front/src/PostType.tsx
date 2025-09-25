@@ -3,6 +3,26 @@ export interface FileAttachment {
   fileName: string;
 }
 
+export interface BackendUser {
+  userId: number;
+  userNickname: string;
+  email: string;
+}
+
+export interface BackendPostResponse {
+  postId: number;
+  title: string;
+  user: BackendUser;
+  url: string;
+  categoryId: string;
+  createdAt: string;
+  views: number;
+  hashtags: string[];
+  likesCount: number;
+  content: string;
+  files: FileAttachment[];
+}
+
 export interface Post {
   id: number;
   title: string;

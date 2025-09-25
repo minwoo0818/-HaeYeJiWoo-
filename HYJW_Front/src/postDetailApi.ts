@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Post } from "./PostType";
+import type { BackendPostResponse, Post } from "./PostType";
 import type { Comment } from "./type";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -26,7 +26,7 @@ export const getPostDetail = async (id: number): Promise<Post> => {
 export const getAllPosts = async (): Promise<Post[]> => {
     const response = await axios.get(`${BASE_URL}/posts`);
     console.log(response);
-    return response.data.map((backendPost: any) => ({
+    return response.data.map((backendPost: BackendPostResponse) => ({
         id: backendPost.postId,
         title: backendPost.title,
         nickname: backendPost.user ? backendPost.user.userNickname : 'Unknown',
