@@ -9,19 +9,6 @@ import type { Post } from "../types/PostType";
 import { GetPosts } from "../api/PostApi";
 import { useParams } from "react-router-dom";
 
-import { getAllPosts } from "../postDetailApi";
-
-export interface Post {
-  id: number; // 게시글 고유 ID
-  title: string; // 게시글 제목
-  author: string; // 작성자 이름
-  image: string; // 이미지 경로
-  category: string; // 게시글 카테고리
-  date: string; // 작성일
-  views: number; // 조회수
-  hashtags: string[]; // 해시태그 목록
-  likes: number; // 좋아요 수
-}
 
 // 한 페이지에 보여줄 게시글 수
 const POSTS_PER_PAGE = 6;
@@ -34,10 +21,7 @@ export default function PostList() {
   const [postData, setPostData] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    getAllPosts().then(setPosts);
-  }, []);
-
+ 
   // 현재 페이지에 보여줄 게시글 인덱스 범위 계산
   const startIndex = currentPage * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;

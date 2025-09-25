@@ -36,14 +36,4 @@ export interface Post {
   content: string;
   files: FileAttachment[];
 }
-// export interface Post {
-//   id: number;
-//   title: string;
-//   author: string;
-//   image: string;
-//   category: string;
-//   date: string;
-//   views: number;
-//   hashtags: string[];
-//   likes: number;
-// }
+

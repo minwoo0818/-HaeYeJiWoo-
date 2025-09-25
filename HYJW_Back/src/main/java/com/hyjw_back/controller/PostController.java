@@ -46,8 +46,21 @@ public class PostController {
     }
 
     //수정해야할수도 있음 
-    @GetMapping(params = "id")
-    public ResponseEntity<PostDetailDto> getPostDetailByRequestParam(@RequestParam Long id) {
+//    @GetMapping(params = "id")
+//    public ResponseEntity<PostDetailDto> getPostDetailByRequestParam(@RequestParam Long id) {
+//        PostDetailDto postDetail = postsService.getPostDetail(id);
+//        if (postDetail != null) {
+//            return new ResponseEntity<>(postDetail, HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
+//
+
+
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<PostDetailDto> getPostDetail(@PathVariable Long id) {
         PostDetailDto postDetail = postsService.getPostDetail(id);
         if (postDetail != null) {
             return new ResponseEntity<>(postDetail, HttpStatus.OK);
@@ -55,6 +68,7 @@ public class PostController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
 
     @GetMapping("/{postId}/comments")
     public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(@PathVariable Long postId) {
