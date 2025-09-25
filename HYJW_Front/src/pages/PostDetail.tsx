@@ -111,11 +111,15 @@ export default function PostDetail () {
             {post.content}
           </div>
 
-          <div className="pd-hashtags">
-            {post.hashtags.map((tag: string) => `#${tag} `)}
-          </div>
-          
-          <hr/>
+          {post.hashtags && post.hashtags.length > 0 &&
+            <div className="pd-hashtags">
+              {post.hashtags.map((tag: string) => `#${tag} `)}
+            </div>
+          }
+
+          {post.hashtags && post.hashtags.length > 0 && post.files && post.files.length > 0 &&
+            <hr/>
+          }
 
           {post.files && post.files.length > 0 && (
             <div className="pd-attachment">
