@@ -57,16 +57,37 @@ public class PostController {
     }
 
     // getAllPosts, getPostDetail 등 다른 메서드는 기존과 동일
+    // 모든 게시물을 조회하는 엔드포인트
+    // URL: /all
     @GetMapping("/all")
     public ResponseEntity<List<PostCardDto>> getAllPosts() {
+        System.out.println("GET /all 엔드포인트 호출됨.");
         List<PostCardDto> posts = postsService.getAllPosts();
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
-    @GetMapping("/{CategoryId}")
-    public ResponseEntity<List<PostCardDto>> getCategoryIdPosts(@PathVariable CategoryId CategoryId) {
-        List<PostCardDto> posts = postsService.getPostsByCategory(CategoryId);
+    // 특정 카테고리 게시물을 조회하는 엔드포인트
+    // URL: /{type} (예: /FREE, /GAME)
+    @GetMapping("/{type}")
+    public ResponseEntity<List<PostCardDto>> getPostsByCategory(@PathVariable String type) {
+        System.out.println("GET /{type} 엔드포인트 호출됨. type: " + type);
+        List<PostCardDto> posts = postsService.getPostsByCategory(type);
         return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+    // 게시물 검색을 위한 엔드포인트
+    // URL: /{type}/search (예: /FREE/search?searchType=title&searchText=제목)
+    @GetMapping("/{type}/search")
+    public ResponseEntity<List<PostCardDto>> searchPosts(
+            @PathVariable String type,
+            @RequestParam("searchType") String searchType,
+            @RequestParam("searchText") String searchText) {
+
+        System.out.println("검색 요청 수신: " + "카테고리=" + type + ", 검색조건=" + searchType + ", 검색어=" + searchText);
+
+        List<PostCardDto> searchResults = postsService.searchPosts(type, searchType, searchText);
+
+        return ResponseEntity.ok(searchResults);
     }
 
     //수정해야할수도 있음 

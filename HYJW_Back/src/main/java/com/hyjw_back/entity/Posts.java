@@ -31,7 +31,7 @@ public class Posts {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "user_nickname", referencedColumnName = "user_nickname", nullable = false)
     private Users user;
 
     @Enumerated(EnumType.STRING)

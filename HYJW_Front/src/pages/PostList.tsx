@@ -6,8 +6,8 @@ import { PostCard } from "../components/PostCard";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import type { Post } from "../types/PostType";
-import { GetPosts } from "../api/PostApi";
-import { useParams } from "react-router-dom";
+import { GetPosts, SearchPosts } from "../api/PostApi";
+import { useParams, useSearchParams } from "react-router-dom";
 
 
 // 한 페이지에 보여줄 게시글 수
@@ -15,7 +15,11 @@ const POSTS_PER_PAGE = 6;
 
 export default function PostList() {
   const { type } = useParams();
-  const [posts, setPosts] = useState<Post[]>([]);
+  // URL 쿼리 파라미터를 가져옵니다.
+  const [searchParams] = useSearchParams();
+  const searchType = searchParams.get("searchType");
+  const searchText = searchParams.get("searchText");
+
   // 현재 페이지 번호 상태 (0부터 시작)
   const [currentPage, setCurrentPage] = useState(0);
   const [postData, setPostData] = useState<Post[]>([]);
@@ -39,32 +43,49 @@ export default function PostList() {
   const totalPages = Math.max(1, Math.ceil(postData.length / POSTS_PER_PAGE));
 
   // 포스트 데이터 가져오는 부분
-  const loadPostData = () => {
-    GetPosts(type)
-      .then((res) => {
-        // console.log("API 응답:", res);
+  const loadPostData = async () => {
+    setIsLoading(true);
+    setCurrentPage(0);
+    try {
+      let res: Post[];
 
-        // API에서 받은 데이터를 Post 타입으로 변환
-        const posts: Post[] = res.map((post: any) => ({
-          id: post.postId,              // postId -> id
-          title: post.title,
-          author: post.userNickname,    // userNickname -> author
-          image: post.url,              // url -> image
-          category: post.categoryId,    // categoryId -> category
-          date: post.createdAt,         // createdAt -> date
-          views: post.views,
-          hashtags: post.hashtags,
-        }));
+      // 검색어가 있을 때는 SearchPosts 함수를 사용
+      if (searchText && searchType) {
+        console.log(`Searching for "${searchText}" in "${searchType}"...`);
+        res = await SearchPosts(type, searchType, searchText);
+      } else {
+        // 검색어가 없을 때는 기존의 GetPosts 함수를 사용
+        console.log(`Fetching all posts for category "${type}"...`);
+        res = await GetPosts(type);
+      }
 
-        setPostData(posts);
-      })
-      .catch((err) => console.log(err))
-      .finally(() => setIsLoading(false));
+      console.log('API에서 받은 원본 응답 데이터:', res);
+
+      // API 응답을 Post 타입으로 매핑
+      const mappedPosts = res.map((post: any) => ({
+        id: post.postId,
+        title: post.title,
+        author: post.userNickname,
+        image: post.url,
+        category: post.categoryId,
+        date: post.createdAt,
+        views: post.views,
+        hashtags: post.hashtags,
+      }));
+
+      console.log('매핑 후 최종 데이터:', mappedPosts);
+
+      setPostData(mappedPosts);
+    } catch (err) {
+      console.error("게시물 조회 중 오류 발생:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadPostData();
-  }, [type]);
+  }, [type, searchType, searchText]);
 
  // 삭제 콜백: PostCard에서 호출
   const handleDeletePost = (id: number) => {

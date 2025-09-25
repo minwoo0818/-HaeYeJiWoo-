@@ -1,39 +1,54 @@
 import { useState } from "react";
+// useSearchParams 훅을 import 합니다.
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Select, MenuItem, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
 export default function SearchBar() {
   const navigate = useNavigate();
-  // 검색 조건 상태: 제목, 내용, 작성자, 해시태그 중 선택
-  const [searchType, setSearchType] = useState("title");
+  // useSearchParams 훅을 사용하여 URL 검색 파라미터를 관리합니다.
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // 검색어 상태
-  const [searchText, setSearchText] = useState("");
+  // URL 파라미터에서 검색 조건과 검색어를 가져와 상태를 초기화합니다.
+  // URL에 값이 없으면 기본값("title", "")을 사용합니다.
+  const [searchType, setSearchType] = useState(
+    searchParams.get("searchType") || "title"
+  );
+  const [searchText, setSearchText] = useState(
+    searchParams.get("searchText") || ""
+  );
 
-  // 검색 버튼 클릭 시 실행되는 함수
+  // 검색 버튼 클릭 또는 Enter 키 입력 시 실행되는 함수
   const handleSearch = () => {
-    console.log("검색 조건:", searchType, "검색어:", searchText);
-    // 실제 검색 로직은 여기에 추가
+    // 검색어가 있을 때만 URL에 파라미터를 추가합니다.
+    if (searchText.trim() !== "") {
+      setSearchParams({
+        searchType,
+        searchText: searchText.trim(), // 검색어 앞뒤 공백 제거
+      });
+    } else {
+      // 검색어가 비어있다면 URL에서 검색 관련 파라미터를 제거합니다.
+      // 이렇게 하면 PostList가 전체 게시물을 다시 불러오게 됩니다.
+      setSearchParams({});
+    }
   };
 
   // 글쓰기 버튼 클릭 시 실행되는 함수
   const handleWrite = () => {
-    console.log("글쓰기 버튼 클릭");
     navigate("/addposts");
   };
 
   return (
     <div
       style={{
-        display: "flex", // 가로 정렬
-        justifyContent: "space-between", // 좌우 요소 간 간격
-        alignItems: "center", // 세로 중앙 정렬
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
         width: "100%",
-        maxWidth: "900px", // 최대 너비 제한
-        gap: "12px", // 요소 간 간격
+        maxWidth: "900px",
+        gap: "12px",
       }}
     >
       {/* 검색창 영역 */}
@@ -41,10 +56,10 @@ export default function SearchBar() {
         style={{
           display: "flex",
           alignItems: "center",
-          border: "1px solid #ccc", // 테두리
-          borderRadius: "8px", // 둥근 모서리
-          overflow: "hidden", // 넘치는 부분 숨김
-          flex: 1, // 남은 공간을 모두 차지
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          overflow: "hidden",
+          flex: 1,
         }}
       >
         {/* 검색 조건 선택 드롭다운 */}
@@ -55,15 +70,15 @@ export default function SearchBar() {
           style={{
             minWidth: 80,
             flexShrink: 1,
-            backgroundColor: "#474747", // 배경색 설정
-            color: "#ffffff", // 글자색 설정
+            backgroundColor: "#474747",
+            color: "#ffffff",
             borderRadius: "8px",
           }}
           MenuProps={{
             PaperProps: {
               sx: {
-                backgroundColor: "#474747", // 드롭다운 배경색
-                color: "#ffffff", // 드롭다운 글자색
+                backgroundColor: "#474747",
+                color: "#ffffff",
               },
             },
           }}
@@ -79,7 +94,12 @@ export default function SearchBar() {
           type="text"
           placeholder="검색"
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)} // 입력값 변경 시 상태 업데이트
+          onChange={(e) => setSearchText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSearch();
+            }
+          }}
           style={{
             flex: 1,
             minWidth: 100,
@@ -108,11 +128,11 @@ export default function SearchBar() {
       <Button
         onClick={handleWrite}
         style={{
-          height: "50px", // 검색창 높이에 맞춤 (필요 시 조절 가능)
+          height: "50px",
           backgroundColor: "#474747",
           color: "#ffffff",
           borderRadius: "8px",
-          padding: "0 16px", // 좌우 여백만 설정
+          padding: "0 16px",
           whiteSpace: "nowrap",
         }}
       >
