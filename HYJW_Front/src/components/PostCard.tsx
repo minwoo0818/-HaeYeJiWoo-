@@ -46,7 +46,7 @@ export function PostCard({ post, onDelete }: PostCardProps) {
   
   return (
     <div
-      onClick={handleCardClick}
+      // onClick={handleCardClick}
       style={{
         border: "3px solid #ccc",
         borderRadius: "12px",
