@@ -5,12 +5,15 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Timestamp;
 
+import org.hibernate.annotations.Where;
+
 @Entity
 @Table(name = "comments")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Where(clause = "deleted = false")
 public class Comments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,4 +43,7 @@ public class Comments {
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 }

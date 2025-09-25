@@ -43,4 +43,9 @@ public class CommentController {
         commentsService.deleteComment(commentId);
         return ResponseEntity.noContent().build();
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

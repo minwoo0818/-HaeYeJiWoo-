@@ -79,6 +79,32 @@ public class CommentsService {
 
     @Transactional
     public void deleteComment(Long commentId) {
-        commentsRepository.deleteById(commentId);
+        Comments comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
+
+        comment.setDeleted(true);
+        comment.setContent("삭제된 댓글입니다."); // Set content to indicate deletion
+        commentsRepository.save(comment);
+    }
+
+    @Transactional(readOnly = true)
+    public CommentResponseDto getCommentById(Long commentId) {
+        Comments comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
+
+        if (comment.isDeleted()) {
+            throw new IllegalArgumentException("Comment with id: " + commentId + " is deleted.");
+        }
+
+        return CommentResponseDto.builder()
+                .id(comment.getCommentsId())
+                .nickname(comment.getUser().getUserNickname())
+                .postId(comment.getPost().getPostId())
+                .userId(comment.getUser().getUserId())
+                .content(comment.getContent())
+                .parentCommentId(comment.getParentComment() != null ? comment.getParentComment().getCommentsId() : null)
+                .createAt(comment.getCreatedAt().toLocalDateTime())
+                .updateAt(comment.getUpdatedAt() != null ? comment.getUpdatedAt().toLocalDateTime() : null)
+                .build();
     }
 }

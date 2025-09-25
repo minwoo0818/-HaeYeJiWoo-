@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Comment } from "../type";
 import '../PostDetail.css'
-import { addComment, deleteComment
+import { addComment, deleteComment, getCommentsByPostId
   
  } from "../postDetailApi";
 
@@ -60,12 +60,21 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
 
     // 댓글 삭제
     const handleDeleteComment = async (commentId: number) => {
-      if (!window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+      const hasReplies = comments.some(comment => comment.parentCommentId === commentId);
+      let confirmationMessage = "댓글을 삭제하시겠습니까?";
+
+      if (hasReplies) {
+        confirmationMessage = "대댓글이 달린 댓글입니다. 정말 삭제하시겠습니까?";
+      }
+
+      if (!window.confirm(confirmationMessage)) {
         return;
       }
       try {
         await deleteComment(commentId);
-        setComments(comments.filter(comment => comment.id !== commentId && comment.parentCommentId !== commentId));
+        // Refetch comments after successful deletion
+        const updatedComments = await getCommentsByPostId(postId);
+        setComments(updatedComments);
       } catch (error) {
         console.error("댓글 삭제 실패:", error);
         alert("댓글을 삭제하는 중 오류가 발생했습니다.");
