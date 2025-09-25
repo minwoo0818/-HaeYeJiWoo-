@@ -77,7 +77,7 @@ public class HyjwBackApplication implements CommandLineRunner {
         post1.setContent("첫 번째 게시글 본문입니다.");
         post1.setUser(user1);
         post1.setCategoryId(CategoryId.DAILY_LIFE);
-        post1.setUrl("/images/메인페이지.png");  // 로컬 URL로 수정
+        post1.setUrl("/files/메인페이지.png");  // 로컬 URL로 수정
         post1.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         postRepository.save(post1);
 
@@ -86,7 +86,7 @@ public class HyjwBackApplication implements CommandLineRunner {
         post2.setContent("두 번째 게시글 본문입니다.");
         post2.setUser(user1);
         post2.setCategoryId(CategoryId.GAME);
-        post2.setUrl("/images/메인페이지.png");  // 로컬 URL로 수정
+        post2.setUrl("/files/메인페이지.png");  // 로컬 URL로 수정
         post2.setCreatedAt(new Timestamp(System.currentTimeMillis() - 86400000));
         postRepository.save(post2);
 
