@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Post } from "../PostType";
+import type { Post } from "../types/PostType";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
@@ -69,7 +69,13 @@ export function PostCard({ post }: PostCardProps) {
       <div style={{ fontSize: "12px", marginBottom: "8px" }}>
         {post.hashtags.map((tag: string) => `#${tag} `)}
       </div>
-
+{/* 게시글 이미지 */}
+        <div style={{ marginBottom: "8px" }}>
+          <img
+            src={`http://localhost:8080${post.image}`}
+            style={{ width: "80%", borderRadius: "8px" }}
+          />
+        </div>
       {/* 수정 및 삭제 버튼 */}
       <div style={{ display: "flex", gap: "8px" }}>
         <button
@@ -98,13 +104,7 @@ export function PostCard({ post }: PostCardProps) {
           삭제
         </button>
 
-        {/* 게시글 이미지 */}
-        <div style={{ marginBottom: "8px" }}>
-          <img
-            src={post.image}
-            style={{ width: "100%", borderRadius: "8px" }}
-          />
-        </div>
+        
       </div>
     </div>
   );
