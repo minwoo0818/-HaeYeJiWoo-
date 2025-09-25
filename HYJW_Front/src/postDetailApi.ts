@@ -11,13 +11,15 @@ export const getPostDetail = async (id: number): Promise<Post> => {
     return {
         id: backendPost.postId,
         title: backendPost.title,
-        author: backendPost.userNickname,
+        nickname: backendPost.user.userNickname,
         image: backendPost.url,
         category: backendPost.categoryId,
         date: backendPost.createdAt,
         views: backendPost.views,
         hashtags: backendPost.hashtags,
         likes: backendPost.likesCount,
+        content: backendPost.content,
+        files: backendPost.files,
     };
 }
 
@@ -27,13 +29,15 @@ export const getAllPosts = async (): Promise<Post[]> => {
     return response.data.map((backendPost: any) => ({
         id: backendPost.postId,
         title: backendPost.title,
-        author: backendPost.userNickname,
+        nickname: backendPost.user ? backendPost.user.userNickname : 'Unknown',
         image: backendPost.url,
         category: backendPost.categoryId,
         date: backendPost.createdAt,
         views: backendPost.views,
         hashtags: backendPost.hashtags,
         likes: backendPost.likesCount,
+        content: backendPost.content,
+        files: backendPost.files,
     }));
 }
 

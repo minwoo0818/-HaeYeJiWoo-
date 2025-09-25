@@ -5,6 +5,17 @@ import { useParams } from "react-router-dom";
 import { getPostDetail } from "../postDetailApi";
 import type { Post } from "../PostType";
 
+const formatDateTime = (isoString: string) => {
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
 export default function PostDetail () {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
@@ -24,7 +35,6 @@ export default function PostDetail () {
     <>
       <div className="pd-container">
         <div className="pd-post-header">
-          <div className="pd-header">메인 바 / 카테고리</div>
           <div className="pd-post-meta">
             <div className="pd-post-num">  글 번호: {post.id} </div>
             <div className="view-count">조회수 {post.views}</div>     
@@ -44,8 +54,8 @@ export default function PostDetail () {
           </div> 
         
           <div className="pd-post-info">
-            <span className="author"><h3>작성자: {post.author}</h3></span>
-            <span className="date">{post.date}</span>
+            <span className="author"><h3>작성자: {post.nickname}</h3></span>
+            <span className="date">{formatDateTime(post.date)}</span>
           </div>
 
           <div className="pd-post-body">
@@ -58,9 +68,27 @@ export default function PostDetail () {
           
           <hr/>
 
-          <div className="pd-attachment">
-            첨부파일: <a href="#">첨부파일.예시 (1MB)</a>
-          </div>
+          {post.files && post.files.length > 0 && (
+            <div className="pd-attachment">
+              첨부파일:
+              {post.files.map((file, index) => {
+                if (!file || !file.url || !file.fileName) return null; // Basic null/undefined check
+
+                const fileExtension = file.fileName.split('.').pop()?.toLowerCase();
+                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
+
+                return (
+                  <div key={`${file.url}-${index}`} className="attachment-item">
+                    {isImage ? (
+                      <img src={file.url} alt={file.fileName} style={{ maxWidth: '100%', height: 'auto' }} />
+                    ) : (
+                      <a href={file.url} target="_blank" rel="noopener noreferrer">{file.fileName}</a>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <hr/>
 
