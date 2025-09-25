@@ -54,6 +54,7 @@ export default function PostList() {
           date: post.createdAt,         // createdAt -> date
           views: post.views,
           hashtags: post.hashtags,
+          likes: post.likesCount,       // likesCount -> likes
         }));
 
         setPostData(posts);
