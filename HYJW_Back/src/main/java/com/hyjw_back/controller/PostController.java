@@ -18,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
+@CrossOrigin(origins = "http://localhost:5173") //프론트 URL 허용
 public class PostController {
 
     @Autowired
