@@ -1,5 +1,6 @@
 package com.hyjw_back.controller;
 
+import com.hyjw_back.constant.CategoryId;
 import com.hyjw_back.dto.PostCreateDto;
 import com.hyjw_back.dto.PostDetailDto;
 import com.hyjw_back.dto.PostCardDto;
@@ -27,20 +28,25 @@ public class PostController {
         return new ResponseEntity<>(newPost, HttpStatus.CREATED);
     }
 
-    // getAllPosts, getPostDetail 등 다른 메서드는 기존과 동일
     @GetMapping("/all")
     public ResponseEntity<List<PostCardDto>> getAllPosts() {
         List<PostCardDto> posts = postsService.getAllPosts();
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
-    @GetMapping("/{postId}")
-    public ResponseEntity<PostDetailDto> getPostDetail(@PathVariable Long postId) {
-        PostDetailDto postDetail = postsService.getPostDetail(postId);
-        if (postDetail != null) {
-            return new ResponseEntity<>(postDetail, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping("/{CategoryId}")
+    public ResponseEntity<List<PostCardDto>> getCategoryIdPosts(@PathVariable CategoryId CategoryId) {
+        List<PostCardDto> posts = postsService.getPostsByCategory(CategoryId);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
+
+//    @GetMapping("/{postId}")
+//    public ResponseEntity<PostDetailDto> getPostDetail(@PathVariable Long postId) {
+//        PostDetailDto postDetail = postsService.getPostDetail(postId);
+//        if (postDetail != null) {
+//            return new ResponseEntity<>(postDetail, HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
 }

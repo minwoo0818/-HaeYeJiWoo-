@@ -29,7 +29,7 @@ public class CommentsService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Posts post = postsRepository.findById(commentCreateDto.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
         Comments comment = new Comments();
         comment.setContent(commentCreateDto.getContent());

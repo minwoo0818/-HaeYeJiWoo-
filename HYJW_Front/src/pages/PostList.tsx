@@ -74,7 +74,7 @@ export default function PostList() {
       >
         {/* 현재 페이지에 해당하는 게시글 카드 렌더링 */}
         {visiblePosts.map((post) => (
-          <PostCard key={post.id} post={post} />
+           <PostCard key={post.id} post={{ ...post, image: post.image }} />
         ))}
       </div>
 

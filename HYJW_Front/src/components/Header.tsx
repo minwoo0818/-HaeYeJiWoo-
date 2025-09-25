@@ -13,10 +13,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 // import "../Header.css";
 
 const navItems = [
-  { name: "게임", path: "/category/game" },
-  { name: "맛집", path: "/category/resturant" },
-  { name: "유머", path: "/category/humor" },
-  { name: "일상", path: "/category/life" },
+  { name: "게임", path: "/posts/GAME" },
+  { name: "맛집", path: "/posts/GOOD_RESTAURANT" },
+  { name: "유머", path: "/posts/HUMOR" },
+  { name: "일상", path: "/posts/DAILY_LIFE" },
   { name: "마이페이지", path: "/category/mypage" }, // 항상 보여줌
 ];
 

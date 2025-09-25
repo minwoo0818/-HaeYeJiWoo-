@@ -110,6 +110,32 @@ public class PostsService {
         }).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<PostCardDto> getPostsByCategory(CategoryId categoryId) {
+        List<Posts> posts = postsRepository.findByCategoryId(categoryId);
+
+        return posts.stream().map(post -> {
+            PostCardDto dto = new PostCardDto();
+            dto.setPostId(post.getPostId());
+            dto.setTitle(post.getTitle());
+            dto.setUserNickname(post.getUser().getUserNickname());
+            dto.setUrl(post.getUrl());
+            dto.setCategoryId(post.getCategoryId());
+            dto.setCreatedAt(post.getCreatedAt());
+            dto.setViews(post.getViews());
+
+            // 해시태그 목록 조회 및 매핑
+            List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
+            dto.setHashtags(hashtags);
+
+            // 좋아요 수 조회
+            Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
+            dto.setLikesCount(likesCount);
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
     @Transactional
     public PostDetailDto getPostDetail(Long postId) {
         Posts post = postsRepository.findById(postId)
