@@ -36,6 +36,7 @@ public class PostsService {
     @Autowired
     private FilesRepository filesRepository;
 
+
     @Transactional
     public PostDetailDto createPost(PostCreateDto postCreateDto, Long userId) {
         // 1. DTO로부터 게시글 엔티티 생성
@@ -86,8 +87,9 @@ public class PostsService {
 
     @Transactional(readOnly = true)
     public List<PostCardDto> getAllPosts() {
+        // 이 메서드는 기존대로 유지
         List<Posts> posts = postsRepository.findAll();
-
+        // ... DTO 변환 및 반환
         return posts.stream().map(post -> {
             PostCardDto dto = new PostCardDto();
             dto.setPostId(post.getPostId());
@@ -98,11 +100,9 @@ public class PostsService {
             dto.setCreatedAt(post.getCreatedAt());
             dto.setViews(post.getViews());
 
-            // 해시태그 목록 조회 및 매핑
             List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
             dto.setHashtags(hashtags);
 
-            // 좋아요 수 조회
             Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
             dto.setLikesCount(likesCount);
 
@@ -111,9 +111,18 @@ public class PostsService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostCardDto> getPostsByCategory(CategoryId categoryId) {
+    public List<PostCardDto> getPostsByCategory(String type) { // <-- CategoryId -> String으로 변경
+        System.out.println("PostsService.getPostsByCategory 호출, type: " + type);
+
+        if ("all".equalsIgnoreCase(type)) {
+            // all 타입일 경우 getAllPosts() 메서드를 재사용
+            return getAllPosts();
+        }
+
+        CategoryId categoryId = CategoryId.valueOf(type.toUpperCase());
         List<Posts> posts = postsRepository.findByCategoryId(categoryId);
 
+        // ... DTO 변환 및 반환
         return posts.stream().map(post -> {
             PostCardDto dto = new PostCardDto();
             dto.setPostId(post.getPostId());
@@ -124,11 +133,75 @@ public class PostsService {
             dto.setCreatedAt(post.getCreatedAt());
             dto.setViews(post.getViews());
 
-            // 해시태그 목록 조회 및 매핑
             List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
             dto.setHashtags(hashtags);
 
-            // 좋아요 수 조회
+            Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
+            dto.setLikesCount(likesCount);
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    public List<PostCardDto> searchPosts(String type, String searchType, String searchText) {
+
+        List<Posts> searchResults;
+
+        // "all" 카테고리 검색 로직
+        if ("all".equalsIgnoreCase(type)) {
+            switch (searchType) {
+                case "title":
+                    searchResults = postsRepository.findByTitleContaining(searchText);
+                    break;
+                case "content":
+                    searchResults = postsRepository.findByContentContaining(searchText);
+                    break;
+                case "userId":
+                    searchResults = postsRepository.findByUserUserNicknameContaining(searchText);
+                    break;
+                case "hashtag":
+                    searchResults = postsRepository.findByTagContaining(searchText);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid search type for all posts: " + searchType);
+            }
+        } else {
+            // 특정 카테고리 검색 로직
+            CategoryId categoryId = CategoryId.valueOf(type.toUpperCase());
+            switch (searchType) {
+                case "title":
+                    searchResults = postsRepository.findByCategoryIdAndTitleContaining(categoryId, searchText);
+                    break;
+                case "content":
+                    searchResults = postsRepository.findByCategoryIdAndContentContaining(categoryId, searchText);
+                    break;
+                case "userId":
+                    searchResults = postsRepository.findByCategoryIdAndUserUserNicknameContaining(categoryId, searchText);
+                    break;
+                case "hashtag":
+                    searchResults = postsRepository.findByCategoryIdAndTagContaining(categoryId, searchText);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid search type: " + searchType);
+            }
+        }
+
+        // 검색 결과를 DTO로 변환하는 공통 로직
+        return searchResults.stream().map(post -> {
+            PostCardDto dto = new PostCardDto();
+            dto.setPostId(post.getPostId());
+            dto.setTitle(post.getTitle());
+            dto.setUserNickname(post.getUser().getUserNickname());
+            dto.setUrl(post.getUrl());
+            dto.setCategoryId(post.getCategoryId());
+            dto.setCreatedAt(post.getCreatedAt());
+            dto.setViews(post.getViews());
+
+            // 해시태그와 좋아요 수는 별도의 쿼리를 통해 가져와야 합니다.
+            // 기존의 getAllPosts와 getPostsByCategory 메서드에 있는 로직을 재사용하세요.
+            List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
+            dto.setHashtags(hashtags);
+
             Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
             dto.setLikesCount(likesCount);
 
