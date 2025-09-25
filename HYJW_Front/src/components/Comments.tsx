@@ -15,11 +15,13 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
     // 새 댓글 입력 상태
     const [newComment, setNewComment] = useState("");
 
-    // 대댓글 입력 상태: commentId별로 
-    const [replyInputs, setReplyInputs] = useState<{ [key: number]: string}> ({});
+  // 대댓글 입력 상태: commentId별로
+  const [replyInputs, setReplyInputs] = useState<{ [key: number]: string }>({});
 
-    // 대댓글 입력창 표시 여부: commentId별
-    const [showReplyInput, setShowReplyInput] = useState<{[key: number]: boolean}>({});
+  // 대댓글 입력창 표시 여부: commentId별
+  const [showReplyInput, setShowReplyInput] = useState<{
+    [key: number]: boolean;
+  }>({});
 
     // 새로운 댓글 등록
     const handleAddComment = async () => {
@@ -37,11 +39,12 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
         alert("댓글을 등록하는 중 오류가 발생했습니다.");
       }
     }
+  };
 
-    // 대댓글 등록
-    const handleAddReply = async (parentId: number) => {
-      const replyContent = replyInputs[parentId];
-      if(!replyContent?.trim()) return;
+  // 대댓글 등록
+  const handleAddReply = async (parentId: number) => {
+    const replyContent = replyInputs[parentId];
+    if (!replyContent?.trim()) return;
 
       try {
         const createdReply = await addComment({
@@ -76,6 +79,7 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
     const toggleReplyInput = (commentId: number) => {
         setShowReplyInput(prev => ({...prev, [commentId]: !prev[commentId]}));
     }
+  };
 
     // 재귀적으로 댓글과 대댓글을 렌더링하는 함수
     const renderComments = (parentId: number | null = null) => {
@@ -99,57 +103,104 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
             <hr/>
           </div>
 
-          {showReplyInput[comment.id] && (
-            <div className="comment-write pd-reply-write">
-              <input
-                type="text"
-                placeholder="대댓글을 입력하세요."
-                value={replyInputs[comment.id] || ''}
-                onChange={(e) => setReplyInputs({...replyInputs, [comment.id]: e.target.value})}
-                style={{ width: "60%", padding: "6px" }}
-              />
+  // 재귀적으로 댓글과 대댓글을 렌더링하는 함수
+  const renderComments = (parentId: number | null = null) => {
+    const filteredComments = comments.filter((comment) =>
+      parentId === null
+        ? comment.parentCommentId === undefined ||
+          comment.parentCommentId === null
+        : comment.parentCommentId === parentId
+    );
+
+    return filteredComments.map((comment) => (
+      <div
+        key={comment.id}
+        className={parentId !== null ? "pd-reply-comment" : ""}
+      >
+        <div className="pd-ex-comment">
+          <p>
+            <strong>{comment.userNickname}</strong>
+            <span className="pd-timestamp">
+              {new Date(comment.createAt).toLocaleString()}
+            </span>
+            {parentId === null && (
               <button
-                onClick={() => handleAddReply(comment.id)}
-                style={{ padding: "6px 12px", marginLeft: "8px", cursor: "pointer" }}
+                className="pd-write-recomment"
+                onClick={() => toggleReplyInput(comment.id)}
               >
-                등록
+                답글쓰기
               </button>
+            )}
+          </p>
+          <div className="pd-ex-comment-content">
+            <p>{comment.content}</p>
+            <div className="comment-actions">
+              <button>수정</button>
+              <button>삭제</button>
             </div>
-          )}
-          
-          {/* Recursively render replies */}
-          <div style={{ marginLeft: '20px' }}>
-            {renderComments(comment.id)}
           </div>
+          <hr />
         </div>
-      ));
-    }
 
-    return (
-        <>
-        <div className="pd-comments-section">
-          <h4>댓글 ({comments.filter(c => !c.parentCommentId).length})</h4>
-
-          {/* 최상위 댓글 렌더링 */}
-          {renderComments()}
-
-          {/* // 새로운 댓글 작성 영역    */}
-          <div className="comment-write">
+        {showReplyInput[comment.id] && (
+          <div className="comment-write pd-reply-write">
             <input
               type="text"
-              placeholder="댓글을 입력하세요."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              style={{ width: "70%", padding: "6px" }}
+              placeholder="대댓글을 입력하세요."
+              value={replyInputs[comment.id] || ""}
+              onChange={(e) =>
+                setReplyInputs({ ...replyInputs, [comment.id]: e.target.value })
+              }
+              style={{ width: "60%", padding: "6px" }}
             />
             <button
-              onClick={handleAddComment}
-              style={{ padding: "6px 12px", marginLeft: "8px", cursor: "pointer" }}
+              onClick={() => handleAddReply(comment.id)}
+              style={{
+                padding: "6px 12px",
+                marginLeft: "8px",
+                cursor: "pointer",
+              }}
             >
               등록
             </button>
           </div>
+        )}
+
+        {/* Recursively render replies */}
+        <div style={{ marginLeft: "20px" }}>{renderComments(comment.id)}</div>
+      </div>
+    ));
+  };
+
+  return (
+    <>
+      <div className="pd-comments-section">
+        <h4>댓글 ({comments.filter((c) => !c.parentCommentId).length})</h4>
+
+        {/* 최상위 댓글 렌더링 */}
+        {renderComments()}
+
+        {/* // 새로운 댓글 작성 영역    */}
+        <div className="comment-write">
+          <input
+            type="text"
+            placeholder="댓글을 입력하세요."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            style={{ width: "70%", padding: "6px" }}
+          />
+          <button
+            onClick={handleAddComment}
+            style={{
+              padding: "6px 12px",
+              marginLeft: "8px",
+              cursor: "pointer",
+            }}
+          >
+            등록
+          </button>
         </div>
-        </>
-    );
+      </div>
+    </>
+  );
 }
