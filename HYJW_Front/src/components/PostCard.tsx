@@ -4,49 +4,42 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
 interface PostCardProps {
   post: Post;
-  onDelete: (id: number) => void;   //삭제후 부모 (postlist) 상태 갱신 콜백
+  onDelete: (id: number) => void;   // 삭제 후 부모 (postlist) 상태 갱신 콜백
 }
-
 export function PostCard({ post, onDelete }: PostCardProps) {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
-
-  // 좋아요 상태를 토글하는 함수
-  const handleLikeToggle = () => {
-    setLiked((prev) => !prev);
-  };
-
+  // 좋아요 상태 토글
+const handleLikeToggle = (e: React.MouseEvent) => {
+  e.stopPropagation(); // 카드 클릭 이벤트 방지
+  setLiked((prev) => !prev);
+};
+  // 카드 클릭 시 상세 페이지로 이동
   const handleCardClick = () => {
     navigate(`/postdetail/${post.id}`);
-  }
-  // 삭제 버튼 클릭
-  const handleDelete = async () => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
-
-    try {
-      const res = await axios.delete(`/api/posts/${post.id}`);
-      // const res = await fetch(`http://localhost:8080/posts/${post.id}`, {
-      //   method: "DELETE",
-      // });
-
-      // if (!res.ok) {
-      //   throw new Error("삭제 실패");
-      // }
-
-      // 삭제 성공 → 부모(PostList) 상태 갱신
-      onDelete(post.id);
-    } catch (err) {
-      console.error(err);
-      alert("삭제 중 오류가 발생했습니다.");
-    }
   };
-  
+  // 삭제 버튼 클릭
+const handleDelete = async (e: React.MouseEvent) => {
+  e.stopPropagation(); // 카드 클릭 이벤트 방지
+  if (!window.confirm("정말 삭제하시겠습니까?")) return;
+  try {
+    await axios.delete(`/api/posts/${post.id}`);
+    onDelete(post.id); // 부모 상태 갱신
+  } catch (err) {
+    console.error(err);
+    alert("삭제 중 오류가 발생했습니다.");
+  }
+};
+// 수정 버튼 클릭
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    navigate(`/edit/${post.id}`);
+  };
   return (
     <div
-      // onClick={handleCardClick}
+      onClick={handleCardClick}
       style={{
         border: "3px solid #ccc",
         borderRadius: "12px",
@@ -68,7 +61,6 @@ export function PostCard({ post, onDelete }: PostCardProps) {
         <span>
           {post.id}번 | {post.title}
         </span>
-
         {/* 작성자 이름과 좋아요 아이콘 */}
         <div style={{ display: "flex", alignItems: "center", gap: "1px" }}>
           <span style={{ fontSize: "15px", color: "#333" }}>
@@ -89,12 +81,10 @@ export function PostCard({ post, onDelete }: PostCardProps) {
           </span>
         </div>
       </div>
-
       {/* 카테고리, 날짜, 조회수 */}
       <div style={{ fontSize: "12px", color: "#555", marginBottom: "8px" }}>
         {post.category} | {post.date} | {post.views}명
       </div>
-
       {/* 해시태그 목록 */}
       <div style={{ fontSize: "12px", marginBottom: "8px" }}>
         {post.hashtags.map((tag: string) => `#${tag} `)}
@@ -111,7 +101,7 @@ export function PostCard({ post, onDelete }: PostCardProps) {
         <button
           style={{
             backgroundColor: "#474747",
-            color: "#ffffff",
+            color: "#FFFFFF",
             border: "none",
             borderRadius: "4px",
             padding: "6px 12px",
@@ -120,22 +110,19 @@ export function PostCard({ post, onDelete }: PostCardProps) {
         >
           수정
         </button>
-
         <button
           style={{
             backgroundColor: "#474747",
-            color: "#ffffff",
+            color: "#FFFFFF",
             border: "none",
             borderRadius: "4px",
             padding: "6px 12px",
             cursor: "pointer",
-          }} 
+          }}
           onClick={handleDelete}
         >
           삭제
         </button>
-
-        
       </div>
     </div>
   );

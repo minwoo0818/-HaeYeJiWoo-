@@ -65,6 +65,7 @@ export default function PostDetail () {
 
     return (
     <>
+    <div className="pd-rootcontainer">
       <div className="pd-container">
         <div className="pd-post-header">
           <div className="pd-post-meta">
@@ -145,6 +146,7 @@ export default function PostDetail () {
         {id && <Comments postId={parseInt(id)} comments={comments} setComments={setComments} />}
 
        </div>  {/* 맨 바깥상자 */}
+    </div>   
     </>
     );
 
