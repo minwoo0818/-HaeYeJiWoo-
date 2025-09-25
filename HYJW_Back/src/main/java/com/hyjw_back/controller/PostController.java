@@ -3,6 +3,8 @@ package com.hyjw_back.controller;
 import com.hyjw_back.dto.PostCreateDto;
 import com.hyjw_back.dto.PostDetailDto;
 import com.hyjw_back.dto.PostCardDto;
+import com.hyjw_back.dto.CommentResponseDto;
+import com.hyjw_back.service.CommentsService;
 import com.hyjw_back.service.PostsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,9 @@ public class PostController {
 
     @Autowired
     private PostsService postsService;
+
+    @Autowired
+    private CommentsService commentsService;
 
     @PostMapping("/{userId}")
     public ResponseEntity<PostDetailDto> createPost(
@@ -52,5 +57,11 @@ public class PostController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(@PathVariable Long postId) {
+        List<CommentResponseDto> comments = commentsService.getCommentsByPostId(postId);
+        return ResponseEntity.ok(comments);
     }
 }

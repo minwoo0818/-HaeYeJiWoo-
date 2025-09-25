@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Comments from "../components/Comments";
 import '../PostDetail.css'
 import { useParams } from "react-router-dom";
-import { getPostDetail } from "../postDetailApi";
+import { getPostDetail, getCommentsByPostId } from "../postDetailApi";
 import type { Post } from "../PostType";
 
 const formatDateTime = (isoString: string) => {
@@ -19,11 +19,15 @@ const formatDateTime = (isoString: string) => {
 export default function PostDetail () {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
 
   useEffect(() => {
     if (id) {
       const postId = parseInt(id);
       getPostDetail(postId).then(setPost);
+      getCommentsByPostId(postId).then(commentsData => {
+        setComments(commentsData);
+      });
     }
   }, [id]);
 
@@ -94,7 +98,7 @@ export default function PostDetail () {
 
         </div>  {/* 본문여기까지 */}
         
-        <Comments/>
+        {id && <Comments postId={parseInt(id)} comments={comments} setComments={setComments} />}
 
        </div>  {/* 맨 바깥상자 */}
     </>
