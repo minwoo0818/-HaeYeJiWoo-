@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Comment } from "../type";
 import '../PostDetail.css'
-import { addComment, deleteComment
+import { addComment, deleteComment, getCommentsByPostId, updateComment
   
  } from "../postDetailApi";
 
@@ -20,6 +20,10 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
 
     // 대댓글 입력창 표시 여부: commentId별
     const [showReplyInput, setShowReplyInput] = useState<{[key: number]: boolean}>({});
+
+    // 댓글 수정 관련 상태
+    const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+    const [editedContent, setEditedContent] = useState<string>("");
 
     // 새로운 댓글 등록
     const handleAddComment = async () => {
@@ -60,12 +64,21 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
 
     // 댓글 삭제
     const handleDeleteComment = async (commentId: number) => {
-      if (!window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+      const hasReplies = comments.some(comment => comment.parentCommentId === commentId);
+      let confirmationMessage = "댓글을 삭제하시겠습니까?";
+
+      if (hasReplies) {
+        confirmationMessage = "대댓글이 달린 댓글입니다. 정말 삭제하시겠습니까?";
+      }
+
+      if (!window.confirm(confirmationMessage)) {
         return;
       }
       try {
         await deleteComment(commentId);
-        setComments(comments.filter(comment => comment.id !== commentId && comment.parentCommentId !== commentId));
+        // Refetch comments after successful deletion
+        const updatedComments = await getCommentsByPostId(postId);
+        setComments(updatedComments);
       } catch (error) {
         console.error("댓글 삭제 실패:", error);
         alert("댓글을 삭제하는 중 오류가 발생했습니다.");
@@ -76,6 +89,35 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
     const toggleReplyInput = (commentId: number) => {
         setShowReplyInput(prev => ({...prev, [commentId]: !prev[commentId]}));
     }
+
+    // 댓글 수정 시작
+    const handleEditComment = (comment: Comment) => {
+      setEditingCommentId(comment.id);
+      setEditedContent(comment.content);
+    };
+
+    // 댓글 수정 저장
+    const handleSaveEditedComment = async (commentId: number) => {
+      if (!editedContent.trim()) {
+        alert("수정할 내용을 입력해주세요.");
+        return;
+      }
+      try {
+        const updated = await updateComment(commentId, editedContent);
+        setComments(comments.map(c => (c.id === commentId ? { ...c, content: updated.content } : c)));
+        setEditingCommentId(null);
+        setEditedContent("");
+      } catch (error) {
+        console.error("댓글 수정 실패:", error);
+        alert("댓글을 수정하는 중 오류가 발생했습니다.");
+      }
+    };
+
+    // 댓글 수정 취소
+    const handleCancelEdit = () => {
+      setEditingCommentId(null);
+      setEditedContent("");
+    };
 
     // 재귀적으로 댓글과 대댓글을 렌더링하는 함수
     const renderComments = (parentId: number | null = null) => {
@@ -89,14 +131,25 @@ export default function Comments({ postId, comments, setComments }: CommentsProp
               <span className="pd-timestamp">{new Date(comment.createAt).toLocaleString()}</span>
               {parentId === null && <button className="pd-write-recomment" onClick={() => toggleReplyInput(comment.id)}>답글쓰기</button>}
             </p>
-            <div className="pd-ex-comment-content">
-              <p>{comment.content}</p>
-              <div className="comment-actions">
-                <button>수정</button>
-                <button onClick={() => handleDeleteComment(comment.id)}>삭제</button>
-              </div>
-            </div>
-            <hr/>
+                      <div className="pd-ex-comment-content">
+                        {editingCommentId === comment.id ? (
+                          <div className="comment-edit-area">
+                            <input
+                              type="text"
+                              value={editedContent}
+                              onChange={(e) => setEditedContent(e.target.value)}
+                              style={{ width: "70%", padding: "6px" }}
+                            />
+                            <button onClick={() => handleSaveEditedComment(comment.id)} style={{ padding: "6px 12px", marginLeft: "8px", cursor: "pointer" }}>저장</button>
+                            <button onClick={handleCancelEdit} style={{ padding: "6px 12px", marginLeft: "8px", cursor: "pointer" }}>취소</button>
+                          </div>
+                        ) : (
+                          <p>{comment.content}</p>
+                        )}
+                                    <div className="comment-actions">
+                                      {editingCommentId !== comment.id && <button onClick={() => handleEditComment(comment)}>수정</button>}
+                                      {editingCommentId !== comment.id && <button onClick={() => handleDeleteComment(comment.id)}>삭제</button>}
+                                    </div>                      </div>            <hr/>
           </div>
 
           {showReplyInput[comment.id] && (

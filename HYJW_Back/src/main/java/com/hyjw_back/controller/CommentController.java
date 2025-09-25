@@ -11,6 +11,19 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+class CommentUpdateDto {
+    private String content;
+}
+
 @RestController
 @RequestMapping("/comments")
 @RequiredArgsConstructor
@@ -42,5 +55,16 @@ public class CommentController {
     public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
         commentsService.deleteComment(commentId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{commentId}")
+    public ResponseEntity<CommentResponseDto> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateDto commentUpdateDto) {
+        CommentResponseDto updatedComment = commentsService.updateComment(commentId, commentUpdateDto.getContent());
+        return ResponseEntity.ok(updatedComment);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
