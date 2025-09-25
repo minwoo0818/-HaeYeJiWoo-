@@ -34,10 +34,10 @@ export default function PostList() {
   const loadPostData = () => {
     GetPosts(type)
       .then((res) => {
-        console.log("API 응답:", res);
+        // console.log("API 응답:", res);
 
         // API에서 받은 데이터를 Post 타입으로 변환
-        const posts = res.map((post: any) => ({
+        const posts: Post[] = res.map((post: any) => ({
           id: post.postId,              // postId -> id
           title: post.title,
           author: post.userNickname,    // userNickname -> author
@@ -58,6 +58,20 @@ export default function PostList() {
     loadPostData();
   }, [type]);
 
+ // 삭제 콜백: PostCard에서 호출
+  const handleDeletePost = (id: number) => {
+    setPostData((prev) => {
+      const newPosts = prev.filter((post) => post.id !== id);
+
+      // 현재 페이지가 비어있으면 한 페이지 뒤로 이동
+      if (currentPage > 0 && startIndex >= newPosts.length) {
+        setCurrentPage((prevPage) => prevPage - 1);
+      }
+
+      return newPosts;
+    });
+  };
+
   return (
     <div style={{ padding: "16px" }}>
       {/* 게시글 카드들을 2열 3행 그리드로 배치 */}
@@ -74,7 +88,7 @@ export default function PostList() {
       >
         {/* 현재 페이지에 해당하는 게시글 카드 렌더링 */}
         {visiblePosts.map((post) => (
-          <PostCard key={post.id} post={post} />
+          <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
         ))}
       </div>
 

@@ -2,17 +2,41 @@ import { useState } from "react";
 import type { Post } from "../PostType";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import axios from "axios";
 
 interface PostCardProps {
   post: Post;
+  onDelete: (id: number) => void;   //삭제후 부모 (postlist) 상태 갱신 콜백
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onDelete }: PostCardProps) {
   const [liked, setLiked] = useState(false);
 
   // 좋아요 상태를 토글하는 함수
   const handleLikeToggle = () => {
     setLiked((prev) => !prev);
+  };
+
+  // 삭제 버튼 클릭
+  const handleDelete = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      const res = await axios.delete(`/api/posts/${post.id}`);
+      // const res = await fetch(`http://localhost:8080/posts/${post.id}`, {
+      //   method: "DELETE",
+      // });
+
+      // if (!res.ok) {
+      //   throw new Error("삭제 실패");
+      // }
+
+      // 삭제 성공 → 부모(PostList) 상태 갱신
+      onDelete(post.id);
+    } catch (err) {
+      console.error(err);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -93,7 +117,7 @@ export function PostCard({ post }: PostCardProps) {
             borderRadius: "4px",
             padding: "6px 12px",
             cursor: "pointer",
-          }}
+          }} onClick={handleDelete}
         >
           삭제
         </button>

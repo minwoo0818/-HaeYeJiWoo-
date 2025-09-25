@@ -86,7 +86,7 @@ public class PostsService {
 
     @Transactional(readOnly = true)
     public List<PostCardDto> getAllPosts() {
-        List<Posts> posts = postsRepository.findAll();
+        List<Posts> posts = postsRepository.findByIsDeleteFalse();
 
         return posts.stream().map(post -> {
             PostCardDto dto = new PostCardDto();
@@ -109,6 +109,7 @@ public class PostsService {
             return dto;
         }).collect(Collectors.toList());
     }
+
 
     @Transactional
     public PostDetailDto getPostDetail(Long postId) {
@@ -177,6 +178,46 @@ public class PostsService {
         Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
         dto.setLikesCount(likesCount);
 
+        return dto;
+    }
+
+
+    //유저 : 소프트 삭제 (isDelete = true) & 관리자 : 하드 삭제 (DB에서 완전히 삭제) 로직
+    @Transactional
+    public void softDeletePost(Long postId) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setIsDelete(true); // 삭제 처리
+        postsRepository.save(post);
+    }
+
+    @Transactional
+    public void hardDeletePost(Long postId) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        postsRepository.delete(post);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostCardDto> getDeletedPosts() {
+        List<Posts> posts = postsRepository.findByIsDeleteTrue(); // 삭제된 것만
+        return posts.stream()
+                .map(this::convertToPostCardDto)
+                .collect(Collectors.toList());
+    }
+
+    // 변환 공통 메서드
+    private PostCardDto convertToPostCardDto(Posts post) {
+        PostCardDto dto = new PostCardDto();
+        dto.setPostId(post.getPostId());
+        dto.setTitle(post.getTitle());
+        dto.setUserNickname(post.getUser().getUserNickname());
+        dto.setUrl(post.getUrl());
+        dto.setCategoryId(post.getCategoryId());
+        dto.setCreatedAt(post.getCreatedAt());
+        dto.setViews(post.getViews());
+        dto.setHashtags(postHashtagRepository.findHashtagTagsByPostId(post.getPostId()));
+        dto.setLikesCount(postLikesRepository.countByPost_PostId(post.getPostId()));
         return dto;
     }
 }
