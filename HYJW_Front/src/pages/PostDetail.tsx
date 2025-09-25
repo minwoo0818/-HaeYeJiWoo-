@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import Comments from "../components/Comments";
 import '../PostDetail.css'
 import { useParams } from "react-router-dom";
-import { getPostDetail, getCommentsByPostId } from "../postDetailApi";
+import { getPostDetail, getCommentsByPostId, likePost, unlikePost, getPostLikeStatus } from "../postDetailApi";
 import type { Post } from "../PostType";
 import type { Comment } from "../type";
-import { useNavigate } from "react-router-dom";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 const formatDateTime = (isoString: string) => {
   const date = new Date(isoString);
@@ -22,18 +23,41 @@ export default function PostDetail () {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [liked, setLiked] = useState(false);
+  const [currentLikesCount, setCurrentLikesCount] = useState(0);
   // const navigate = useNavigate();
 
 
   useEffect(() => {
     if (id) {
       const postId = parseInt(id);
-      getPostDetail(postId).then(setPost);
+      getPostDetail(postId).then(postData => {
+        setPost(postData);
+        setCurrentLikesCount(postData.likes);
+      });
       getCommentsByPostId(postId).then(commentsData => {
         setComments(commentsData);
       });
+      getPostLikeStatus(postId).then(setLiked);
     }
   }, [id]);
+
+  const handleLikeToggle = async () => {
+    if (!post) return;
+    try {
+      if (liked) {
+        await unlikePost(post.id);
+        setCurrentLikesCount(prev => prev - 1);
+      } else {
+        await likePost(post.id);
+        setCurrentLikesCount(prev => prev + 1);
+      }
+      setLiked(prev => !prev);
+    } catch (error) {
+      console.error("좋아요 토글 실패:", error);
+      alert("좋아요 상태를 변경하는 중 오류가 발생했습니다.");
+    }
+  };
 
   if (!post) {
     return <div>게시글을 불러오는 중...</div>;
@@ -46,7 +70,23 @@ export default function PostDetail () {
           <div className="pd-post-meta">
             <div className="pd-post-num">  글 번호: {post.id} </div>
             <div className="view-count">조회수 {post.views}</div>     
-            <div><button className="pd-like">♡</button>좋아요 {post.likes}</div>
+            {/* 작성자 이름과 좋아요 아이콘 */}
+            <div style={{ display: "flex", alignItems: "center", gap: "1px" }}>
+              <span
+                onClick={handleLikeToggle}
+                style={{
+                  cursor: "pointer",
+                  color: liked ? "red" : "black",
+                  fontSize: "20px",
+                  borderRadius: "50%",
+                  position: "relative",
+                  top: "4px",
+                }}
+              >
+                {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+              </span>
+              <span>{currentLikesCount}</span>
+            </div>
           </div>
         </div>
       <hr/>

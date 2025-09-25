@@ -64,3 +64,29 @@ export const updateComment = async (commentId: number, content: string): Promise
     const response = await axios.put(`${BASE_URL}/comments/${commentId}`, { content });
     return response.data;
 };
+
+// Post Like APIs
+export const likePost = async (postId: number): Promise<void> => {
+    await axios.post(`${BASE_URL}/posts/${postId}/like`);
+};
+
+export const unlikePost = async (postId: number): Promise<void> => {
+    await axios.delete(`${BASE_URL}/posts/${postId}/like`);
+};
+
+export const getPostLikeStatus = async (postId: number): Promise<boolean> => {
+    try {
+        const response = await axios.get(`${BASE_URL}/posts/${postId}/like/status`);
+        return response.status === 200; // Assuming 200 means liked, adjust if backend sends boolean in data
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+            return false; // Not found means not liked
+        }
+        throw error;
+    }
+};
+
+export const getPostLikesCount = async (postId: number): Promise<number> => {
+    const response = await axios.get(`${BASE_URL}/posts/${postId}/likes/count`);
+    return response.data.count; // Assuming backend returns { count: number }
+};
