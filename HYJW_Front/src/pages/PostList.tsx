@@ -28,7 +28,7 @@ export default function PostList() {
   const hasPrevPage = currentPage > 0;
 
   // 전체 페이지 수 계산 (총 게시글 수 / 페이지당 게시글 수)
-  const totalPages = Math.ceil(postData.length / POSTS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(postData.length / POSTS_PER_PAGE));
 
   // 포스트 데이터 가져오는 부분
   const loadPostData = () => {
