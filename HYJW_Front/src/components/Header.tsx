@@ -10,6 +10,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuIcon from "@mui/icons-material/Menu";
+import { useAuthStore } from "../authStore";
 // import "../Header.css";
 
 const navItems = [
@@ -21,7 +22,9 @@ const navItems = [
 ];
 
 function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -37,12 +40,31 @@ function ResponsiveAppBar() {
     handleCloseNavMenu();
   };
 
+  const handleLoginClick = () => {
+    navigate("/login"); // /login 페이지로 이동
+  };
+
+  const { logout } = useAuthStore();
+  const handleLogoutClick = () => {
+    sessionStorage.removeItem("jwt");
+    logout();
+    navigate("/login");
+  };
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#474747", width: "95vw" }}>
+    <AppBar
+      position="static"
+      sx={{ backgroundColor: "#474747", width: "95vw" }}
+    >
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
-          sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center"  }}
+          sx={{
+            display: "flex",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
         >
           {/* 햄버거 메뉴 */}
           <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
@@ -57,7 +79,7 @@ function ResponsiveAppBar() {
               <MenuIcon fontSize="large" />
             </IconButton>
 
-            {/* 모바일 메뉴 */} 
+            {/* 모바일 메뉴 */}
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
@@ -74,11 +96,14 @@ function ResponsiveAppBar() {
               }}
             >
               {navItems.map((item) => (
-                <MenuItem key={item.name} onClick={() => handleClick(item.path)}> 
-                  <Typography textAlign="center">{item.name}</Typography> 
-                </MenuItem> 
+                <MenuItem
+                  key={item.name}
+                  onClick={() => handleClick(item.path)}
+                >
+                  <Typography textAlign="center">{item.name}</Typography>
+                </MenuItem>
               ))}
-            </Menu> 
+            </Menu>
           </Box>
 
           {/* 로고 */}
@@ -123,14 +148,25 @@ function ResponsiveAppBar() {
           {/* 로그인 버튼 (오른쪽 정렬) */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ flexGrow: 0 }}>
-            <Button
-              variant="outlined"
-              color="inherit"
-              onClick={() => handleClick("/login")}
-              sx={{ ml: 2 }}
-            >
-              로그인
-            </Button>
+            {!isAuthenticated ? (
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={handleLoginClick}
+                sx={{ ml: 2 }}
+              >
+                로그인
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={handleLogoutClick}
+                sx={{ ml: 2 }}
+              >
+                로그아웃
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>

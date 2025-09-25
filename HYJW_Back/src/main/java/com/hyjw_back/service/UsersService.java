@@ -24,7 +24,7 @@ public class UsersService {
     }
 
     @Transactional
-    public UserDto registerUser(UserDto userDto) {
+    public UserDto signupUser(UserDto userDto) {
         if (isEmailDuplicate(userDto.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }

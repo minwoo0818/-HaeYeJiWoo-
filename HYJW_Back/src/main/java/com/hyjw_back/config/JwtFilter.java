@@ -26,13 +26,14 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String uri = request.getRequestURI();
-        System.out.println("JwtFilter 요청 URI: " + uri); // ✅ 여기에 추가
+        System.out.println("JwtFilter 요청 URI: " + uri); //
 
 
-        if (uri.contains("/api/users/register") ||
-                uri.contains("/api/users/checkEmail") ||
-                uri.contains("/api/users/checkNickname")) {
-            System.out.println("JwtFilter 예외 처리 통과: " + uri); // ✅ 통과 로그 추가
+        if (uri.contains("/users/signup") ||
+                uri.contains("/users/login") ||
+                uri.contains("/users/checkEmail") ||
+                uri.contains("/users/checkNickname")) {
+            System.out.println("JwtFilter 예외 처리 통과: " + uri); //
             filterChain.doFilter(request, response);
             return;
         }

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextField, Button, Stack, Typography, Box } from "@mui/material";
+import { useAuthStore } from "../authStore";
 
 // 환경 변수에서 API 기본 URL 가져오기
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -20,23 +21,37 @@ const Login = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+  const login = useAuthStore((state) => state.login);
 
   // 로그인 버튼 클릭 시 실행되는 함수
   const handleSubmit = async () => {
-    const res = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST", // POST 요청으로 로그인 시도
-      headers: { "Content-Type": "application/json" }, // JSON 형식으로 전송
-      body: JSON.stringify(form), // 폼 데이터를 문자열로 변환
-    });
+    try {
+      const res = await fetch(`${BASE_URL}/users/login`, {
+        method: "POST", // POST 요청으로 로그인 시도
+        headers: { "Content-Type": "application/json" }, // JSON 형식으로 전송
+        body: JSON.stringify(form), // 폼 데이터를 문자열로 변환
+      });
 
-    if (res.ok) {
-      // 로그인 성공 시 알림 후 페이지 이동
-      alert("로그인 성공!");
-      navigate("/category/all"); // 로그인 후 카테고리 페이지로 이동
-    } else {
-      // 로그인 실패 시 서버에서 받은 메시지 출력
-      const msg = await res.text();
-      alert(msg);
+      if (res.ok) {
+        const token = res.headers.get("Authorization");
+        if (token) {
+          localStorage.setItem("token", token);
+          sessionStorage.setItem("jwt", token);
+          login();
+        }
+        alert("로그인 성공!");
+        navigate("/");
+      } else if (res.status === 401) {
+        alert("이메일 또는 비밀번호가 잘못되었습니다."); // ✅ 인증 실패 메시지
+      } else if (res.status === 500) {
+        alert("서버 오류입니다. 잠시 후 다시 시도해주세요."); // ✅ 서버 오류 메시지
+      } else {
+        const msg = await res.text();
+        alert(msg); // 기타 오류 메시지
+      }
+    } catch (err) {
+      console.error("로그인 에러:", err);
+      alert("로그인 요청 실패");
     }
   };
 
