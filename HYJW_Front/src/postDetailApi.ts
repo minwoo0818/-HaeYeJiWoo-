@@ -77,7 +77,8 @@ export const unlikePost = async (postId: number): Promise<void> => {
 export const getPostLikeStatus = async (postId: number): Promise<boolean> => {
     try {
         const response = await axios.get(`${BASE_URL}/posts/${postId}/like/status`);
-        return response.status === 200; // Assuming 200 means liked, adjust if backend sends boolean in data
+        // return response.status === 200;
+        return response.data;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 404) {
             return false; // Not found means not liked
