@@ -81,10 +81,29 @@ public class CommentsService {
     public void deleteComment(Long commentId) {
         Comments comment = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
+        commentsRepository.delete(comment);
+    }
 
-        comment.setDeleted(true);
-        comment.setContent("삭제된 댓글입니다."); // Set content to indicate deletion
-        commentsRepository.save(comment);
+    @Transactional
+    public CommentResponseDto updateComment(Long commentId, String newContent) {
+        Comments comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
+
+        comment.setContent(newContent);
+        comment.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+
+        Comments updatedComment = commentsRepository.save(comment);
+
+        return CommentResponseDto.builder()
+                .id(updatedComment.getCommentsId())
+                .nickname(updatedComment.getUser().getUserNickname())
+                .postId(updatedComment.getPost().getPostId())
+                .userId(updatedComment.getUser().getUserId())
+                .content(updatedComment.getContent())
+                .parentCommentId(updatedComment.getParentComment() != null ? updatedComment.getParentComment().getCommentsId() : null)
+                .createAt(updatedComment.getCreatedAt().toLocalDateTime())
+                .updateAt(updatedComment.getUpdatedAt() != null ? updatedComment.getUpdatedAt().toLocalDateTime() : null)
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -92,9 +111,7 @@ public class CommentsService {
         Comments comment = commentsRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
 
-        if (comment.isDeleted()) {
-            throw new IllegalArgumentException("Comment with id: " + commentId + " is deleted.");
-        }
+
 
         return CommentResponseDto.builder()
                 .id(comment.getCommentsId())

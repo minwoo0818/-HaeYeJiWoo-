@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface CommentsRepository extends JpaRepository<Comments, Long> {
 
-    @Query("SELECT c FROM Comments c WHERE c.post.postId = :postId AND c.deleted = false")
+    @Query("SELECT c FROM Comments c WHERE c.post.postId = :postId")
     List<Comments> findByPostId(@Param("postId") Long postId);
 }
