@@ -7,7 +7,6 @@ import type { Post } from "../PostType";
 import type { Comment } from "../type";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import useLikeStore from "../stores/likeStore";
 
 const formatDateTime = (isoString: string) => {
   const date = new Date(isoString);
@@ -24,55 +23,37 @@ export default function PostDetail () {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
-  const { status, likes, setStatus, setLikes, incrementLikes, decrementLikes } = useLikeStore();
+  const [liked, setLiked] = useState(false);
+  const [currentLikesCount, setCurrentLikesCount] = useState(0);
   // const navigate = useNavigate();
 
 
   useEffect(() => {
-    setStatus('loading');
     if (id) {
       const postId = parseInt(id);
       getPostDetail(postId).then(postData => {
         setPost(postData);
-        setLikes(postData.likes);
+        setCurrentLikesCount(postData.likes);
       });
       getCommentsByPostId(postId).then(commentsData => {
         setComments(commentsData);
       });
-      getPostLikeStatus(postId).then(likedStatus => {
-        console.log(`[DEBUG] API response for getPostLikeStatus for post ${postId}:`, likedStatus);
-        setStatus(likedStatus ? 'liked' : 'unliked');
-      });
+      getPostLikeStatus(postId).then(setLiked);
     }
-  }, [id, setStatus, setLikes]);
+  }, [id]);
 
   const handleLikeToggle = async () => {
-    if (!post || status === 'loading') return;
-    
-    const isLiked = status === 'liked';
-
-    // Optimistic UI update
-    setStatus(isLiked ? 'unliked' : 'liked');
-    if (isLiked) {
-      decrementLikes();
-    } else {
-      incrementLikes();
-    }
-
+    if (!post) return;
     try {
-      if (isLiked) {
+      if (liked) {
         await unlikePost(post.id);
+        setCurrentLikesCount(prev => prev - 1);
       } else {
         await likePost(post.id);
+        setCurrentLikesCount(prev => prev + 1);
       }
+      setLiked(prev => !prev);
     } catch (error) {
-      // Revert UI on error
-      setStatus(isLiked ? 'liked' : 'unliked');
-      if (isLiked) {
-        incrementLikes();
-      } else {
-        decrementLikes();
-      }
       console.error("좋아요 토글 실패:", error);
       alert("좋아요 상태를 변경하는 중 오류가 발생했습니다.");
     }
@@ -95,19 +76,17 @@ export default function PostDetail () {
               <span
                 onClick={handleLikeToggle}
                 style={{
-                  cursor: status === 'loading' ? 'default' : 'pointer',
-                  color: status === 'liked' ? "red" : "black",
+                  cursor: "pointer",
+                  color: liked ? "red" : "black",
                   fontSize: "20px",
                   borderRadius: "50%",
                   position: "relative",
                   top: "4px",
                 }}
               >
-                {status === 'liked' && <FavoriteIcon />}
-                {status === 'unliked' && <FavoriteBorderIcon />}
-                {/* 로딩 중에는 아이콘을 잠시 숨길 수 있습니다 */}
+                {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
               </span>
-              <span>{likes}</span>
+              <span>{currentLikesCount}</span>
             </div>
           </div>
         </div>
