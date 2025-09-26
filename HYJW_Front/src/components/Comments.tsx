@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Comment } from "../type";
-import "../PostDetail.css";
+import "../css/PostDetail.css";
 import {
   addComment,
   deleteComment,
