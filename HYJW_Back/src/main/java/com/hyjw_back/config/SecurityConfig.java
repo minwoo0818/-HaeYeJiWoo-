@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "/users/login",  "/users/signup").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/checkEmail", "/users/checkNickname").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users/checkEmail", "/users/checkNickname", "posts/**" ,"postdetail/**").permitAll()
                         .requestMatchers("/images/**").permitAll()
                         .anyRequest().authenticated()
                 )

@@ -3,6 +3,7 @@ import type { Post } from "../types/PostType";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../authStore";
 
 interface PostCardProps {
   post: Post;
@@ -12,7 +13,8 @@ export function PostCard({ post }: PostCardProps) {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
 
-  // 좋아요 상태를 토글하는 함수
+  const currentNickname = useAuthStore((state) => state.nickname); // ✅ 로그인한 사용자 닉네임
+
   const handleLikeToggle = () => {
     setLiked((prev) => !prev);
   };
@@ -20,6 +22,8 @@ export function PostCard({ post }: PostCardProps) {
   const handleCardClick = () => {
     navigate(`/postdetail/${post.id}`);
   };
+  console.log("로그인 닉네임:", currentNickname);
+  console.log("게시글 작성자 닉네임:", post.nickname);
 
   return (
     <div
@@ -49,7 +53,7 @@ export function PostCard({ post }: PostCardProps) {
         {/* 작성자 이름과 좋아요 아이콘 */}
         <div style={{ display: "flex", alignItems: "center", gap: "1px" }}>
           <span style={{ fontSize: "15px", color: "#333" }}>
-            작성자 : {post.author}
+            작성자 : {post.nickname}
           </span>
           <span
             onClick={handleLikeToggle}
@@ -76,43 +80,45 @@ export function PostCard({ post }: PostCardProps) {
       <div style={{ fontSize: "12px", marginBottom: "8px" }}>
         {post.hashtags.map((tag: string) => `#${tag} `)}
       </div>
-{/* 게시글 이미지 */}
-        <div style={{ marginBottom: "8px" }}>
-          <img
-            src={`http://localhost:8080${post.image}`}
-            style={{ width: "80%", borderRadius: "8px" }}
-          />
-        </div>
-      {/* 수정 및 삭제 버튼 */}
-      <div style={{ display: "flex", gap: "8px" }}>
-        <button
-          style={{
-            backgroundColor: "#474747",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "4px",
-            padding: "6px 12px",
-            cursor: "pointer",
-          }}
-        >
-          수정
-        </button>
 
-        <button
-          style={{
-            backgroundColor: "#474747",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "4px",
-            padding: "6px 12px",
-            cursor: "pointer",
-          }}
-        >
-          삭제
-        </button>
-
-        
+      {/* 게시글 이미지 */}
+      <div style={{ marginBottom: "8px" }}>
+        <img
+          src={`http://localhost:8080${post.image}`}
+          style={{ width: "80%", borderRadius: "8px" }}
+        />
       </div>
+
+      {/* 수정 및 삭제 버튼: 닉네임이 같을 때만 표시 */}
+      {currentNickname === post.nickname && (
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            style={{
+              backgroundColor: "#474747",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "6px 12px",
+              cursor: "pointer",
+            }}
+          >
+            수정
+          </button>
+
+          <button
+            style={{
+              backgroundColor: "#474747",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "6px 12px",
+              cursor: "pointer",
+            }}
+          >
+            삭제
+          </button>
+        </div>
+      )}
     </div>
   );
 }

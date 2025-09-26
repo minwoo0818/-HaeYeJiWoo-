@@ -1,6 +1,6 @@
 import axios from "axios";
-import type { BackendPostResponse, Post } from "./PostType";
 import type { Comment } from "./type";
+import type { Post } from "./types/PostType";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 

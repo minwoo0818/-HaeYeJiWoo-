@@ -9,7 +9,6 @@ import type { Post } from "../types/PostType";
 import { GetPosts } from "../api/PostApi";
 import { useParams } from "react-router-dom";
 
-
 // 한 페이지에 보여줄 게시글 수
 const POSTS_PER_PAGE = 6;
 
@@ -21,7 +20,6 @@ export default function PostList() {
   const [postData, setPostData] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
- 
   // 현재 페이지에 보여줄 게시글 인덱스 범위 계산
   const startIndex = currentPage * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
@@ -45,15 +43,18 @@ export default function PostList() {
         console.log("API 응답:", res);
 
         // API에서 받은 데이터를 Post 타입으로 변환
-        const posts = res.map((post: any) => ({
-          id: post.postId,              // postId -> id
+        const posts: Post[] = res.map((post: any) => ({
+          id: post.postId,
           title: post.title,
-          author: post.userNickname,    // userNickname -> author
-          image: post.url,              // url -> image
-          category: post.categoryId,    // categoryId -> category
-          date: post.createdAt,         // createdAt -> date
+          nickname: post.userNickname, // author → nickname
+          image: post.url,
+          category: post.categoryId,
+          date: post.createdAt,
           views: post.views,
           hashtags: post.hashtags,
+          likes: post.likesCount,
+          content: post.content,
+          files: post.files || [], // 없을 수도 있으니 기본값
         }));
 
         setPostData(posts);
@@ -82,7 +83,7 @@ export default function PostList() {
       >
         {/* 현재 페이지에 해당하는 게시글 카드 렌더링 */}
         {visiblePosts.map((post) => (
-           <PostCard key={post.id} post={{ ...post}} />
+          <PostCard key={post.id} post={{ ...post }} />
         ))}
       </div>
 

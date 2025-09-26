@@ -2,6 +2,8 @@ package com.hyjw_back.controller;
 
 import com.hyjw_back.dto.AccountCredentials;
 import com.hyjw_back.dto.UserDto;
+import com.hyjw_back.entity.Users;
+import com.hyjw_back.entity.repository.UsersRepository;
 import com.hyjw_back.service.JwtService;
 import com.hyjw_back.service.UsersService;
 import jakarta.validation.Valid;
@@ -12,7 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -27,6 +33,8 @@ public class UserController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private UsersRepository usersRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<UserDto> signupUser(@Valid @RequestBody UserDto userDto) {
@@ -62,20 +70,24 @@ public class UserController {
         }
     }
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody AccountCredentials credentials){
-        // 1. user의 id pw 정보를 기반으로 UsernamePasswordAuthenticationToken을 생성한다.
+    public ResponseEntity<?> loginUser(@RequestBody AccountCredentials credentials) {
+        // 1~5: 인증 처리
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(credentials.getEmail(), credentials.getPassword());
-        // 2. 생성된 UsernamePasswordAuthenticationToken을 authenticationManager에게 전달.
-        // 3. authenticationManager은 UserDetailsService의 loadUserByUsername을 호출 (DB에 있는 유저정보 UserDetails객체를 불러옴)
-        // 4. 조회된 유저정보(UserDetails와 UsernamePasswordAuthenticationToken을 비교해 인증처리.
+
         Authentication authentication = authenticationManager.authenticate(token);
-        // 5. 최종 반환된 Authentication(인증된 유저 정보)를 기반으로 JWT TOKEN 발급
         String jwtToken = jwtService.generateToken(authentication.getName());
-        // 6. 컨트롤러는 응답 헤더(Authorication)에 Bearer <JWT TOKEN VALUE> 형태로 응답
-        // 이후 클라이언트는 이 토큰을 가지고 다른 API 요청시 Authorization 헤더에 넣어 인증을 받게됨.
-        return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
-                .build();
+
+        // ✅ 닉네임 조회 (DB에서 사용자 정보 가져오기)
+        Users user = usersRepository.findByEmail(credentials.getEmail())
+                .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
+
+        // ✅ 응답 본문에 nickname과 token 포함
+        Map<String, String> response = new HashMap<>();
+        response.put("nickname", user.getUserNickname());
+        response.put("token", "Bearer " + jwtToken);
+
+        return ResponseEntity.ok(response); // ✅ JSON 응답
     }
+
 }

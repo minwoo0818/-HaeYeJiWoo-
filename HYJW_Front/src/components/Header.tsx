@@ -11,15 +11,6 @@ import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useAuthStore } from "../authStore";
-// import "../Header.css";
-
-const navItems = [
-  { name: "게임", path: "/posts/GAME" },
-  { name: "맛집", path: "/posts/GOOD_RESTAURANT" },
-  { name: "유머", path: "/posts/HUMOR" },
-  { name: "일상", path: "/posts/DAILY_LIFE" },
-  { name: "마이페이지", path: "/category/mypage" }, // 항상 보여줌
-];
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -41,7 +32,7 @@ function ResponsiveAppBar() {
   };
 
   const handleLoginClick = () => {
-    navigate("/login"); // /login 페이지로 이동
+    navigate("/login");
   };
 
   const { logout } = useAuthStore();
@@ -50,19 +41,31 @@ function ResponsiveAppBar() {
     logout();
     navigate("/login");
   };
+
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  // ✅ 로그인 상태에 따라 마이페이지 버튼 조건부 포함
+  const navItems = [
+    { name: "게임", path: "/posts/GAME" },
+    { name: "맛집", path: "/posts/GOOD_RESTAURANT" },
+    { name: "유머", path: "/posts/HUMOR" },
+    { name: "일상", path: "/posts/DAILY_LIFE" },
+    ...(isAuthenticated
+      ? [{ name: "마이페이지", path: "/category/mypage" }]
+      : []),
+  ];
 
   return (
     <AppBar
       position="static"
-      sx={{ backgroundColor: "#474747", width: "95vw" }}
+      sx={{ backgroundColor: "#474747", width: "100vw" }}
     >
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
           sx={{
             display: "flex",
-            justifyContent: "flex-start",
+            justifyContent: "space-between",
             alignItems: "center",
           }}
         >
@@ -145,7 +148,7 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
-          {/* 로그인 버튼 (오른쪽 정렬) */}
+          {/* 로그인 / 로그아웃 버튼 */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ flexGrow: 0 }}>
             {!isAuthenticated ? (

@@ -6,6 +6,7 @@ import SignUp from "./pages/SignUp";
 import PostDetail from "./pages/PostDetail";
 import PostListApp from "./PostListApp";
 import AddPosts from "./pages/AddPosts";
+import AdminMain from "./pages/AdminMain";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/posts/:type" element={<PostListApp />} />
         <Route path="/addposts" element={<AddPosts />} />
         <Route path="/postdetail/:id" element={<PostDetail />} />
+        <Route path="/admin/main" element={<AdminMain />} />
       </Routes>
     </>
   );

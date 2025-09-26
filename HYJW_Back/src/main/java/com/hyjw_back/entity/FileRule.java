@@ -1,27 +1,45 @@
 package com.hyjw_back.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
 @Table(name = "file_rule")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class FileRule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "file_rule_id")
-    private Long fileRuleId;
+    private Long id;
 
-    @Column(name = "file_max_num", nullable = false)
-    private Integer fileMaxNum;
-
-    @Column(name = "file_size", nullable = false)
-    private Integer fileSize;
-
-    @Column(name = "file_type", nullable = false, length = 20)
+    private int fileMaxNum;
+    private int fileSize;
     private String fileType;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public int getFileMaxNum() {
+        return fileMaxNum;
+    }
+
+    public void setFileMaxNum(int fileMaxNum) {
+        this.fileMaxNum = fileMaxNum;
+    }
+
+    public int getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(int fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
 }

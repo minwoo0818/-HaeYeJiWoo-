@@ -33,18 +33,26 @@ const Login = () => {
       });
 
       if (res.ok) {
-        const token = res.headers.get("Authorization");
-        if (token) {
-          localStorage.setItem("token", token);
-          sessionStorage.setItem("jwt", token);
-          login();
+        const contentType = res.headers.get("Content-Type");
+        if (contentType?.includes("application/json")) {
+          const data = await res.json(); // ✅ JSON 응답일 때만 파싱
+          const nickname = data.nickname;
+          const token = data.token || res.headers.get("Authorization");
+
+          if (token && nickname) {
+            sessionStorage.setItem("jwt", token);
+            login(nickname);
+          }
+        } else {
+          console.warn("JSON 응답이 아님:", contentType);
         }
+
         alert("로그인 성공!");
         navigate("/");
       } else if (res.status === 401) {
-        alert("이메일 또는 비밀번호가 잘못되었습니다."); // ✅ 인증 실패 메시지
+        alert("이메일 또는 비밀번호가 잘못되었습니다."); //
       } else if (res.status === 500) {
-        alert("서버 오류입니다. 잠시 후 다시 시도해주세요."); // ✅ 서버 오류 메시지
+        alert("서버 오류입니다. 잠시 후 다시 시도해주세요."); //
       } else {
         const msg = await res.text();
         alert(msg); // 기타 오류 메시지
