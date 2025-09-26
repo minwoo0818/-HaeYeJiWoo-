@@ -13,25 +13,25 @@ export default function CommentTable() {
       <Table aria-label="comments table">
         <TableHead>
           <TableRow>
-            <TableCell align="center">댓글 번호</TableCell>
-            <TableCell align="center">글 번호</TableCell>
-            <TableCell align="center">유저 닉네임</TableCell>
-            <TableCell align="center">댓글 내용</TableCell>
-            <TableCell align="center">유형</TableCell>
-            <TableCell align="center">작성일시</TableCell>
-            <TableCell align="center">수정일시</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>댓글 번호</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>글 번호</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>유저 닉네임</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>댓글 내용</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>유형</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>작성일시</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>수정일시</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {dummyComments.map((comment) => (
             <TableRow key={comment.id}>
-              <TableCell align="center">{comment.id}</TableCell>
-              <TableCell align="center">{comment.postId}</TableCell>
-              <TableCell align="center">{comment.nickname}</TableCell>
-              <TableCell align="center">{comment.content}</TableCell>
-              <TableCell align="center">{comment.isReply}</TableCell>
-              <TableCell align="center">{comment.createdAt}</TableCell>
-              <TableCell align="center">{comment.updatedAt}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{comment.id}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{comment.postId}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{comment.nickname}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{comment.content}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{comment.isReply}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{comment.createdAt}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{comment.updatedAt}</TableCell>
             </TableRow>
           ))}
         </TableBody>

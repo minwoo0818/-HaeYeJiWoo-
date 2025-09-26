@@ -12,17 +12,17 @@ export default function UserTable() {
       <Table aria-label="users table">
         <TableHead>
           <TableRow>
-            <TableCell align="center">이메일</TableCell>
-            <TableCell align="center">닉네임</TableCell>
-            <TableCell align="center">비밀번호</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>이메일</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>닉네임</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>비밀번호</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {dummyUsers.map((user) => (
             <TableRow key={user.email}>
-              <TableCell align="center">{user.email}</TableCell>
-              <TableCell align="center">{user.nickname}</TableCell>
-              <TableCell align="center">******** {/* Security: Passwords should not be displayed */}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{user.email}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{user.nickname}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>******** {/* Security: Passwords should not be displayed */}</TableCell>
             </TableRow>
           ))}
         </TableBody>
