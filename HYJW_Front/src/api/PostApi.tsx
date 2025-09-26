@@ -6,7 +6,6 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 // 기존 게시물 조회 함수 (변경 없음)
 export const GetPosts = async (type: string | undefined): Promise<Post[]> => {
   const response = await axios.get(`${BASE_URL}/posts/${type}`);
-  return response.data;
   const backendPosts: BackendPostResponse[] = response.data;
   return backendPosts.map(backendPost => ({
     id: backendPost.postId,
@@ -38,7 +37,7 @@ export const SearchPosts = async (
     const response = await axios.get(
       `${BASE_URL}/posts/${type}/search?${queryParams.toString()}`
     );
-    return response.data;
+
     const backendPosts: BackendPostResponse[] = response.data;
     return backendPosts.map(backendPost => ({
       id: backendPost.postId,

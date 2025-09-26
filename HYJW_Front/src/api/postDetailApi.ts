@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { Comment } from "../type";
+
 import type { Post, BackendPostResponse } from "../types/PostType";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -7,6 +8,7 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 export const getPostDetail = async (id: number): Promise<Post> => {
     const response = await axios.get(`${BASE_URL}/posts/detail/${id}`);
     console.log(response);
+
     const backendPost: BackendPostResponse = response.data;
     return {
         id: backendPost.postId,
@@ -54,7 +56,8 @@ export const addComment = async (payload: AddCommentPayload): Promise<Comment> =
     console.log(response);
     console.log(payload);
     return response.data;
-};
+};    
+
 
 export const deleteComment = async (commentId: number): Promise<void> => {
     await axios.delete(`${BASE_URL}/comments/${commentId}`);
