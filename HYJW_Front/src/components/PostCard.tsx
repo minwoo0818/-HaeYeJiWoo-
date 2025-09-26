@@ -1,30 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Post } from "../types/PostType";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { likePost, unlikePost, getPostLikeStatus } from "../postDetailApi";
 
 interface PostCardProps {
   post: Post;
   onDelete: (id: number) => void;   // 삭제 후 부모 (postlist) 상태 갱신 콜백
 }
-
 export function PostCard({ post, onDelete }: PostCardProps) {
   const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(post.likes || 0);
   const navigate = useNavigate();
 
-  // 좋아요 상태 토글
-const handleLikeToggle = (e: React.MouseEvent) => {
-  e.stopPropagation(); // 카드 클릭 이벤트 방지
-  setLiked((prev) => !prev);
-};
+  useEffect(() => {
+    getPostLikeStatus(post.id).then(setLiked);
+  }, [post.id]);
 
+  // 좋아요 상태 토글
+  const handleLikeToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    try {
+      if (liked) {
+        await unlikePost(post.id);
+        setLikesCount((prev) => prev - 1);
+      } else {
+        await likePost(post.id);
+        setLikesCount((prev) => prev + 1);
+      }
+      setLiked((prev) => !prev);
+    } catch (error) {
+      console.error("좋아요 토글 실패:", error);
+      alert("좋아요 상태를 변경하는 중 오류가 발생했습니다.");
+    }
+  };
   // 카드 클릭 시 상세 페이지로 이동
   const handleCardClick = () => {
     navigate(`/postdetail/${post.id}`);
   };
-
   // 삭제 버튼 클릭
 const handleDelete = async (e: React.MouseEvent) => {
   e.stopPropagation(); // 카드 클릭 이벤트 방지
@@ -69,7 +84,6 @@ const handleDelete = async (e: React.MouseEvent) => {
         <span>
           {post.id}번 | {post.title}
         </span>
-
         {/* 작성자 이름과 좋아요 아이콘 */}
         <div style={{ display: "flex", alignItems: "center", gap: "1px" }}>
           <span style={{ fontSize: "15px", color: "#333" }}>
@@ -88,14 +102,13 @@ const handleDelete = async (e: React.MouseEvent) => {
           >
             {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
           </span>
+          <span>{likesCount}</span>
         </div>
       </div>
-
       {/* 카테고리, 날짜, 조회수 */}
       <div style={{ fontSize: "12px", color: "#555", marginBottom: "8px" }}>
         {post.category} | {post.date} | {post.views}명
       </div>
-
       {/* 해시태그 목록 */}
       <div style={{ fontSize: "12px", marginBottom: "8px" }}>
         {post.hashtags.map((tag: string) => `#${tag} `)}
@@ -112,7 +125,7 @@ const handleDelete = async (e: React.MouseEvent) => {
         <button
           style={{
             backgroundColor: "#474747",
-            color: "#ffffff",
+            color: "#FFFFFF",
             border: "none",
             borderRadius: "4px",
             padding: "6px 12px",
@@ -121,16 +134,15 @@ const handleDelete = async (e: React.MouseEvent) => {
         >
           수정
         </button>
-
         <button
           style={{
             backgroundColor: "#474747",
-            color: "#ffffff",
+            color: "#FFFFFF",
             border: "none",
             borderRadius: "4px",
             padding: "6px 12px",
             cursor: "pointer",
-          }} 
+          }}
           onClick={handleDelete}
         >
           삭제

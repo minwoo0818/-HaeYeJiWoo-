@@ -6,12 +6,19 @@ body {
   height: 100vh;           /* 화면 전체 높이 */
 }
 
+.pd-rootcontainer {
+  margin-top: 7px;
+  display: flex;
+  justify-content: center;
+}
+
 .pd-container {
   width: 50vw;              /* 뷰포트 전체 너비 */
   min-height: 100vh;         /* 필요 시 전체 높이도 */
   box-sizing: border-box;    /* padding 포함해서 계산 */
   padding: 40px 24px;
   background-color: #fff;
+
 }
 
 .view-count {
@@ -59,7 +66,7 @@ body {
   background: #fff;
   border: 1px solid #000;      /* 검은색 실선 */
   border-radius: 12px;         /* 둥근 모서리 */
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12); /* 아래로 퍼지는 부드러운 그림자 */
+
   padding: 16px;
   width: auto;
   height: 500px;
