@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import type { Post } from '../../types/PostType';
+import { useEffect, useState } from 'react';
 import { GetPosts } from '../../api/PostApi';
 
 const formatDateTime = (dateString: string) => {
@@ -20,8 +20,9 @@ export default function PostTable() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const data = await GetPosts('all'); // Using GetPosts
+        const data = await GetPosts();
         setPosts(data);
+        console.log(data);
       } catch (error) {
         console.error("Failed to fetch posts:", error);
       }

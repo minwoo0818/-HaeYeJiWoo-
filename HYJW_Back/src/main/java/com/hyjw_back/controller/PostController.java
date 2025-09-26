@@ -64,6 +64,7 @@ public class PostController {
     public ResponseEntity<List<PostCardDto>> getAllPosts() {
         System.out.println("GET /all 엔드포인트 호출됨.");
         List<PostCardDto> posts = postsService.getAllPosts();
+
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
