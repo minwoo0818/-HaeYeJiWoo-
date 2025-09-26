@@ -25,29 +25,29 @@ export default function PostTable() {
       <Table aria-label="posts table">
         <TableHead>
           <TableRow>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>게시물 번호</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>제목</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>내용</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>조회수</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>유저 닉네임</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>카테고리</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>첨부파일</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>작성일시</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>수정일시</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>게시물 번호</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>제목</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>내용</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>조회수</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>유저 닉네임</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>카테고리</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>첨부파일</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>작성일시</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black' }}>수정일시</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {posts.map((post) => (
             <TableRow key={post.id}>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.id}</TableCell>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.title}</TableCell>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.content}</TableCell>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.views}</TableCell>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.nickname}</TableCell>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.category}</TableCell>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.files && post.files.length > 0 ? post.files[0].fileName : '없음'}</TableCell>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.date}</TableCell>
-              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.date}</TableCell> {/* Assuming updatedAt is same as createdAt for now */}
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.id}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.title}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.content}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.views}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.nickname}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.category}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.files && post.files.length > 0 ? post.files[0].fileName : '없음'}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.date}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid black' }}>{post.date}</TableCell> {/* Assuming updatedAt is same as createdAt for now */}
             </TableRow>
           ))}
         </TableBody>
