@@ -158,3 +158,83 @@ body {
 .postupdate {
   margin-right: 10px;
 }
+
+/* 블러된 텍스트 공통 */
+.pd-sensitive-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 4px;
+}
+
+/* 기본 블러 (텍스트) */
+.pd-blur {
+  filter: blur(6px);
+  -webkit-filter: blur(6px);
+  transition: filter 0.2s ease;
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.6);
+}
+
+/* 블러 해제된 상태 */
+.pd-unblur {
+  filter: none;
+  -webkit-filter: none;
+  transition: filter 0.2s ease;
+  padding: 0 4px;
+}
+
+/* 민감정보 옆 버튼 */
+.pd-reveal-btn {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* 이미지 래퍼 */
+.pd-image-wrapper {
+  position: relative;
+  display: inline-block;
+  margin: 8px 0;
+}
+
+/* 이미지 블러 */
+.pd-attachment-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  transition: filter 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+/* 이미지 블러 적용 */
+.pd-attachment-image.pd-blur {
+  filter: blur(8px);
+}
+
+/* 이미지 블러 해제 */
+.pd-attachment-image.pd-unblur {
+  filter: none;
+}
+
+/* 이미지 컨트롤 버튼들 (보기/블러) */
+.pd-image-controls {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+}
+
+.pd-image-controls button {
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
