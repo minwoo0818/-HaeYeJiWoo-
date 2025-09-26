@@ -1,14 +1,8 @@
 package com.hyjw_back.controller;
 
-import com.hyjw_back.constant.CategoryId;
-import com.hyjw_back.dto.PostCreateDto;
-import com.hyjw_back.dto.PostDetailDto;
-import com.hyjw_back.dto.PostCardDto;
-import com.hyjw_back.dto.CommentResponseDto;
+import com.hyjw_back.dto.*;
 import com.hyjw_back.service.CommentsService;
-import com.hyjw_back.entity.Posts;
 import com.hyjw_back.service.PostsService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +21,24 @@ public class PostController {
     @Autowired
     private CommentsService commentsService;
 
-    @PostMapping("/{userId}")
+    // 첨부파일 있을때
+    @PostMapping("/create/file/{userId}")
     public ResponseEntity<PostDetailDto> createPost(
             @PathVariable Long userId,
-            @RequestBody PostCreateDto postCreateDto) {
+            @ModelAttribute PostCreateIncludeFIleDto postCreateIncludeFIleDto) {  // @ModelAttribute → @RequestBody
+        PostDetailDto newPost = postsService.createPost(postCreateIncludeFIleDto, userId);
+        return new ResponseEntity<>(newPost, HttpStatus.CREATED);
+    }
 
+    // 첨부파일 없을때
+    @PostMapping("/create/no_file/{userId}")
+    public ResponseEntity<PostDetailDto> createNoFile (
+            @PathVariable Long userId,
+            @ModelAttribute PostCreateDto postCreateDto) {  // @ModelAttribute → @RequestBody
         PostDetailDto newPost = postsService.createPost(postCreateDto, userId);
         return new ResponseEntity<>(newPost, HttpStatus.CREATED);
     }
+
 
     // 유저: 소프트 삭제 (isDelete = true)
     @DeleteMapping("/{postId}")
