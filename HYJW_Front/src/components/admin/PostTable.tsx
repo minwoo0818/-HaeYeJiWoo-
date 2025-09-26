@@ -9,8 +9,8 @@ const dummyPosts = [
 
 export default function PostTable() {
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="posts table">
+    <TableContainer component={Paper} sx={{ width: 1000, margin: 'auto' }}>
+      <Table aria-label="posts table">
         <TableHead>
           <TableRow>
             <TableCell>게시물 번호</TableCell>

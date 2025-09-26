@@ -9,8 +9,8 @@ const dummyComments = [
 
 export default function CommentTable() {
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="comments table">
+    <TableContainer component={Paper} sx={{ width: 1000, margin: 'auto' }}>
+      <Table aria-label="comments table">
         <TableHead>
           <TableRow>
             <TableCell>댓글 번호</TableCell>

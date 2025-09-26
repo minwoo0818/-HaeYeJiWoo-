@@ -8,8 +8,8 @@ const dummyUsers = [
 
 export default function UserTable() {
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="users table">
+    <TableContainer component={Paper} sx={{ width: 1000, margin: 'auto' }}>
+      <Table aria-label="users table">
         <TableHead>
           <TableRow>
             <TableCell>이메일</TableCell>
