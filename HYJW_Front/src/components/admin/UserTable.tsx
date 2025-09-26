@@ -12,9 +12,9 @@ export default function UserTable() {
       <Table aria-label="users table">
         <TableHead>
           <TableRow>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>이메일</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>닉네임</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>비밀번호</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>이메일</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>닉네임</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>비밀번호</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

@@ -13,13 +13,13 @@ export default function CommentTable() {
       <Table aria-label="comments table">
         <TableHead>
           <TableRow>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>댓글 번호</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>글 번호</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>유저 닉네임</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>댓글 내용</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>유형</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>작성일시</TableCell>
-            <TableCell align="center" sx={{ border: '1px solid black' }}>수정일시</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>댓글 번호</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>글 번호</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>유저 닉네임</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>댓글 내용</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>유형</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>작성일시</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid black', backgroundColor: 'skyblue' }}>수정일시</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
