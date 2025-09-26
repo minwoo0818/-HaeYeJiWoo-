@@ -5,7 +5,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Select, MenuItem, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../authStore";
 
 export default function SearchBar() {

@@ -38,8 +38,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(HttpMethod.POST, "/users/login",  "/users/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/login",  "/users/signup", "posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/checkEmail", "/users/checkNickname", "posts/**" ,"postdetail/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "posts/**").permitAll()
                         .requestMatchers("/images/**").permitAll()
                         .anyRequest().authenticated()
                 )

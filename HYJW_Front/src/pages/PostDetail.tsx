@@ -9,7 +9,7 @@ import {
   unlikePost,
   getPostLikeStatus,
 } from "../api/postDetailApi";
-import type { Post } from "../PostType";
+import type { Post } from "../types/PostType";
 import type { Comment } from "../type";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
