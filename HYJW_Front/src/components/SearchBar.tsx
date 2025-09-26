@@ -5,6 +5,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { Select, MenuItem, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../authStore";
 
 export default function SearchBar() {
   const navigate = useNavigate();
@@ -40,6 +42,7 @@ export default function SearchBar() {
     navigate("/addposts");
   };
 
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return (
     <div
       style={{
@@ -125,19 +128,21 @@ export default function SearchBar() {
       </div>
 
       {/* 글쓰기 버튼 */}
-      <Button
-        onClick={handleWrite}
-        style={{
-          height: "50px",
-          backgroundColor: "#474747",
-          color: "#ffffff",
-          borderRadius: "8px",
-          padding: "0 16px",
-          whiteSpace: "nowrap",
-        }}
-      >
-        글쓰기
-      </Button>
+      {isAuthenticated && (
+        <Button
+          onClick={handleWrite}
+          style={{
+            height: "50px",
+            backgroundColor: "#474747",
+            color: "#ffffff",
+            borderRadius: "8px",
+            padding: "0 16px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          글쓰기
+        </Button>
+      )}
     </div>
   );
 }

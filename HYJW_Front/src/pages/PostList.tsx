@@ -9,7 +9,6 @@ import type { Post } from "../types/PostType";
 import { GetPosts, SearchPosts } from "../api/PostApi";
 import { useParams, useSearchParams } from "react-router-dom";
 
-
 // 한 페이지에 보여줄 게시글 수
 const POSTS_PER_PAGE = 6;
 
@@ -25,7 +24,6 @@ export default function PostList() {
   const [postData, setPostData] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
- 
   // 현재 페이지에 보여줄 게시글 인덱스 범위 계산
   const startIndex = currentPage * POSTS_PER_PAGE;
   const endIndex = startIndex + POSTS_PER_PAGE;
@@ -58,20 +56,22 @@ export default function PostList() {
         console.log(`Fetching all posts for category "${type}"...`);
         res = await GetPosts(type);
       }
-        // API에서 받은 데이터를 Post 타입으로 변환
-        const mappedPosts: Post[] = res.map((post: any) => ({
-          id: post.postId,              // postId -> id
-          title: post.title,
-          author: post.userNickname,    // userNickname -> author
-          image: post.url,              // url -> image
-          category: post.categoryId,    // categoryId -> category
-          date: post.createdAt,         // createdAt -> date
-          views: post.views,
-          hashtags: post.hashtags,
-          likes: post.likesCount,       // likesCount -> likes
-        }));
+      // API에서 받은 데이터를 Post 타입으로 변환
+      const mappedPosts: Post[] = res.map((post: any) => ({
+        id: post.postId, // postId -> id
+        title: post.title,
+        nickname: post.userNickname, // author → nickname
+        image: post.url,
+        category: post.categoryId,
+        date: post.createdAt,
+        views: post.views,
+        hashtags: post.hashtags,
+        likes: post.likesCount,
+        content: post.content,
+        files: post.files || [], // 없을 수도 있으니 기본값
+      }));
 
-      console.log('API에서 받은 원본 응답 데이터:', res);
+      console.log("API에서 받은 원본 응답 데이터:", res);
 
       // // API 응답을 Post 타입으로 매핑
       // const mappedPosts = res.map((post: any) => ({
@@ -85,7 +85,7 @@ export default function PostList() {
       //   hashtags: post.hashtags,
       // }));
 
-      console.log('매핑 후 최종 데이터:', mappedPosts);
+      console.log("매핑 후 최종 데이터:", mappedPosts);
 
       setPostData(mappedPosts);
     } catch (err) {
@@ -99,7 +99,7 @@ export default function PostList() {
     loadPostData();
   }, [type, searchType, searchText]);
 
- // 삭제 콜백: PostCard에서 호출
+  // 삭제 콜백: PostCard에서 호출
   const handleDeletePost = (id: number) => {
     setPostData((prev) => {
       const newPosts = prev.filter((post) => post.id !== id);

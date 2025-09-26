@@ -4,11 +4,12 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { likePost, unlikePost, getPostLikeStatus } from "../postDetailApi";
+import { likePost, unlikePost, getPostLikeStatus } from "../api/postDetailApi";
+import { useAuthStore } from "../authStore";
 
 interface PostCardProps {
   post: Post;
-  onDelete: (id: number) => void;   // 삭제 후 부모 (postlist) 상태 갱신 콜백
+  onDelete: (id: number) => void; // 삭제 후 부모 (postlist) 상태 갱신 콜백
 }
 export function PostCard({ post, onDelete }: PostCardProps) {
   const [liked, setLiked] = useState(false);
@@ -18,6 +19,7 @@ export function PostCard({ post, onDelete }: PostCardProps) {
   useEffect(() => {
     getPostLikeStatus(post.id).then(setLiked);
   }, [post.id]);
+  const currentNickname = useAuthStore((state) => state.nickname); // ✅ 로그인한 사용자 닉네임
 
   // 좋아요 상태 토글
   const handleLikeToggle = async (e: React.MouseEvent) => {
@@ -41,22 +43,25 @@ export function PostCard({ post, onDelete }: PostCardProps) {
     navigate(`/postdetail/${post.id}`);
   };
   // 삭제 버튼 클릭
-const handleDelete = async (e: React.MouseEvent) => {
-  e.stopPropagation(); // 카드 클릭 이벤트 방지
-  if (!window.confirm("정말 삭제하시겠습니까?")) return;
-  try {
-    await axios.delete(`/api/posts/${post.id}`);
-    onDelete(post.id); // 부모 상태 갱신
-  } catch (err) {
-    console.error(err);
-    alert("삭제 중 오류가 발생했습니다.");
-  }
-};
-// 수정 버튼 클릭
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      await axios.delete(`/api/posts/${post.id}`);
+      onDelete(post.id); // 부모 상태 갱신
+    } catch (err) {
+      console.error(err);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  };
+  // 수정 버튼 클릭
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation(); // 카드 클릭 이벤트 방지
     navigate(`/edit/${post.id}`);
   };
+  console.log("로그인 닉네임:", currentNickname);
+  console.log("게시글 작성자 닉네임:", post.nickname);
+
   return (
     <div
       onClick={handleCardClick}
@@ -110,41 +115,46 @@ const handleDelete = async (e: React.MouseEvent) => {
       <div style={{ fontSize: "12px", marginBottom: "8px" }}>
         {post.hashtags.map((tag: string) => `#${tag} `)}
       </div>
-{/* 게시글 이미지 */}
-        <div style={{ marginBottom: "8px" }}>
-          <img
-            src={`http://localhost:8080${post.image}`}
-            style={{ width: "80%", borderRadius: "8px" }}
-          />
-        </div>
-      {/* 수정 및 삭제 버튼 */}
-      <div style={{ display: "flex", gap: "8px" }}>
-        <button
-          style={{
-            backgroundColor: "#474747",
-            color: "#FFFFFF",
-            border: "none",
-            borderRadius: "4px",
-            padding: "6px 12px",
-            cursor: "pointer",
-          }}
-        >
-          수정
-        </button>
-        <button
-          style={{
-            backgroundColor: "#474747",
-            color: "#FFFFFF",
-            border: "none",
-            borderRadius: "4px",
-            padding: "6px 12px",
-            cursor: "pointer",
-          }}
-          onClick={handleDelete}
-        >
-          삭제
-        </button>
+
+      {/* 게시글 이미지 */}
+      <div style={{ marginBottom: "8px" }}>
+        <img
+          src={`http://localhost:8080${post.image}`}
+          style={{ width: "80%", borderRadius: "8px" }}
+        />
       </div>
+
+      {/* 수정 및 삭제 버튼: 닉네임이 같을 때만 표시 */}
+      {currentNickname === post.nickname && (
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            style={{
+              backgroundColor: "#474747",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "6px 12px",
+              cursor: "pointer",
+            }}
+          >
+            수정
+          </button>
+
+          <button
+            style={{
+              backgroundColor: "#474747",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "4px",
+              padding: "6px 12px",
+              cursor: "pointer",
+            }}
+            onClick={handleDelete}
+          >
+            삭제
+          </button>
+        </div>
+      )}
     </div>
   );
 }

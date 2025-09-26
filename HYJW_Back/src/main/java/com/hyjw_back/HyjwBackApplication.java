@@ -8,6 +8,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.sql.Timestamp;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 @SpringBootApplication
 public class HyjwBackApplication implements CommandLineRunner {
@@ -35,6 +37,8 @@ public class HyjwBackApplication implements CommandLineRunner {
 
     @Autowired
     private FileRuleRepository fileRuleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public static void main(String[] args) {
         SpringApplication.run(HyjwBackApplication.class, args);
@@ -54,9 +58,10 @@ public class HyjwBackApplication implements CommandLineRunner {
         // Users 더미 데이터
         Users user1 = new Users();
         user1.setUserNickname("개발자A");
-        user1.setEmail("devA@example.com");
-        user1.setHashedPassword("password_hash_a");
+        user1.setEmail("wjdgotjd10@naver.com");
+        user1.setHashedPassword(passwordEncoder.encode("1234")); // 🔴 암호화된 비밀번호로 저장
         usersRepository.save(user1);
+
 
         Users user2 = new Users();
         user2.setUserNickname("디자이너B");

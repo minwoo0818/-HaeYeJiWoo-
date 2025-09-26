@@ -10,18 +10,12 @@ import MenuItem from "@mui/material/MenuItem";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuIcon from "@mui/icons-material/Menu";
-// import "../Header.css";
-
-const navItems = [
-  { name: "게임", path: "/posts/GAME" },
-  { name: "맛집", path: "/posts/GOOD_RESTAURANT" },
-  { name: "유머", path: "/posts/HUMOR" },
-  { name: "일상", path: "/posts/DAILY_LIFE" },
-  { name: "마이페이지", path: "/category/mypage" }, // 항상 보여줌
-];
+import { useAuthStore } from "../authStore";
 
 function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
   const navigate = useNavigate();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -37,12 +31,43 @@ function ResponsiveAppBar() {
     handleCloseNavMenu();
   };
 
+  const handleLoginClick = () => {
+    navigate("/login");
+  };
+
+  const { logout } = useAuthStore();
+  const handleLogoutClick = () => {
+    sessionStorage.removeItem("jwt");
+    logout();
+    navigate("/login");
+  };
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  // ✅ 로그인 상태에 따라 마이페이지 버튼 조건부 포함
+  const navItems = [
+    { name: "게임", path: "/posts/GAME" },
+    { name: "맛집", path: "/posts/GOOD_RESTAURANT" },
+    { name: "유머", path: "/posts/HUMOR" },
+    { name: "일상", path: "/posts/DAILY_LIFE" },
+    ...(isAuthenticated
+      ? [{ name: "마이페이지", path: "/category/mypage" }]
+      : []),
+  ];
+
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#474747", width: "100vw" }}>
+    <AppBar
+      position="static"
+      sx={{ backgroundColor: "#474747", width: "100vw" }}
+    >
       <Container maxWidth="xl">
         <Toolbar
           disableGutters
-          sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center"  }}
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
           {/* 햄버거 메뉴 */}
           <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
@@ -57,7 +82,7 @@ function ResponsiveAppBar() {
               <MenuIcon fontSize="large" />
             </IconButton>
 
-            {/* 모바일 메뉴 */} 
+            {/* 모바일 메뉴 */}
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
@@ -74,11 +99,14 @@ function ResponsiveAppBar() {
               }}
             >
               {navItems.map((item) => (
-                <MenuItem key={item.name} onClick={() => handleClick(item.path)}> 
-                  <Typography textAlign="center">{item.name}</Typography> 
-                </MenuItem> 
+                <MenuItem
+                  key={item.name}
+                  onClick={() => handleClick(item.path)}
+                >
+                  <Typography textAlign="center">{item.name}</Typography>
+                </MenuItem>
               ))}
-            </Menu> 
+            </Menu>
           </Box>
 
           {/* 로고 */}
@@ -120,17 +148,28 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
-          {/* 로그인 버튼 (오른쪽 정렬) */}
+          {/* 로그인 / 로그아웃 버튼 */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ flexGrow: 0 }}>
-            <Button
-              variant="outlined"
-              color="inherit"
-              onClick={() => handleClick("/login")}
-              sx={{ ml: 2 }}
-            >
-              로그인
-            </Button>
+            {!isAuthenticated ? (
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={handleLoginClick}
+                sx={{ ml: 2 }}
+              >
+                로그인
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={handleLogoutClick}
+                sx={{ ml: 2 }}
+              >
+                로그아웃
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>
