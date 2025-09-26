@@ -25,29 +25,29 @@ export default function PostTable() {
       <Table aria-label="posts table">
         <TableHead>
           <TableRow>
-            <TableCell align="center">게시물 번호</TableCell>
-            <TableCell align="center">제목</TableCell>
-            <TableCell align="center">내용</TableCell>
-            <TableCell align="center">조회수</TableCell>
-            <TableCell align="center">유저 닉네임</TableCell>
-            <TableCell align="center">카테고리</TableCell>
-            <TableCell align="center">첨부파일</TableCell>
-            <TableCell align="center">작성일시</TableCell>
-            <TableCell align="center">수정일시</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>게시물 번호</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>제목</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>내용</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>조회수</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>유저 닉네임</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>카테고리</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>첨부파일</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>작성일시</TableCell>
+            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>수정일시</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {posts.map((post) => (
             <TableRow key={post.id}>
-              <TableCell align="center">{post.id}</TableCell>
-              <TableCell align="center">{post.title}</TableCell>
-              <TableCell align="center">{post.content}</TableCell>
-              <TableCell align="center">{post.views}</TableCell>
-              <TableCell align="center">{post.nickname}</TableCell>
-              <TableCell align="center">{post.category}</TableCell>
-              <TableCell align="center">{post.files && post.files.length > 0 ? post.files[0].fileName : '없음'}</TableCell>
-              <TableCell align="center">{post.date}</TableCell>
-              <TableCell align="center">{post.date}</TableCell> {/* Assuming updatedAt is same as createdAt for now */}
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.id}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.title}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.content}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.views}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.nickname}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.category}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.files && post.files.length > 0 ? post.files[0].fileName : '없음'}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.date}</TableCell>
+              <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>{post.date}</TableCell> {/* Assuming updatedAt is same as createdAt for now */}
             </TableRow>
           ))}
         </TableBody>
