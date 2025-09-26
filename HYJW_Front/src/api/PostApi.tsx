@@ -1,3 +1,5 @@
+// PostApi.ts
+
 import axios from "axios";
 import type { Post, BackendPostResponse } from "../types/PostType";
 
@@ -37,7 +39,6 @@ export const SearchPosts = async (
     const response = await axios.get(
       `${BASE_URL}/posts/${type}/search?${queryParams.toString()}`
     );
-
     const backendPosts: BackendPostResponse[] = response.data;
     return backendPosts.map(backendPost => ({
       id: backendPost.postId,
