@@ -23,11 +23,13 @@ export default function AdminDataTables() {
   return (
     <Box sx={{ width: "100%" }}>
       {/* 상단 탭 메뉴 */}
-      <Tabs value={value} onChange={handleChange} aria-label="관리자 데이터 테이블 탭">
-        <Tab label="게시글 관리" />
-        <Tab label="댓글 관리" />
-        <Tab label="회원 관리" />
-      </Tabs>
+      <Box sx={{ display: 'flex', justifyContent: 'center', borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={handleChange} aria-label="관리자 데이터 테이블 탭">
+          <Tab label="게시글 관리" />
+          <Tab label="댓글 관리" />
+          <Tab label="회원 관리" />
+        </Tabs>
+      </Box>
 
       {/* 탭별 콘텐츠 */}
       <TabPanel value={value} index={0}>
