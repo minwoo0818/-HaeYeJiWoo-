@@ -9,29 +9,29 @@ const dummyComments = [
 
 export default function CommentTable() {
   return (
-    <TableContainer component={Paper} sx={{ width: 1000, margin: 'auto' }}>
+    <TableContainer component={Paper} sx={{ width: 1200, margin: 'auto' }}>
       <Table aria-label="comments table">
         <TableHead>
           <TableRow>
-            <TableCell>댓글 번호</TableCell>
-            <TableCell>글 번호</TableCell>
-            <TableCell>유저 닉네임</TableCell>
-            <TableCell>댓글 내용</TableCell>
-            <TableCell>유형</TableCell>
-            <TableCell>작성일시</TableCell>
-            <TableCell>수정일시</TableCell>
+            <TableCell align="center">댓글 번호</TableCell>
+            <TableCell align="center">글 번호</TableCell>
+            <TableCell align="center">유저 닉네임</TableCell>
+            <TableCell align="center">댓글 내용</TableCell>
+            <TableCell align="center">유형</TableCell>
+            <TableCell align="center">작성일시</TableCell>
+            <TableCell align="center">수정일시</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {dummyComments.map((comment) => (
             <TableRow key={comment.id}>
-              <TableCell>{comment.id}</TableCell>
-              <TableCell>{comment.postId}</TableCell>
-              <TableCell>{comment.nickname}</TableCell>
-              <TableCell>{comment.content}</TableCell>
-              <TableCell>{comment.isReply}</TableCell>
-              <TableCell>{comment.createdAt}</TableCell>
-              <TableCell>{comment.updatedAt}</TableCell>
+              <TableCell align="center">{comment.id}</TableCell>
+              <TableCell align="center">{comment.postId}</TableCell>
+              <TableCell align="center">{comment.nickname}</TableCell>
+              <TableCell align="center">{comment.content}</TableCell>
+              <TableCell align="center">{comment.isReply}</TableCell>
+              <TableCell align="center">{comment.createdAt}</TableCell>
+              <TableCell align="center">{comment.updatedAt}</TableCell>
             </TableRow>
           ))}
         </TableBody>

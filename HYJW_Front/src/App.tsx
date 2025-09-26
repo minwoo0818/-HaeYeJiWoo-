@@ -24,7 +24,7 @@ function App() {
         <Route path="/postdetail/:id" element={<PostDetail />} />
         <Route path="/adminpostlist" element={<AdminPostList />} />
         <Route path="/admin/main" element={<AdminMain />} />
-        <Route path="/admintable" element={<AdminDataTables />} />
+        <Route path="/admin/table" element={<AdminDataTables />} />
       </Routes>
     </>
   );
