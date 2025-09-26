@@ -98,9 +98,11 @@ public class PostsService {
             dto.setCreatedAt(post.getCreatedAt());
             dto.setViews(post.getViews());
 
+            // 해시태그 목록 조회 및 매핑
             List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
             dto.setHashtags(hashtags);
 
+            // 좋아요 수 조회
             Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
             dto.setLikesCount(likesCount);
 
@@ -200,6 +202,7 @@ public class PostsService {
             List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
             dto.setHashtags(hashtags);
 
+            // 좋아요 수 조회
             Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
             dto.setLikesCount(likesCount);
 
@@ -300,6 +303,60 @@ public class PostsService {
 
         // 3. 게시글 삭제
         postsRepository.delete(post);
+    }
+
+
+
+    @Transactional
+    public void addLike(Long postId, String userEmail) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+
+        Users user = usersRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        // Only add a like if it doesn't already exist
+        postLikesRepository.findByPostAndUser(post, user).ifPresentOrElse(
+                postLike -> {
+                    // Like already exists, do nothing or log
+                    System.out.println("User " + userEmail + " already liked post " + postId);
+                },
+                () -> {
+                    // Like does not exist, create it
+                    PostLikes newPostLike = new PostLikes();
+                    newPostLike.setPost(post);
+                    newPostLike.setUser(user);
+                    postLikesRepository.save(newPostLike);
+                }
+        );
+    }
+
+    @Transactional
+    public void removeLike(Long postId, String userEmail) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+
+        Users user = usersRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        // Only remove a like if it exists
+        postLikesRepository.findByPostAndUser(post, user).ifPresent(
+                postLike -> {
+                    // Like exists, delete it
+                    postLikesRepository.delete(postLike);
+                }
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public boolean getPostLikeStatus(Long postId, String userEmail) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+
+        Users user = usersRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
+
+        return postLikesRepository.findByPostAndUser(post, user).isPresent();
     }
 
     @Transactional(readOnly = true)

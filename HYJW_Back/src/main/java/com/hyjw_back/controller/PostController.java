@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -119,5 +120,29 @@ public class PostController {
     public ResponseEntity<List<CommentResponseDto>> getCommentsByPostId(@PathVariable Long postId) {
         List<CommentResponseDto> comments = commentsService.getCommentsByPostId(postId);
         return ResponseEntity.ok(comments);
+    }
+
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Void> likePost(@PathVariable Long postId, Principal principal) {
+        // 임시: 인증 기능이 없으므로 하드코딩된 사용자 이메일 사용 (테스트용, 실제 구현 시 변경 필요)
+        String userEmail = "testuser@example.com"; // 실제 사용자 이메일로 대체 필요
+        postsService.addLike(postId, userEmail);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{postId}/like")
+    public ResponseEntity<Void> unlikePost(@PathVariable Long postId, Principal principal) {
+        // 임시: 인증 기능이 없으므로 하드코딩된 사용자 이메일 사용 (테스트용, 실제 구현 시 변경 필요)
+        String userEmail = "testuser@example.com"; // 실제 사용자 이메일로 대체 필요
+        postsService.removeLike(postId, userEmail);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{postId}/like/status")
+    public ResponseEntity<Boolean> getPostLikeStatus(@PathVariable Long postId, Principal principal) {
+        // 임시: 인증 기능이 없으므로 하드코딩된 사용자 이메일 사용 (테스트용, 실제 구현 시 변경 필요)
+        String userEmail = "testuser@example.com"; // 실제 사용자 이메일로 대체 필요
+        boolean isLiked = postsService.getPostLikeStatus(postId, userEmail);
+        return ResponseEntity.ok(isLiked);
     }
 }

@@ -58,20 +58,32 @@ export default function PostList() {
         console.log(`Fetching all posts for category "${type}"...`);
         res = await GetPosts(type);
       }
+        // API에서 받은 데이터를 Post 타입으로 변환
+        const mappedPosts: Post[] = res.map((post: any) => ({
+          id: post.postId,              // postId -> id
+          title: post.title,
+          author: post.userNickname,    // userNickname -> author
+          image: post.url,              // url -> image
+          category: post.categoryId,    // categoryId -> category
+          date: post.createdAt,         // createdAt -> date
+          views: post.views,
+          hashtags: post.hashtags,
+          likes: post.likesCount,       // likesCount -> likes
+        }));
 
       console.log('API에서 받은 원본 응답 데이터:', res);
 
-      // API 응답을 Post 타입으로 매핑
-      const mappedPosts = res.map((post: any) => ({
-        id: post.postId,
-        title: post.title,
-        author: post.userNickname,
-        image: post.url,
-        category: post.categoryId,
-        date: post.createdAt,
-        views: post.views,
-        hashtags: post.hashtags,
-      }));
+      // // API 응답을 Post 타입으로 매핑
+      // const mappedPosts = res.map((post: any) => ({
+      //   id: post.postId,
+      //   title: post.title,
+      //   author: post.userNickname,
+      //   image: post.url,
+      //   category: post.categoryId,
+      //   date: post.createdAt,
+      //   views: post.views,
+      //   hashtags: post.hashtags,
+      // }));
 
       console.log('매핑 후 최종 데이터:', mappedPosts);
 

@@ -71,6 +71,12 @@ public class HyjwBackApplication implements CommandLineRunner {
         anonymousUser.setHashedPassword("anonymous_password"); // A placeholder password
         usersRepository.save(anonymousUser);
 
+        Users anonymousUser2 = new Users();
+        anonymousUser2.setUserNickname("Anonymous2");
+        anonymousUser2.setEmail("testuser@example.com");
+        anonymousUser2.setHashedPassword("anonymous_password"); // A placeholder password
+        usersRepository.save(anonymousUser2);
+
         // Posts 더미 데이터
         Posts post1 = new Posts();
         post1.setTitle("첫 번째 게시글 제목");
