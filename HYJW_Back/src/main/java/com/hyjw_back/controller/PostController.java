@@ -3,6 +3,8 @@ package com.hyjw_back.controller;
 import com.hyjw_back.dto.*;
 import com.hyjw_back.service.CommentsService;
 import com.hyjw_back.service.PostsService;
+import jakarta.persistence.Id;
+import jakarta.persistence.PostUpdate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -105,6 +107,12 @@ public class PostController {
 //        }
 //    }
 //
+
+    @PostUpdate("/post/{id}")
+    public void updatePost(@PathVariable Long postId, @RequestBody PostCreateDto ) {
+        return postsService.updatePost(Id, post)
+    }
+
 
 
 

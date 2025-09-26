@@ -4,6 +4,7 @@ import com.hyjw_back.constant.CategoryId;
 import com.hyjw_back.dto.*;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -451,6 +452,21 @@ public class PostsService {
         return posts.stream()
                 .map(this::convertToPostCardDto)
                 .collect(Collectors.toList());
+    }
+
+    public PostDto updatePost(Long id, PostDto postDto) {
+        // 1. DB에서 기존 게시글 조회 (없으면 예외 발생)
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. id=" + id));
+
+        // 2. 엔티티의 update 메서드로 값 수정
+        post.updatePost(postDto);
+
+        // 3. 변경된 엔티티 저장
+        Post updated = postRepository.save(post);
+
+        // 4. 엔티티 -> DTO 변환 후 반환
+        return new PostDto(updated);
     }
 
     // 변환 공통 메서드
