@@ -9,7 +9,6 @@ public class FileRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private int fileMaxNum;
     private int fileSize;
     private String fileType;
@@ -42,4 +41,9 @@ public class FileRule {
     public void setFileType(String fileType) {
         this.fileType = fileType;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
 }

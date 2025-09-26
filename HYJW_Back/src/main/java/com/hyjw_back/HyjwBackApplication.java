@@ -1,5 +1,6 @@
 package com.hyjw_back;
 
+import com.hyjw_back.constant.ADMIN;
 import com.hyjw_back.constant.CategoryId;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
@@ -59,14 +60,16 @@ public class HyjwBackApplication implements CommandLineRunner {
         Users user1 = new Users();
         user1.setUserNickname("개발자A");
         user1.setEmail("wjdgotjd10@naver.com");
-        user1.setHashedPassword(passwordEncoder.encode("1234")); // 🔴 암호화된 비밀번호로 저장
+        user1.setHashedPassword(passwordEncoder.encode("1234"));
+        user1.setUserRole(ADMIN.ADMIN); //
         usersRepository.save(user1);
+
 
 
         Users user2 = new Users();
         user2.setUserNickname("디자이너B");
-        user2.setEmail("designB@example.com");
-        user2.setHashedPassword("password_hash_b");
+        user2.setEmail("wjdgotjd100@naver.com");
+        user2.setHashedPassword(passwordEncoder.encode("1234")); // ✅ 수정 완료
         usersRepository.save(user2);
 
         // Add anonymous user for testing
