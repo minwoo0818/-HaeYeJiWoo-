@@ -16,24 +16,35 @@ export function PostCard({ post, onDelete }: PostCardProps) {
   const navigate = useNavigate();
   const currentNickname = useAuthStore((state) => state.nickname); // 로그인한 사용자 닉네임
 
-  const handleLikeToggle = () => {
-    setLiked((prev) => !prev);
-  };
+  // 좋아요 상태 토글
+const handleLikeToggle = (e: React.MouseEvent) => {
+  e.stopPropagation(); // 카드 클릭 이벤트 방지
+  setLiked((prev) => !prev);
+};
 
+  // 카드 클릭 시 상세 페이지로 이동
   const handleCardClick = () => {
     navigate(`/postdetail/${post.id}`);
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+  // 삭제 버튼 클릭
+const handleDelete = async (e: React.MouseEvent) => {
+  e.stopPropagation(); // 카드 클릭 이벤트 방지
+  if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
-    try {
-      await axios.delete(`/api/posts/${post.id}`);
-      onDelete(post.id); // 삭제 성공 시 부모 상태 갱신
-    } catch (err) {
-      console.error(err);
-      alert("삭제 중 오류가 발생했습니다.");
-    }
+  try {
+    await axios.delete(`/api/posts/${post.id}`);
+    onDelete(post.id); // 부모 상태 갱신
+  } catch (err) {
+    console.error(err);
+    alert("삭제 중 오류가 발생했습니다.");
+  }
+};
+  
+// 수정 버튼 클릭
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    navigate(`/edit/${post.id}`);
   };
 
   return (
@@ -102,6 +113,19 @@ export function PostCard({ post, onDelete }: PostCardProps) {
           src={`${import.meta.env.VITE_API_URL}${post.image}`}
           style={{ width: "80%", borderRadius: "8px" }}
         />
+        <button
+          style={{
+            backgroundColor: "#474747",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "4px",
+            padding: "6px 12px",
+            cursor: "pointer",
+          }} 
+          onClick={handleDelete}
+        >
+          삭제
+        </button>
       </div>
 
       {/* 수정 및 삭제 버튼: 닉네임이 같을 때만 표시 */}

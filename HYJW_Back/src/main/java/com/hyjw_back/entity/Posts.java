@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "posts")
@@ -29,9 +31,8 @@ public class Posts {
     @ColumnDefault("0")
     private Integer views = 0;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
     @Enumerated(EnumType.STRING)
@@ -52,5 +53,12 @@ public class Posts {
     // 실제 DB 컬럼명은 is_delete, 기본값은 0
     @Column(name = "is_delete", columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean isDelete = false;
+
+    // file
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Files> files = new ArrayList<>();
+
+
+
 
 }
