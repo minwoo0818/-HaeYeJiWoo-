@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface PostsRepository extends JpaRepository<Posts, Long> {
     List<Posts> findByCategoryId(CategoryId categoryId);
+    List<Posts> findByIsDeleteFalse(); // 살아있는 게시글
+    List<Posts> findByIsDeleteTrue();  // 삭제된 게시글
 }

@@ -5,6 +5,8 @@ import { useParams } from "react-router-dom";
 import { getPostDetail, getCommentsByPostId } from "../postDetailApi";
 import type { Comment } from "../type";
 import type { Post } from "../types/PostType";
+import { useNavigate } from "react-router-dom";
+
 const formatDateTime = (isoString: string) => {
   const date = new Date(isoString);
   const year = date.getFullYear();
@@ -19,6 +21,9 @@ export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  // const navigate = useNavigate();
+
+
   useEffect(() => {
     if (id) {
       const postId = parseInt(id);

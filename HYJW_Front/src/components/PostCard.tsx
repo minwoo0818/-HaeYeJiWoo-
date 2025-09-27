@@ -4,16 +4,17 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../authStore";
+import axios from "axios";
 
 interface PostCardProps {
   post: Post;
+  onDelete: (id: number) => void; // 삭제 후 부모(PostList) 상태 갱신 콜백
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onDelete }: PostCardProps) {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
-
-  const currentNickname = useAuthStore((state) => state.nickname); // ✅ 로그인한 사용자 닉네임
+  const currentNickname = useAuthStore((state) => state.nickname); // 로그인한 사용자 닉네임
 
   const handleLikeToggle = () => {
     setLiked((prev) => !prev);
@@ -22,8 +23,18 @@ export function PostCard({ post }: PostCardProps) {
   const handleCardClick = () => {
     navigate(`/postdetail/${post.id}`);
   };
-  console.log("로그인 닉네임:", currentNickname);
-  console.log("게시글 작성자 닉네임:", post.nickname);
+
+  const handleDelete = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      await axios.delete(`/api/posts/${post.id}`);
+      onDelete(post.id); // 삭제 성공 시 부모 상태 갱신
+    } catch (err) {
+      console.error(err);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
     <div
@@ -35,6 +46,7 @@ export function PostCard({ post }: PostCardProps) {
         width: "350px",
         marginBottom: "16px",
         fontFamily: "Arial, sans-serif",
+        cursor: "pointer",
       }}
     >
       {/* 게시글 제목 및 작성자 정보 */}
@@ -56,7 +68,10 @@ export function PostCard({ post }: PostCardProps) {
             작성자 : {post.nickname}
           </span>
           <span
-            onClick={handleLikeToggle}
+            onClick={(e) => {
+              e.stopPropagation(); // 카드 클릭 방지
+              handleLikeToggle();
+            }}
             style={{
               cursor: "pointer",
               color: liked ? "red" : "black",
@@ -84,7 +99,7 @@ export function PostCard({ post }: PostCardProps) {
       {/* 게시글 이미지 */}
       <div style={{ marginBottom: "8px" }}>
         <img
-          src={`http://localhost:8080${post.image}`}
+          src={`${import.meta.env.VITE_API_URL}${post.image}`}
           style={{ width: "80%", borderRadius: "8px" }}
         />
       </div>
@@ -93,6 +108,10 @@ export function PostCard({ post }: PostCardProps) {
       {currentNickname === post.nickname && (
         <div style={{ display: "flex", gap: "8px" }}>
           <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/edit/${post.id}`);
+            }}
             style={{
               backgroundColor: "#474747",
               color: "#ffffff",
@@ -106,6 +125,10 @@ export function PostCard({ post }: PostCardProps) {
           </button>
 
           <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete();
+            }}
             style={{
               backgroundColor: "#474747",
               color: "#ffffff",

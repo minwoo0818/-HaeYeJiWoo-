@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "comments")
@@ -11,6 +15,7 @@ import java.sql.Timestamp;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class Comments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,4 +45,7 @@ public class Comments {
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
+
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comments> replies = new ArrayList<>();
 }

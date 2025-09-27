@@ -5,6 +5,7 @@ import {
   addComment,
   deleteComment,
   getCommentsByPostId,
+  updateComment,
 } from "../postDetailApi";
 
 interface CommentsProps {
@@ -13,25 +14,18 @@ interface CommentsProps {
   setComments: (comments: Comment[]) => void;
 }
 
-export default function Comments({
-  postId,
-  comments,
-  setComments,
-}: CommentsProps) {
+export default function Comments({ postId, comments, setComments }: CommentsProps) {
   const [newComment, setNewComment] = useState("");
-  const [replyInputs, setReplyInputs] = useState<{ [key: number]: string }>({});
-  const [showReplyInput, setShowReplyInput] = useState<{
-    [key: number]: boolean;
-  }>({});
+  const [replyInputs, setReplyInputs] = useState<Record<number, string>>({});
+  const [showReplyInput, setShowReplyInput] = useState<Record<number, boolean>>({});
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editedContent, setEditedContent] = useState("");
 
-  // 새로운 댓글 등록
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
+
     try {
-      const createdComment = await addComment({
-        content: newComment,
-        postId: postId,
-      });
+      const createdComment = await addComment({ content: newComment, postId });
       setComments([...comments, createdComment]);
       setNewComment("");
     } catch (error) {
@@ -40,15 +34,15 @@ export default function Comments({
     }
   };
 
-  // 🔧 바뀐 부분: 대댓글 등록 시 parentCommentId 포함
   const handleAddReply = async (parentId: number) => {
     const replyContent = replyInputs[parentId];
     if (!replyContent?.trim()) return;
+
     try {
       const createdReply = await addComment({
         content: replyContent,
-        postId: postId,
-        parentCommentId: parentId, // 🔧 대댓글 연결을 위한 필드 추가
+        postId,
+        parentCommentId: parentId,
       });
       setComments([...comments, createdReply]);
       setReplyInputs({ ...replyInputs, [parentId]: "" });
@@ -64,6 +58,7 @@ export default function Comments({
     const confirmMsg = hasReplies
       ? "대댓글이 달린 댓글입니다. 정말 삭제하시겠습니까?"
       : "댓글을 삭제하시겠습니까?";
+
     if (!window.confirm(confirmMsg)) return;
 
     try {
@@ -83,6 +78,37 @@ export default function Comments({
     }));
   };
 
+  const handleEditComment = (comment: Comment) => {
+    setEditingCommentId(comment.id);
+    setEditedContent(comment.content);
+  };
+
+  const handleSaveEditedComment = async (commentId: number) => {
+    if (!editedContent.trim()) {
+      alert("수정할 내용을 입력해주세요.");
+      return;
+    }
+
+    try {
+      const updated = await updateComment(commentId, editedContent);
+      setComments(
+        comments.map((c) =>
+          c.id === commentId ? { ...c, content: updated.content } : c
+        )
+      );
+      setEditingCommentId(null);
+      setEditedContent("");
+    } catch (error) {
+      console.error("댓글 수정 실패:", error);
+      alert("댓글을 수정하는 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditedContent("");
+  };
+
   const renderComments = (parentId: number | null = null) => {
     const filtered = comments.filter((c) =>
       parentId === null
@@ -91,10 +117,7 @@ export default function Comments({
     );
 
     return filtered.map((comment) => (
-      <div
-        key={comment.id}
-        className={parentId !== null ? "pd-reply-comment" : ""}
-      >
+      <div key={comment.id} className={parentId !== null ? "pd-reply-comment" : ""}>
         <div className="pd-ex-comment">
           <p>
             <strong>{comment.userNickname}</strong>
@@ -111,18 +134,42 @@ export default function Comments({
             )}
           </p>
           <div className="pd-ex-comment-content">
-            <p>{comment.content}</p>
+            {editingCommentId === comment.id ? (
+              <div className="comment-edit-area">
+                <input
+                  type="text"
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  style={{ width: "70%", padding: "6px" }}
+                />
+                <button
+                  onClick={() => handleSaveEditedComment(comment.id)}
+                  style={{ padding: "6px 12px", marginLeft: "8px", cursor: "pointer" }}
+                >
+                  저장
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  style={{ padding: "6px 12px", marginLeft: "8px", cursor: "pointer" }}
+                >
+                  취소
+                </button>
+              </div>
+            ) : (
+              <p>{comment.content}</p>
+            )}
             <div className="comment-actions">
-              <button>수정</button>
-              <button onClick={() => handleDeleteComment(comment.id)}>
-                삭제
-              </button>
+              {editingCommentId !== comment.id && (
+                <button onClick={() => handleEditComment(comment)}>수정</button>
+              )}
+              {editingCommentId !== comment.id && (
+                <button onClick={() => handleDeleteComment(comment.id)}>삭제</button>
+              )}
             </div>
           </div>
           <hr />
         </div>
 
-        {/* 🔧 바뀐 부분: 대댓글 입력창 */}
         {showReplyInput[comment.id] && (
           <div className="comment-write pd-reply-write">
             <input
@@ -135,7 +182,7 @@ export default function Comments({
               style={{ width: "60%", padding: "6px" }}
             />
             <button
-              onClick={() => handleAddReply(comment.id)} // 🔧 대댓글 등록 함수 연결
+              onClick={() => handleAddReply(comment.id)}
               style={{
                 padding: "6px 12px",
                 marginLeft: "8px",
@@ -147,7 +194,6 @@ export default function Comments({
           </div>
         )}
 
-        {/* 재귀 렌더링 */}
         <div style={{ marginLeft: "20px" }}>{renderComments(comment.id)}</div>
       </div>
     ));

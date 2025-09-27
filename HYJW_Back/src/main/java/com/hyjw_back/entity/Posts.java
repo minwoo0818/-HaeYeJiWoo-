@@ -48,4 +48,9 @@ public class Posts {
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
+    // 게시글 삭제 여부 (false: 노출, true: 삭제 처리)
+    // 실제 DB 컬럼명은 is_delete, 기본값은 0
+    @Column(name = "is_delete", columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean isDelete = false;
+
 }

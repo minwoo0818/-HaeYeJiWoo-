@@ -79,6 +79,49 @@ public class CommentsService {
 
     @Transactional
     public void deleteComment(Long commentId) {
-        commentsRepository.deleteById(commentId);
+        Comments comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
+        commentsRepository.delete(comment);
+    }
+
+    @Transactional
+    public CommentResponseDto updateComment(Long commentId, String newContent) {
+        Comments comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
+
+        comment.setContent(newContent);
+        comment.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+
+        Comments updatedComment = commentsRepository.save(comment);
+
+        return CommentResponseDto.builder()
+                .id(updatedComment.getCommentsId())
+                .nickname(updatedComment.getUser().getUserNickname())
+                .postId(updatedComment.getPost().getPostId())
+                .userId(updatedComment.getUser().getUserId())
+                .content(updatedComment.getContent())
+                .parentCommentId(updatedComment.getParentComment() != null ? updatedComment.getParentComment().getCommentsId() : null)
+                .createAt(updatedComment.getCreatedAt().toLocalDateTime())
+                .updateAt(updatedComment.getUpdatedAt() != null ? updatedComment.getUpdatedAt().toLocalDateTime() : null)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public CommentResponseDto getCommentById(Long commentId) {
+        Comments comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
+
+
+
+        return CommentResponseDto.builder()
+                .id(comment.getCommentsId())
+                .nickname(comment.getUser().getUserNickname())
+                .postId(comment.getPost().getPostId())
+                .userId(comment.getUser().getUserId())
+                .content(comment.getContent())
+                .parentCommentId(comment.getParentComment() != null ? comment.getParentComment().getCommentsId() : null)
+                .createAt(comment.getCreatedAt().toLocalDateTime())
+                .updateAt(comment.getUpdatedAt() != null ? comment.getUpdatedAt().toLocalDateTime() : null)
+                .build();
     }
 }

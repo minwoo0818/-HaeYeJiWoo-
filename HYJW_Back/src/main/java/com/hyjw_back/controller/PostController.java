@@ -6,7 +6,9 @@ import com.hyjw_back.dto.PostDetailDto;
 import com.hyjw_back.dto.PostCardDto;
 import com.hyjw_back.dto.CommentResponseDto;
 import com.hyjw_back.service.CommentsService;
+import com.hyjw_back.entity.Posts;
 import com.hyjw_back.service.PostsService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
+@CrossOrigin(origins = "http://localhost:5173") //프론트 URL 허용
 public class PostController {
 
     @Autowired
@@ -33,6 +36,27 @@ public class PostController {
         return new ResponseEntity<>(newPost, HttpStatus.CREATED);
     }
 
+    // 유저: 소프트 삭제 (isDelete = true)
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> softDeletePost(@PathVariable Long postId) {
+        postsService.softDeletePost(postId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 관리자: 하드 삭제 (DB에서 완전히 삭제)
+    @DeleteMapping("/admin/{postId}")
+    public ResponseEntity<Void> hardDeletePost(@PathVariable Long postId) {
+        postsService.hardDeletePost(postId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 관리자: 삭제된 게시글 목록 확인
+    @GetMapping("/admin/deleted")
+    public ResponseEntity<List<PostCardDto>> getDeletedPosts() {
+        return ResponseEntity.ok(postsService.getDeletedPosts());
+    }
+
+    // getAllPosts, getPostDetail 등 다른 메서드는 기존과 동일
     @GetMapping("/all")
     public ResponseEntity<List<PostCardDto>> getAllPosts() {
         List<PostCardDto> posts = postsService.getAllPosts();
