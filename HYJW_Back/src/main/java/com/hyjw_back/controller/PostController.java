@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
-@CrossOrigin(origins = "http://localhost:5173") //프론트 URL 허용
+@CrossOrigin(origins = "http://localhost:5174") //프론트 URL 허용
 public class PostController {
 
     @Autowired
@@ -108,11 +108,14 @@ public class PostController {
 //    }
 //
 
-    @PostUpdate("/post/{id}")
-    public void updatePost(@PathVariable Long postId, @RequestBody PostCreateDto ) {
-        return postsService.updatePost(Id, post)
-    }
+    @PutMapping("/{id}")
+    public ResponseEntity<PostDetailDto> updatePost(
+            @PathVariable("id") Long postId,
+            @RequestBody PostUpdateDto postUpdateDto) { // 수정된 데이터를 DTO로 받음
 
+        PostDetailDto updatedPost = postsService.updatePost(postId, postUpdateDto);
+        return ResponseEntity.ok(updatedPost); // 200 OK와 수정된 DTO 반환
+    }
 
 
 

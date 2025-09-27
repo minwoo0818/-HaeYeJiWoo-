@@ -45,7 +45,7 @@ public class PostsService {
     @Autowired
     private FilesRepository filesRepository;
 
-    //========================================== 첨부파일포함 ==============================================
+    //========================================== 첨부파일포함 ==========================================
     @Transactional
     public PostDetailDto createPost(PostCreateIncludeFIleDto postCreateIncludeFIleDto, Long userId) {
         // 1. 게시글 엔티티 생성 및 저장
@@ -454,19 +454,27 @@ public class PostsService {
                 .collect(Collectors.toList());
     }
 
-    public PostDto updatePost(Long id, PostDto postDto) {
-        // 1. DB에서 기존 게시글 조회 (없으면 예외 발생)
-        Post post = postRepository.findById(id)
+    @Transactional
+    public PostDetailDto updatePost(Long id, PostUpdateDto postUpdateDto) {
+
+        // 1. DB에서 Posts 엔티티 조회 -> findById는 Optional을 반환하므로, orElseThrow를 사용해 없으면 예외를 발생
+        Posts postEntity = postsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. id=" + id));
 
-        // 2. 엔티티의 update 메서드로 값 수정
-        post.updatePost(postDto);
+        // 2. 수정 권한 검사 (나중에 시큐리티 등록후)
+        // 예: if (!postEntity.getUser().getUserId()
+        // .equals(currentUserId)) { throw new AccessDeniedException(); }
 
-        // 3. 변경된 엔티티 저장
-        Post updated = postRepository.save(post);
+        // 3. 엔티티의 update 메서드를 호출하여 DTO의 값으로 엔티티 필드를 변경
+        postEntity.updatePost(
+                postUpdateDto.getTitle(),
+                postUpdateDto.getContent()
+                // DTO에 파일 수정 로직이 있다면 여기서 추가
+        );
 
-        // 4. 엔티티 -> DTO 변환 후 반환
-        return new PostDto(updated);
+        // 4. 변경된 엔티티 -> DTO 변환 후 반환
+        return new PostDetailDto(postEntity);
+        // PostDetailDto 생성자에 Posts 엔티티를 받아 DTO로 변환하는 로직이 있다고 가정
     }
 
     // 변환 공통 메서드

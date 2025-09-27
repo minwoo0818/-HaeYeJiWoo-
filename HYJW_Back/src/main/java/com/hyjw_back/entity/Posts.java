@@ -58,7 +58,31 @@ public class Posts {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Files> files = new ArrayList<>();
 
+    // 게시글 내용 변경을 위한 메서드 추가
+    public void updatePost(String title, String content ) {
+        this.title = title;
+        this.content = content;
+//        this.updatedAt = new Timestamp(System.currentTimeMillis());
+    }
 
+    // 좋아요 (PostLikes) 관계 매핑 필드 추가
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLikes> postLikes = new ArrayList<>();
 
+    // 해시태그 (PostHashtags) 관계 매핑 필드 추가
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostHashtags> postHashtags = new ArrayList<>();
+
+    // 댓글 (Comments) 관계 매핑 필드 추가 (Comments 엔티티가 있다면 추가)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comments> comments = new ArrayList<>();
+
+    // ... (기존 updatePost 메서드)
+//    public void updatePost(String title, String content /*, ...다른 필드 */) {
+//        this.title = title;
+//        this.content = content;
+//        // 수정 시간 업데이트 로직도 추가하는 것이 좋습니다.
+//        // this.updatedAt = new Timestamp(System.currentTimeMillis());
+//    }
 
 }
