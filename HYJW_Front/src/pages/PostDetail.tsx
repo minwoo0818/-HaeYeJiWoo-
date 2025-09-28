@@ -241,43 +241,7 @@ export default function PostDetail() {
                     </div>
                   );
                 })}
-                {/* {post.files.map((file, index) => {
-                  if (!file || !file.url || !file.fileName) return null; // Basic null/undefined check
-                  const fileExtension = file.fileName
-                    .split(".")
-                    .pop()
-                    ?.toLowerCase();
-                  const isImage = [
-                    "jpg",
-                    "jpeg",
-                    "png",
-                    "gif",
-                    "webp",
-                    "svg",
-                  ].includes(fileExtension || "");
-                  return (
-                    <div
-                      key={`${file.url}-${index}`}
-                      className="attachment-item"
-                    >
-                      {isImage ? (
-                        <img
-                          src={file.url}
-                          alt={file.fileName}
-                          style={{ maxWidth: "100%", height: "auto" }}
-                        />
-                      ) : (
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {file.fileName}
-                        </a>
-                      )}
-                    </div>
-                  );
-                })} */}
+                
               </div>
             )}
 
