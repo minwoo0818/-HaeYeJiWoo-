@@ -1,4 +1,5 @@
 export interface FileAttachment {
+  fileOriginalName: string | undefined;   //PostDetail에서 첨부파일 부분 타입 새로 선언함 
   url: string;
   fileName: string;
 }

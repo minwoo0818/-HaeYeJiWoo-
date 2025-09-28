@@ -1,6 +1,7 @@
 export interface FileAttachment {
   url: string;
-  fileName: string;
+  // fileName: string;
+  fileOriginalName: string; 
 }
 
 export interface BackendUser {

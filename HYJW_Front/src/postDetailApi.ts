@@ -1,13 +1,14 @@
 import axios from "axios";
-import type { Post } from "./PostType";
+import type { BackendPostResponse, Post } from "./PostType";
 import type { Comment } from "./type";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const getPostDetail = async (id: number): Promise<Post> => {
-    const response = await axios.get(`${BASE_URL}/posts/detail/${id}`);
-    console.log(response);
+    const response = await axios.get<BackendPostResponse>(`${BASE_URL}/posts/detail/${id}`);
+    // console.log(response);
     const backendPost = response.data;
+
     return {
         id: backendPost.postId,
         title: backendPost.title,
@@ -63,4 +64,18 @@ export const deleteComment = async (commentId: number): Promise<void> => {
 export const updateComment = async (commentId: number, content: string): Promise<Comment> => {
     const response = await axios.put(`${BASE_URL}/comments/${commentId}`, { content });
     return response.data;
+};
+
+// 게시글 수정 (PUT 요청) 함수
+export const updatePost = async (postId: number, updatedPost: Post): Promise<Post> => {
+    try {
+        const response = await axios.put<Post>(
+            `${BASE_URL}/posts/${postId}`, // 백엔드 수정 API 경로
+            updatedPost // 수정된 데이터
+        );
+        return response.data;
+    } catch (error) {
+        console.error('API Error updating post:', error);
+        throw error;
+    }
 };
