@@ -18,6 +18,7 @@ export interface BackendPostResponse {
   url: string;
   categoryId: string;
   createdAt: string;
+  updatedAt: string;
   views: number;
   hashtags: string[];
   likesCount: number;
@@ -31,7 +32,8 @@ export interface Post {
   nickname: string;
   image: string;
   category: string;
-  date: string;
+  createdAt: string;
+  updatedAt: string;
   views: number;
   hashtags: string[];
   likes: number;

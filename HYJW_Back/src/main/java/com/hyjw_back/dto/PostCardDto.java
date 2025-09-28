@@ -13,6 +13,7 @@ public class PostCardDto {
     private String url;
     private CategoryId categoryId;
     private Timestamp createdAt;
+    private Timestamp updatedAt;
     private Integer views;
     private List<String> hashtags;
     private Integer likesCount;

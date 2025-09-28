@@ -223,28 +223,8 @@ public class PostsService {
     @Transactional(readOnly = true)
     public List<PostCardDto> getAllPosts() {
         List<Posts> posts = postsRepository.findByIsDeleteFalse();
-
-        return posts.stream().map(post -> {
-            PostCardDto dto = new PostCardDto();
-            dto.setPostId(post.getPostId());
-            dto.setTitle(post.getTitle());
-            dto.setUserNickname(post.getUser().getUserNickname());
-            dto.setUrl(post.getUrl());
-            dto.setCategoryId(post.getCategoryId());
-            dto.setCreatedAt(post.getCreatedAt());
-            dto.setViews(post.getViews());
-            dto.setContent(post.getContent());
-
-            // 해시태그 목록 조회 및 매핑
-            List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
-            dto.setHashtags(hashtags);
-
-            // 좋아요 수 조회
-            Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
-            dto.setLikesCount(likesCount);
-
-            return dto;
-        }).collect(Collectors.toList());
+        return posts.stream().map(this::convertToPostCardDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -260,24 +240,8 @@ public class PostsService {
         List<Posts> posts = postsRepository.findByCategoryId(categoryId);
 
         // ... DTO 변환 및 반환
-        return posts.stream().map(post -> {
-            PostCardDto dto = new PostCardDto();
-            dto.setPostId(post.getPostId());
-            dto.setTitle(post.getTitle());
-            dto.setUserNickname(post.getUser().getUserNickname());
-            dto.setUrl(post.getUrl());
-            dto.setCategoryId(post.getCategoryId());
-            dto.setCreatedAt(post.getCreatedAt());
-            dto.setViews(post.getViews());
-
-            List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
-            dto.setHashtags(hashtags);
-
-            Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
-            dto.setLikesCount(likesCount);
-
-            return dto;
-        }).collect(Collectors.toList());
+        return posts.stream().map(this::convertToPostCardDto)
+                .collect(Collectors.toList());
     }
 
     public List<PostCardDto> searchPosts(String type, String searchType, String searchText) {
@@ -325,27 +289,8 @@ public class PostsService {
         }
 
         // 검색 결과를 DTO로 변환하는 공통 로직
-        return searchResults.stream().map(post -> {
-            PostCardDto dto = new PostCardDto();
-            dto.setPostId(post.getPostId());
-            dto.setTitle(post.getTitle());
-            dto.setUserNickname(post.getUser().getUserNickname());
-            dto.setUrl(post.getUrl());
-            dto.setCategoryId(post.getCategoryId());
-            dto.setCreatedAt(post.getCreatedAt());
-            dto.setViews(post.getViews());
-
-            // 해시태그와 좋아요 수는 별도의 쿼리를 통해 가져와야 합니다.
-            // 기존의 getAllPosts와 getPostsByCategory 메서드에 있는 로직을 재사용하세요.
-            List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
-            dto.setHashtags(hashtags);
-
-            // 좋아요 수 조회
-            Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
-            dto.setLikesCount(likesCount);
-
-            return dto;
-        }).collect(Collectors.toList());
+        return searchResults.stream().map(this::convertToPostCardDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -368,6 +313,7 @@ public class PostsService {
         dto.setContent(post.getContent());
         dto.setViews(post.getViews());
         dto.setCreatedAt(post.getCreatedAt());
+        dto.setUpdatedAt(post.getUpdatedAt());
 
         // 작성자 정보
         UserDto userDto = new UserDto();
@@ -534,9 +480,8 @@ public class PostsService {
         dto.setUserNickname(post.getUser().getUserNickname());
         dto.setUrl(post.getUrl());
         dto.setCategoryId(post.getCategoryId());
-        dto.setCreatedAt(post.getCreatedAt());
         dto.setViews(post.getViews());
-        dto.setHashtags(postHashtagRepository.findHashtagTagsByPostId(post.getPostId()));
+        dto.setUpdatedAt(post.getUpdatedAt());
         dto.setLikesCount(postLikesRepository.countByPost_PostId(post.getPostId()));
         return dto;
     }

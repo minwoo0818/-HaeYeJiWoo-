@@ -147,15 +147,12 @@ export default function Comments({
           <p>
             <strong>{comment.nickname}</strong>
             <span className="pd-timestamp">
-              {new Date(comment.createAt).toLocaleString()}
-            </span>
-            {comment.updateAt &&
+              {comment.updateAt &&
               new Date(comment.createAt).getTime() !==
-                new Date(comment.updateAt).getTime() && (
-                <span className="pd-timestamp">
-                  (수정: {new Date(comment.updateAt).toLocaleString()})
-                </span>
-              )}
+                new Date(comment.updateAt).getTime()
+                ? `(수정) ${new Date(comment.updateAt).toLocaleString()}`
+                : new Date(comment.createAt).toLocaleString()}
+            </span>
             {parentId === null && (
               <button
                 className="pd-write-recomment"

@@ -17,6 +17,7 @@ public class PostDetailDto {
     private String title;
     private UserDto user; // 작성자 정보
     private Timestamp createdAt;
+    private Timestamp updatedAt;
     private String content;
     private List<String> hashtags; // 해시태그 목록
     private List<FileDto> files; // 첨부파일 목록
@@ -37,6 +38,7 @@ public class PostDetailDto {
         this.user = new UserDto(posts.getUser());
 
         this.createdAt = posts.getCreatedAt();
+        this.updatedAt = posts.getUpdatedAt();
         this.content = posts.getContent();
 
         // 해시태그 목록 매핑 (PostHashtags 컬렉션을 String 목록으로 변환)

@@ -8,7 +8,7 @@ import {
   likePost,
   unlikePost,
   getPostLikeStatus,
-  // updatePost,
+  updatePost,
 } from "../api/postDetailApi";
 import type { Post } from "../types/PostType";
 import type { Comment } from "../type";
@@ -85,17 +85,19 @@ export default function PostDetail() {
 
     const postId = parseInt(id as string);
     const updatedData = {
-      ...post, // 기존 데이터 유지
       title: editTitle,
       content: editContent,
-      // files, hashtags 등 다른 수정 필드는 여기서 처리해야 합니다.
     };
 
     try {
-      // updatePost 함수는 백엔드에 PUT 요청을 보낸다고 가정
-      // const response = await updatePost(postId, updatedData);
+      const response = await updatePost(postId, updatedData);
 
-      // setPost(response); // 서버에서 받은 최신 데이터로 업데이트
+      setPost(prevPost => {
+        if (prevPost) {
+          return { ...prevPost, ...response };
+        }
+        return response;
+      }); // 서버에서 받은 최신 데이터로 업데이트
       setIsEditing(false); // 읽기 모드로 전환
       alert("게시글이 성공적으로 수정되었습니다.");
     } catch (error) {
@@ -177,7 +179,13 @@ export default function PostDetail() {
               <span className="author">
                 <h3>작성자: {post.nickname}</h3>
               </span>
-              <span className="date">{formatDateTime(post.date)}</span>
+                            <span className="date">
+                {post.updatedAt &&
+                new Date(post.createdAt).getTime() !==
+                  new Date(post.updatedAt).getTime()
+                  ? `(수정) ${formatDateTime(post.updatedAt)} `
+                  : formatDateTime(post.createdAt)}
+              </span>
             </div>
 
             <div className="pd-post-body">{post.content}</div>

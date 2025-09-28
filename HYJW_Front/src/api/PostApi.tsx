@@ -18,7 +18,8 @@ export const GetPosts = async (type: string = "all"): Promise<Post[]> => {
     nickname: backendPost.userNickname || "알 수 없는 사용자", // Handle missing user
     image: backendPost.url,
     category: backendPost.categoryId,
-    date: backendPost.createdAt,
+    createdAt: backendPost.createdAt,
+    updatedAt: backendPost.updatedAt,
     views: backendPost.views,
     hashtags: backendPost.hashtags,
     likes: backendPost.likesCount,
@@ -51,7 +52,8 @@ export const SearchPosts = async (
       nickname: backendPost.user?.userNickname || "알 수 없는 사용자", // Handle missing user
       image: backendPost.url,
       category: backendPost.categoryId,
-      date: backendPost.createdAt,
+      createdAt: backendPost.createdAt,
+      updatedAt: backendPost.updatedAt,
       views: backendPost.views,
       hashtags: backendPost.hashtags,
       likes: backendPost.likesCount,

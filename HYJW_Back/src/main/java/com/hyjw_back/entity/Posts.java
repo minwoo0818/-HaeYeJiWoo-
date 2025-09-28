@@ -62,7 +62,7 @@ public class Posts {
     public void updatePost(String title, String content ) {
         this.title = title;
         this.content = content;
-//        this.updatedAt = new Timestamp(System.currentTimeMillis());
+        this.updatedAt = new Timestamp(System.currentTimeMillis());
     }
 
     // 좋아요 (PostLikes) 관계 매핑 필드 추가
