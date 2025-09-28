@@ -40,6 +40,7 @@ export default function PostDetail() {
   // 2. ✅ 수정 중인 내용을 위한 상태 추가
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [showImageMap, setShowImageMap] = useState<{ [key: number]: boolean }>({});
 
   useEffect(() => {
     if (id) {
@@ -209,8 +210,44 @@ export default function PostDetail() {
                 {post.files.map((file, index) => {
                   console.log("확인", file);
                   return (
-                    <div key={index}> {/* Add a key for list items */}
+                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                       {file.fileType && file.fileType.startsWith('image/') ? (
+                        <>
+                          <a
+                            href={`${BASE_URL}${file.url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              e.preventDefault(); // Prevent default link behavior
+                              setShowImageMap(prev => ({ ...prev, [index]: !prev[index] }));
+                            }}
+                          >
+                            {`${file.fileOriginalName} (${(
+                              (file.fileSize || 0) / 1024
+                            ).toFixed(1)}MB)`}
+                          </a>
+                          <button
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = `${BASE_URL}${file.url}`;
+                              link.download = file.fileOriginalName || 'download';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                            style={{ padding: '4px 8px', cursor: 'pointer' }}
+                          >
+                            다운로드
+                          </button>
+                          {showImageMap[index] && (
+                            <img
+                              src={`${BASE_URL}${file.url}`}
+                              alt={file.fileOriginalName}
+                              style={{ maxWidth: "100%", height: "auto", display: "block", marginTop: "8px", border: "1px solid #eee" }}
+                            />
+                          )}
+                        </>
+                      ) : (
                         <>
                           <a
                             href={`${BASE_URL}${file.url}`}
@@ -221,22 +258,20 @@ export default function PostDetail() {
                               (file.fileSize || 0) / 1024
                             ).toFixed(1)}MB)`}
                           </a>
-                          <img
-                            src={`${BASE_URL}${file.url}`}
-                            alt={file.fileOriginalName}
-                            style={{ maxWidth: "100%", height: "auto", display: "block", marginTop: "8px", border: "1px solid #eee" }}
-                          />
+                          <button
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = `${BASE_URL}${file.url}`;
+                              link.download = file.fileOriginalName || 'download';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                            style={{ padding: '4px 8px', cursor: 'pointer' }}
+                          >
+                            다운로드
+                          </button>
                         </>
-                      ) : (
-                        <a
-                          href={`${BASE_URL}${file.url}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {`${file.fileOriginalName} (${(
-                            (file.fileSize || 0) / 1024
-                          ).toFixed(1)}MB)`}
-                        </a>
                       )}
                     </div>
                   );
