@@ -1,7 +1,7 @@
 export type Comment = {
   id: number;
-  userNickname: string;
   postId: number;
+  nickname: string;
   userId: number;
   content: string;
   parentCommentId?: number;
@@ -20,6 +20,19 @@ export type PostType = {
   content: string;
   hashtags: string;
   files: string;
-}
+};
 
-export type AddCommentPayload = Omit<Comment, 'id' | 'nickname' | 'userId' | 'createAt' | 'updateAt'>;
+export type AddCommentPayload = Omit<
+  Comment,
+  "id" | "nickname" | "userId" | "createAt" | "updateAt"
+>;
+
+export type AdminComment = {
+  id?: number;
+  title?: string;
+  nickname?: string;
+  userId?: number;
+  content?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};

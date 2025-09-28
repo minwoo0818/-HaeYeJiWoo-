@@ -130,6 +130,16 @@ export default function PostDetail() {
               <div className="pd-attachment">
                 첨부파일:
                 {post.files.map((file, index) => {
+                  console.log("확인", file);
+                  return (
+                    <>
+                      <div>{`${file.fileOriginalName} (${(
+                        (file.fileSize || 0) / 1024
+                      ).toFixed(1)}MB)`}</div>
+                    </>
+                  );
+                })}
+                {/* {post.files.map((file, index) => {
                   if (!file || !file.url || !file.fileName) return null; // Basic null/undefined check
                   const fileExtension = file.fileName
                     .split(".")
@@ -165,7 +175,7 @@ export default function PostDetail() {
                       )}
                     </div>
                   );
-                })}
+                })} */}
               </div>
             )}
 

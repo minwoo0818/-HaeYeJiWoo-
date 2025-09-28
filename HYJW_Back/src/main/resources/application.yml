@@ -5,14 +5,13 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/hyjwdb
     username: root
-    password: 1234
+    password: a1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: create
-
 #  web:
 #    resources:
 #      static-locations: file:///C:/-HaYeJiWoo-/images/

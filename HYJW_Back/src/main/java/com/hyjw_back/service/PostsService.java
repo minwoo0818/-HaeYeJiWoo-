@@ -97,6 +97,7 @@ public class PostsService {
             dto.setCategoryId(post.getCategoryId());
             dto.setCreatedAt(post.getCreatedAt());
             dto.setViews(post.getViews());
+            dto.setContent(post.getContent());
 
             // 해시태그 목록 조회 및 매핑
             List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
@@ -176,7 +177,8 @@ public class PostsService {
                     searchResults = postsRepository.findByCategoryIdAndContentContaining(categoryId, searchText);
                     break;
                 case "userId":
-                    searchResults = postsRepository.findByCategoryIdAndUserUserNicknameContaining(categoryId, searchText);
+                    searchResults = postsRepository.findByCategoryIdAndUserUserNicknameContaining(categoryId,
+                            searchText);
                     break;
                 case "hashtag":
                     searchResults = postsRepository.findByCategoryIdAndTagContaining(categoryId, searchText);
@@ -249,6 +251,8 @@ public class PostsService {
                     fileDto.setFileOriginalName(file.getFileOriginalName());
                     fileDto.setUrl(file.getUrl());
                     fileDto.setFileType(file.getFileType());
+                    fileDto.setFileSize(file.getFileSize());
+                    fileDto.setDownloads(file.getDownloads());
                     return fileDto;
                 })
                 .collect(Collectors.toList());
@@ -280,7 +284,7 @@ public class PostsService {
         return dto;
     }
 
-    //유저 : 소프트 삭제 (isDelete = true)
+    // 유저 : 소프트 삭제 (isDelete = true)
     @Transactional
     public void softDeletePost(Long postId) {
         Posts post = postsRepository.findById(postId)
@@ -305,8 +309,6 @@ public class PostsService {
         postsRepository.delete(post);
     }
 
-
-
     @Transactional
     public void addLike(Long postId, String userEmail) {
         Posts post = postsRepository.findById(postId)
@@ -327,8 +329,7 @@ public class PostsService {
                     newPostLike.setPost(post);
                     newPostLike.setUser(user);
                     postLikesRepository.save(newPostLike);
-                }
-        );
+                });
     }
 
     @Transactional
@@ -344,8 +345,7 @@ public class PostsService {
                 postLike -> {
                     // Like exists, delete it
                     postLikesRepository.delete(postLike);
-                }
-        );
+                });
     }
 
     @Transactional(readOnly = true)

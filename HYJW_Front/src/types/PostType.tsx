@@ -1,6 +1,8 @@
 export interface FileAttachment {
-  url: string;
-  fileName: string;
+  url?: string;
+  fileOriginalName?: string;
+  fileType?: string;
+  fileSize?: number; // byte
 }
 
 export interface BackendUser {
@@ -36,4 +38,3 @@ export interface Post {
   content: string;
   files: FileAttachment[];
 }
-

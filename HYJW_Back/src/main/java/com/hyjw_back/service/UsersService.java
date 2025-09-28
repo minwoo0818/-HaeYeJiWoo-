@@ -4,6 +4,10 @@ import com.hyjw_back.dto.UserDto;
 import com.hyjw_back.entity.Users;
 import com.hyjw_back.entity.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +50,19 @@ public class UsersService {
         savedUserDto.setUserNickname(savedUser.getUserNickname());
         savedUserDto.setEmail(savedUser.getEmail());
         return savedUserDto;
+    }
+
+    public List<UserDto> getUser() {
+        List<Users> userInfo = usersRepository.findAll();
+        List<UserDto> userDtoList = new ArrayList<>();
+        for (Users user : userInfo) {
+            UserDto userDto = new UserDto();
+            userDto.setUserId(user.getUserId());
+            userDto.setUserNickname(user.getUserNickname());
+            userDto.setEmail(user.getEmail());
+            userDtoList.add(userDto);
+        }
+        return userDtoList;
     }
 
 }

@@ -16,4 +16,5 @@ public class PostCardDto {
     private Integer views;
     private List<String> hashtags;
     private Integer likesCount;
+    private String content;
 }

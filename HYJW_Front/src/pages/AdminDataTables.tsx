@@ -21,26 +21,30 @@ export default function AdminDataTables() {
   };
 
   return (
-    <Box sx={{ width: "100%" }}>
-      {/* 상단 탭 메뉴 */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange} aria-label="관리자 데이터 테이블 탭">
-          <Tab label="게시글 관리" />
-          <Tab label="댓글 관리" />
-          <Tab label="회원 관리" />
-        </Tabs>
-      </Box>
+    <Box sx={{ display: 'flex', width: '100%' }}>
+      <Tabs
+        orientation="vertical"
+        value={value}
+        onChange={handleChange}
+        aria-label="관리자 데이터 테이블 탭"
+        sx={{ borderRight: 1, borderColor: 'divider', minWidth: 150 }}
+      >
+        <Tab label="게시글 관리" />
+        <Tab label="댓글 관리" />
+        <Tab label="회원 관리" />
+      </Tabs>
 
-      {/* 탭별 콘텐츠 */}
-      <TabPanel value={value} index={0}>
-        <PostTable />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <CommentTable />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <UserTable />
-      </TabPanel>
+      <Box sx={{ flexGrow: 1 }}>
+        <TabPanel value={value} index={0}>
+          <PostTable />
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <CommentTable />
+        </TabPanel>
+        <TabPanel value={value} index={2}>
+          <UserTable />
+        </TabPanel>
+      </Box>
     </Box>
   );
 }

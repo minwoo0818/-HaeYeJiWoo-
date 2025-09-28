@@ -56,20 +56,6 @@ export default function PostList() {
         console.log(`Fetching all posts for category "${type}"...`);
         res = await GetPosts(type);
       }
-      // API에서 받은 데이터를 Post 타입으로 변환
-      const mappedPosts: Post[] = res.map((post: any) => ({
-        id: post.postId, // postId -> id
-        title: post.title,
-        nickname: post.userNickname, // author → nickname
-        image: post.url,
-        category: post.categoryId,
-        date: post.createdAt,
-        views: post.views,
-        hashtags: post.hashtags,
-        likes: post.likesCount,
-        content: post.content,
-        files: post.files || [], // 없을 수도 있으니 기본값
-      }));
 
       console.log("API에서 받은 원본 응답 데이터:", res);
 
@@ -85,9 +71,9 @@ export default function PostList() {
       //   hashtags: post.hashtags,
       // }));
 
-      console.log("매핑 후 최종 데이터:", mappedPosts);
+      console.log("매핑 후 최종 데이터:", res);
 
-      setPostData(mappedPosts);
+      setPostData(res);
     } catch (err) {
       console.error("게시물 조회 중 오류 발생:", err);
     } finally {

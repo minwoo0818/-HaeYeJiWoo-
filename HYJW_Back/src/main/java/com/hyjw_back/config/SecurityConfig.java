@@ -1,7 +1,5 @@
 package com.hyjw_back.config;
 
-
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,18 +36,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/images/**","/users/login","/users/checkEmail","/users/checkNickname","/users/signup","postdetail/**","posts/**", "/comments/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-
+                        .requestMatchers("/images/**", "/users/login", "/users/checkEmail", "/users/checkNickname",
+                                "/users/signup", "users/**", "postdetail/**", "posts/**", "/comments/**",
+                                "/comments/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint));
 
         return http.build();
     }
-
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -60,6 +57,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
