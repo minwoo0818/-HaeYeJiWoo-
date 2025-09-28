@@ -124,6 +124,7 @@ public class PostsService {
                 file.setUrl(imgUrl);  //파일 저장 경로 => 파일 저장 폴더 이름 + 파일 uuid 이름
                 file.setFileType(extension.substring(1));
                 file.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+                file.setFileSize((int) multipartFile.getSize()); // Add this line
                 filesRepository.save(file);
             }
         }

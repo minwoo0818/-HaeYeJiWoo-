@@ -222,9 +222,11 @@ export default function PostDetail() {
                               setShowImageMap(prev => ({ ...prev, [index]: !prev[index] }));
                             }}
                           >
-                            {`${file.fileOriginalName} (${(
-                              (file.fileSize || 0) / 1024
-                            ).toFixed(1)}MB)`}
+                            {`${file.fileOriginalName} (${
+                              file.fileSize === null || file.fileSize === undefined
+                                ? "크기 정보 없음"
+                                : `${(file.fileSize / (1024 * 1024)).toFixed(3)}MB`
+                            })`}
                           </a>
                           <button
                             onClick={() => {
@@ -254,9 +256,11 @@ export default function PostDetail() {
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            {`${file.fileOriginalName} (${(
-                              (file.fileSize || 0) / 1024
-                            ).toFixed(1)}MB)`}
+                            {`${file.fileOriginalName} (${
+                              file.fileSize === null || file.fileSize === undefined
+                                ? "크기 정보 없음"
+                                : `${(file.fileSize / (1024 * 1024)).toFixed(3)}MB`
+                            })`}
                           </a>
                           <button
                             onClick={() => {
