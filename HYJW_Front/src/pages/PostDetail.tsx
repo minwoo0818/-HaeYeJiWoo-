@@ -160,14 +160,14 @@ export default function PostDetail() {
               <div className="action-buttons">
                 {/* === 버튼 그룹 전환 === */}
                 {isEditing ? (
-                  <>
+                  <div style={{ display: 'flex', gap: '10px' }}>
                     <button className="postsave" onClick={handleSave}>
                       저장
                     </button>
                     <button className="postcancel" onClick={handleCancel}>
                       취소
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <>
                     <button className="postupdate" onClick={handleToggleEdit}>
