@@ -484,6 +484,7 @@ public class PostsService {
         dto.setViews(post.getViews());
         dto.setUpdatedAt(post.getUpdatedAt());
         dto.setContent(post.getContent());
+        dto.setHashtags(postHashtagRepository.findHashtagTagsByPostId(post.getPostId()));
         dto.setLikesCount(postLikesRepository.countByPost_PostId(post.getPostId()));
         return dto;
     }
