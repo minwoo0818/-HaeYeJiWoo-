@@ -3,6 +3,7 @@ package com.hyjw_back.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,5 +30,8 @@ public class PostUpdateDto {
     // 5-1. 기존 첨부파일 중 삭제할 파일의 ID 목록
     private List<Long> fileIdsToDelete;
 
+    private List<MultipartFile> fileIdsToUpdate;
 
+    // 7. 새로 추가할 파일 데이터 목록 (getNewFiles() 관련)
+    private List<MultipartFile> newFiles;
 }

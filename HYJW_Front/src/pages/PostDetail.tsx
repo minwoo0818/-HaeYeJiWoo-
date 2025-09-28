@@ -27,9 +27,9 @@ export default function PostDetail () {
   // 2. 수정 중인 내용을 위한 상태 추가
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
-  // ✅ 8. 수정 중인 파일 목록을 위한 상태 추가
+  //  8. 수정 중인 파일 목록을 위한 상태 추가
   const [editFiles, setEditFiles] = useState<Post['files']>([]); 
-// ✅ 9. 수정 중인 해시태그 목록을 위한 상태 추가
+//  9. 수정 중인 해시태그 목록을 위한 상태 추가
 const [editHashtags, setEditHashtags] = useState<string[]>([]); 
 
 
@@ -226,14 +226,15 @@ const [editHashtags, setEditHashtags] = useState<string[]>([]);
           <input
           type="text"
           // 태그를 쉼표와 공백으로 이어붙여서 입력 필드에 표시합니다.
-          value={editHashtags.map(tag => `#${tag}`).join(' ')} 
+          value={editHashtags.join(', ')} 
           onChange={(e) => {
                             // 입력된 문자열을 `#`와 공백을 기준으로 다시 배열로 분리합니다.
-          const newTags = e.target.value.split(/#|,|\s+/).filter(tag => tag.trim() !== '');
+          const newTags = e.target.value.split(/, |,| /).filter(tag => tag.trim() !== '');
           setEditHashtags(newTags);
           }}
-                          placeholder="해시태그를 #태그1 #태그2 형식으로 입력하세요"
-          className="pd-edit-hashtags"
+          // 사용자에게 '태그1, 태그2' 형식으로 입력하도록 안내합니다.
+        placeholder="해시태그를 태그1, 태그2 형식으로 입력하세요" 
+        className="pd-edit-hashtags"
           />
           ) : (
           // 읽기 모드: 기존대로 해시태그 표시

@@ -5,12 +5,14 @@ import com.hyjw_back.dto.*;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -20,6 +22,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PostsService {
     @Value("${itemImgLocation}")
     String itemImgLocation;
@@ -252,6 +255,18 @@ public class PostsService {
         }).collect(Collectors.toList());
     }
 
+    // PostsService.java (PostsService 클래스 내부에 추가)
+    @Transactional(readOnly = true)
+    public List<PostCardDto> getDeletedPosts() {
+        // PostsRepository에 정의된 findByIsDeleteTrue()를 사용
+        List<Posts> posts = postsRepository.findByIsDeleteTrue();
+
+        // 아래 private convertToPostCardDto 메서드를 재사용합니다.
+        return posts.stream()
+                .map(this::convertToPostCardDto)
+                .collect(Collectors.toList());
+    }
+
     @Transactional(readOnly = true)
     public List<PostCardDto> getPostsByCategory(String type) { // <-- CategoryId -> String으로 변경
         System.out.println("PostsService.getPostsByCategory 호출, type: " + type);
@@ -446,35 +461,94 @@ public class PostsService {
         postsRepository.delete(post);
     }
 
-    @Transactional(readOnly = true)
-    public List<PostCardDto> getDeletedPosts() {
-        List<Posts> posts = postsRepository.findByIsDeleteTrue(); // 삭제된 것만
-        return posts.stream()
-                .map(this::convertToPostCardDto)
-                .collect(Collectors.toList());
-    }
-
     @Transactional
     public PostDetailDto updatePost(Long id, PostUpdateDto postUpdateDto) {
 
-        // 1. DB에서 Posts 엔티티 조회 -> findById는 Optional을 반환하므로, orElseThrow를 사용해 없으면 예외를 발생
+        // 1. 게시글 엔티티 조회 및 기본 필드 업데이트
         Posts postEntity = postsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. id=" + id));
 
-        // 2. 수정 권한 검사 (나중에 시큐리티 등록후)
-        // 예: if (!postEntity.getUser().getUserId()
-        // .equals(currentUserId)) { throw new AccessDeniedException(); }
-
-        // 3. 엔티티의 update 메서드를 호출하여 DTO의 값으로 엔티티 필드를 변경
         postEntity.updatePost(
                 postUpdateDto.getTitle(),
                 postUpdateDto.getContent()
-                // DTO에 파일 수정 로직이 있다면 여기서 추가
         );
 
-        // 4. 변경된 엔티티 -> DTO 변환 후 반환
+        // 2. 해시태그 업데이트: 기존 연결 DB에서 삭제 후 새로 저장
+        postHashtagRepository.deleteByPost(postEntity); // ⭐️ DB에서 기존 연결 명시적 삭제
+        postEntity.getPostHashtags().clear();
+
+        if (postUpdateDto.getHashtags() != null) {
+            postUpdateDto.getHashtags().forEach(tagName -> {
+                Hashtags hashtag = hashtagRepository.findByTag(tagName)
+                        .orElseGet(() -> {
+                            Hashtags newHashtag = new Hashtags();
+                            newHashtag.setTag(tagName);
+                            return hashtagRepository.save(newHashtag);
+                        });
+
+                PostHashtags postHashtag = new PostHashtags();
+                postHashtag.setPost(postEntity);
+                postHashtag.setHashtag(hashtag);
+
+                postHashtagRepository.save(postHashtag);
+                postEntity.getPostHashtags().add(postHashtag);
+            });
+        }
+
+        // 3-1. 기존 파일 삭제 처리 (서버 파일 및 DB 레코드)
+        if (postUpdateDto.getFileIdsToDelete() != null && !postUpdateDto.getFileIdsToDelete().isEmpty()) {
+            postUpdateDto.getFileIdsToDelete().forEach(fileId -> {
+                Files fileEntity = filesRepository.findById(fileId)
+                        .orElseThrow(() -> new EntityNotFoundException("삭제할 파일을 찾을 수 없습니다. File ID: " + fileId));
+
+                String filePath = itemImgLocation + fileEntity.getUrl().replace("/files/", "");
+
+                try {
+                    File deleteFile = new File(filePath);
+                    if (deleteFile.exists() && deleteFile.delete()) {
+                        System.out.println("서버 파일 삭제 성공: " + filePath);
+                    }
+                } catch (Exception e) {
+                    System.err.println("파일 삭제 중 오류 발생: " + e.getMessage());
+                }
+                filesRepository.delete(fileEntity);
+            });
+        }
+
+        // 3-2. 새로 추가된 파일 처리 (서버 저장 및 DB 레코드 추가)
+        if (postUpdateDto.getNewFiles() != null && !postUpdateDto.getNewFiles().isEmpty()) {
+            for (MultipartFile newFile : postUpdateDto.getNewFiles()) {
+                if (newFile.isEmpty()) continue;
+
+                try {
+                    String originalFileName = newFile.getOriginalFilename();
+                    String extension = originalFileName != null && originalFileName.contains(".") ?
+                            originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
+                    String savedFileName = UUID.randomUUID().toString() + extension;
+
+                    File destinationFile = new File(itemImgLocation + savedFileName);
+                    if (!destinationFile.getParentFile().exists()) {
+                        destinationFile.getParentFile().mkdirs();
+                    }
+                    newFile.transferTo(destinationFile);
+
+                    Files files = new Files();
+                    files.setFileOriginalName(originalFileName);
+                    files.setUrl("/files/" + savedFileName);
+                    files.setFileType(extension.replace(".", ""));
+                    files.setPost(postEntity);
+
+                    filesRepository.save(files);
+                    postEntity.getFiles().add(files);
+
+                } catch (IOException | IllegalStateException e) {
+                    throw new RuntimeException("파일 저장에 실패했습니다: " + newFile.getOriginalFilename(), e);
+                }
+            }
+        }
+
+        // 4. 변경된 엔티티를 DTO로 변환 후 반환
         return new PostDetailDto(postEntity);
-        // PostDetailDto 생성자에 Posts 엔티티를 받아 DTO로 변환하는 로직이 있다고 가정
     }
 
     // 변환 공통 메서드
