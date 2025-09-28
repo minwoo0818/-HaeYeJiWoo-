@@ -136,10 +136,12 @@ export default function PostTable() {
               <TableCell align="center" sx={{ border: "1px solid black" }}>
                 {post.files && post.files.length > 0
                   ? post.files[0].fileName
-                  : "없음"}
+                  : ""}
               </TableCell>
               <TableCell align="center" sx={{ border: "1px solid black" }}>
-                {post.hashtags}
+                {post.hashtags && post.hashtags.length > 0
+                  ? post.hashtags.map((tag: string) => `#${tag} `)
+                  : ""}
               </TableCell>
               <TableCell align="center" sx={{ border: "1px solid black" }}>
                 {formatDateTime(post.createdAt)}
