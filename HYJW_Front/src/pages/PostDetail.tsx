@@ -15,6 +15,8 @@ import type { Comment } from "../type";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const formatDateTime = (isoString: string) => {
   const date = new Date(isoString);
   const year = date.getFullYear();
@@ -207,11 +209,36 @@ export default function PostDetail() {
                 {post.files.map((file, index) => {
                   console.log("확인", file);
                   return (
-                    <>
-                      <div>{`${file.fileOriginalName} (${(
-                        (file.fileSize || 0) / 1024
-                      ).toFixed(1)}MB)`}</div>
-                    </>
+                    <div key={index}> {/* Add a key for list items */}
+                      {file.fileType && file.fileType.startsWith('image/') ? (
+                        <>
+                          <a
+                            href={`${BASE_URL}${file.url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {`${file.fileOriginalName} (${(
+                              (file.fileSize || 0) / 1024
+                            ).toFixed(1)}MB)`}
+                          </a>
+                          <img
+                            src={`${BASE_URL}${file.url}`}
+                            alt={file.fileOriginalName}
+                            style={{ maxWidth: "100%", height: "auto", display: "block", marginTop: "8px", border: "1px solid #eee" }}
+                          />
+                        </>
+                      ) : (
+                        <a
+                          href={`${BASE_URL}${file.url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {`${file.fileOriginalName} (${(
+                            (file.fileSize || 0) / 1024
+                          ).toFixed(1)}MB)`}
+                        </a>
+                      )}
+                    </div>
                   );
                 })}
                 {/* {post.files.map((file, index) => {
