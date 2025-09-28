@@ -480,8 +480,10 @@ public class PostsService {
         dto.setUserNickname(post.getUser().getUserNickname());
         dto.setUrl(post.getUrl());
         dto.setCategoryId(post.getCategoryId());
+        dto.setCreatedAt(post.getCreatedAt());
         dto.setViews(post.getViews());
         dto.setUpdatedAt(post.getUpdatedAt());
+        dto.setContent(post.getContent());
         dto.setLikesCount(postLikesRepository.countByPost_PostId(post.getPostId()));
         return dto;
     }
