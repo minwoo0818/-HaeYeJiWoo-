@@ -137,9 +137,15 @@ export function PostTable() {
               </TableCell>
               <TableCell align="center" sx={{ border: "1px solid black" }}>
                 {post.image ? (
-                  post.image.substring(post.image.lastIndexOf('/') + 1)
+                  <a
+                    href={`${BASE_URL}${post.image}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {post.image.substring(post.image.lastIndexOf('/') + 1)}
+                  </a>
                 ) : (
-                  "없음"
+                  ""
                 )}
               </TableCell>
               <TableCell align="center" sx={{ border: "1px solid black" }}>
