@@ -15,3 +15,12 @@ spring:
 #  web:
 #    resources:
 #      static-locations: file:///C:/-HaYeJiWoo-/images/
+#경로 Postservice 실제 업로드 경로로 가면 ㅇㅇ : String uploadPath = "C:/typeapp/-HaYeJiWoo-/images";
+
+#팀원마다 경로가 틀리니 수정하면서 작업하십시오. (주의)
+#코하 컴퓨타 경로
+#uploadPath: file:///C:/typeapp/-HaYeJiWoo-/images/
+#itemImgLocation: C:/typeapp/-HaYeJiWoo-/images
+# 지수컴퓨타 경로
+uploadPath: file:C:/-HaeYeJiWoo-/images/
+itemImgLocation: C:/-HaeYeJiWoo-/images

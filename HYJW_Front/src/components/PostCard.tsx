@@ -122,6 +122,19 @@ export function PostCard({ post, onDelete }: PostCardProps) {
           src={`http://localhost:8080${post.image}`}
           style={{ width: "80%", borderRadius: "8px" }}
         />
+        <button
+          style={{
+            backgroundColor: "#474747",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "4px",
+            padding: "6px 12px",
+            cursor: "pointer",
+          }}
+          onClick={handleDelete}
+        >
+          삭제
+        </button>
       </div>
 
       {/* 수정 및 삭제 버튼: 닉네임이 같을 때만 표시 */}

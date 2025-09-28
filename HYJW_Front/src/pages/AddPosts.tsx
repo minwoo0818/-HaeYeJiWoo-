@@ -45,26 +45,40 @@ export default function AddPosts() {
   const handleSubmit = async () => {
     const userId = 1; // 임시 사용자 ID
 
+    const hasFile = form.files && form.files.size > 0; //파일 존재 여부 확인 
+
+    const url = hasFile ? `/api/posts/create/file/${userId}` : `/api/posts/create/no_file/${userId}`;
+
     // 해시태그 쉼표로 구분해서 배열로 변환
     const hashtagsArray = form.hashtags
       .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag !== "");
 
-    const payload = {
-    categoryId: form.categoryId, // string
-    title: form.title,           // string
-    content: form.content,       // string
-    hashtags: hashtagsArray,     // string[]
-    files: [],                   // 빈 배열도 괜찮지만 FileCreateDto 형태여야 할 수도 있음
-    };
+      //FormDate 생성
+    const formdata = new FormData();
+    formdata.append("categoryId", form.categoryId);
+    formdata.append("title", form.title);
+    formdata.append("content", form.content);
+    hashtagsArray.forEach((h) => {
+      formdata.append("hashtags", h);
+    })
+    // formdata.append("files", form.files ?? "");
+
+    if (hasFile) {
+      formdata.append("files", form.files as File);
+    }
 
     try {
-      const res = await axios.post(`/api/posts/${userId}`, payload);
+      const res = await axios.post( url, formdata, {
+        headers: {
+          'Content-Type': 'multipart/form-data' 
+        }
+    });
+
       console.log("게시글 등록 성공:", res.data);
       alert("게시글이 등록되었습니다!");
-      
-      //작성 완료 후 PostList로 이동ㄴ
+      //작성 완료 후 PostList로 이동
       navigate("/posts/all");
 
     } catch (err) { 

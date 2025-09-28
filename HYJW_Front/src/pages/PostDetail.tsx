@@ -8,6 +8,7 @@ import {
   likePost,
   unlikePost,
   getPostLikeStatus,
+  updatePost,
 } from "../api/postDetailApi";
 import type { Post } from "../types/PostType";
 import type { Comment } from "../type";
@@ -31,6 +32,12 @@ export default function PostDetail() {
   const [liked, setLiked] = useState(false);
   const [currentLikesCount, setCurrentLikesCount] = useState(0);
   // const navigate = useNavigate();
+  
+  // 1. ✅ 수정 모드 상태 추가
+  const [isEditing, setIsEditing] = useState(false);
+  // 2. ✅ 수정 중인 내용을 위한 상태 추가
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -38,6 +45,11 @@ export default function PostDetail() {
       getPostDetail(postId).then((postData) => {
         setPost(postData);
         setCurrentLikesCount(postData.likes);
+        // 3. ✅ 기존 데이터를 수정 상태의 초기값으로 설정
+        if (postData) {
+          setEditTitle(postData.title);
+          setEditContent(postData.content);
+        }
       });
       getCommentsByPostId(postId).then((commentsData) => {
         setComments(commentsData);
@@ -62,6 +74,47 @@ export default function PostDetail() {
       alert("좋아요 상태를 변경하는 중 오류가 발생했습니다.");
     }
   };
+  // 4. ✅ 수정 모드 토글 함수
+  const handleToggleEdit = () => {
+    setIsEditing(prev => !prev);
+  };
+  
+  // 5. ✅ 저장(수정) 버튼 핸들러
+  const handleSave = async () => {
+    if (!post) return;
+
+    const postId = parseInt(id as string);
+    const updatedData = {
+      ...post, // 기존 데이터 유지
+      title: editTitle,
+      content: editContent,
+      // files, hashtags 등 다른 수정 필드는 여기서 처리해야 합니다.
+    };
+
+    try {
+        // updatePost 함수는 백엔드에 PUT 요청을 보낸다고 가정
+        const response = await updatePost(postId, updatedData); 
+        
+        setPost(response); // 서버에서 받은 최신 데이터로 업데이트
+        setIsEditing(false); // 읽기 모드로 전환
+        alert('게시글이 성공적으로 수정되었습니다.');
+        
+    } catch (error) {
+        console.error('게시글 수정 실패:', error);
+        alert('게시글 수정에 실패했습니다.');
+    }
+  };
+  
+  // 6. ✅ 취소 버튼 핸들러
+  const handleCancel = () => {
+      // 기존 데이터로 복원하고 읽기 모드로 전환
+      if (post) {
+          setEditTitle(post.title);
+          setEditContent(post.content);
+      }
+      setIsEditing(false);
+  };
+
 
   if (!post) {
     return <div>게시글을 불러오는 중...</div>;
@@ -102,9 +155,19 @@ export default function PostDetail() {
                 <h2>{post.title}</h2>
               </div>
               <div className="action-buttons">
-                <button className="postupdate">수정</button>
-                <button>삭제</button>
-              </div>
+              {/* === 버튼 그룹 전환 === */}
+              {isEditing ? (
+                <>
+                  <button className="postsave" onClick={handleSave}>저장</button>
+                  <button className="postcancel" onClick={handleCancel}>취소</button>
+                </>
+              ) : (
+                <>
+                  <button className="postupdate" onClick={handleToggleEdit}>수정</button>
+                  <button>삭제</button>
+                </>
+              )}
+            </div>
             </div>
             <div className="pd-post-info">
               <span className="author">
@@ -192,6 +255,4 @@ export default function PostDetail() {
         </div>{" "}
         {/* 맨 바깥상자 */}
       </div>
-    </>
-  );
-}
+    </>)

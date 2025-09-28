@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "posts")
@@ -29,9 +31,8 @@ public class Posts {
     @ColumnDefault("0")
     private Integer views = 0;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_nickname", referencedColumnName = "user_nickname", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
     @Enumerated(EnumType.STRING)
@@ -52,5 +53,36 @@ public class Posts {
     // 실제 DB 컬럼명은 is_delete, 기본값은 0
     @Column(name = "is_delete", columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean isDelete = false;
+
+    // file
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Files> files = new ArrayList<>();
+
+    // 게시글 내용 변경을 위한 메서드 추가
+    public void updatePost(String title, String content ) {
+        this.title = title;
+        this.content = content;
+//        this.updatedAt = new Timestamp(System.currentTimeMillis());
+    }
+
+    // 좋아요 (PostLikes) 관계 매핑 필드 추가
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLikes> postLikes = new ArrayList<>();
+
+    // 해시태그 (PostHashtags) 관계 매핑 필드 추가
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostHashtags> postHashtags = new ArrayList<>();
+
+    // 댓글 (Comments) 관계 매핑 필드 추가 (Comments 엔티티가 있다면 추가)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comments> comments = new ArrayList<>();
+
+    // ... (기존 updatePost 메서드)
+//    public void updatePost(String title, String content /*, ...다른 필드 */) {
+//        this.title = title;
+//        this.content = content;
+//        // 수정 시간 업데이트 로직도 추가하는 것이 좋습니다.
+//        // this.updatedAt = new Timestamp(System.currentTimeMillis());
+//    }
 
 }
