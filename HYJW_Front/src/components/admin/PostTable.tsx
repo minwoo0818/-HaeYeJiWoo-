@@ -11,6 +11,8 @@ import type { Post } from "../../types/PostType";
 import { useEffect, useState } from "react";
 import { GetPosts } from "../../api/PostApi";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const formatDateTime = (dateString: string | undefined | null) => {
   if (!dateString) {
     return "N/A";
@@ -28,7 +30,7 @@ const formatDateTime = (dateString: string | undefined | null) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-export default function PostTable() {
+export function PostTable() {
   const [posts, setPosts] = useState<Post[]>([]);
   const fetchPosts = async () => {
     try {
@@ -134,9 +136,11 @@ export default function PostTable() {
                 {post.category}
               </TableCell>
               <TableCell align="center" sx={{ border: "1px solid black" }}>
-                {post.files && post.files.length > 0
-                  ? post.files[0].fileName
-                  : ""}
+                {post.image ? (
+                  post.image.substring(post.image.lastIndexOf('/') + 1)
+                ) : (
+                  "없음"
+                )}
               </TableCell>
               <TableCell align="center" sx={{ border: "1px solid black" }}>
                 {post.hashtags && post.hashtags.length > 0
@@ -156,3 +160,5 @@ export default function PostTable() {
     </TableContainer>
   );
 }
+
+export default PostTable;
