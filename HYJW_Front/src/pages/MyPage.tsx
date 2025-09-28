@@ -1,6 +1,6 @@
-// src/pages/MyPage.tsx
 import { Box, Typography, Button, TextField, Stack } from "@mui/material";
 import { useState, useEffect } from "react";
+import { getUserInfo, updateUserInfo } from "../api/MyPageApi"; 
 
 const MyPage = () => {
   const [form, setForm] = useState({
@@ -11,20 +11,12 @@ const MyPage = () => {
 
   useEffect(() => {
     const token = sessionStorage.getItem("jwt");
-    console.log("토큰 확인:", token);
-    fetch("/api/user/me", {
-      method: "GET",
-      headers: {
-        Authorization: `${token}`,
-      },
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text);
-        }
-        return res.json();
-      })
+    if (!token) {
+      console.warn("토큰 없음");
+      return;
+    }
+
+    getUserInfo(token)
       .then((data) => {
         setForm({
           email: data.email,
@@ -43,31 +35,30 @@ const MyPage = () => {
 
   const handleUpdate = async () => {
     const token = sessionStorage.getItem("jwt");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
 
     try {
-      const res = await fetch("http://localhost:8080/users/update", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${token}`,
-        },
-        body: JSON.stringify({
-          email: form.email,
-          nickname: form.nickname,
-          password: form.password,
-        }),
+      await updateUserInfo(token, {
+        email: form.email,
+        nickname: form.nickname,
+        password: form.password,
       });
+      alert("수정되었습니다.");
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    console.error("수정 요청 실패:", err.message);
+    alert("수정 실패: " + err.message);
+  } else {
+    console.error("알 수 없는 오류:", err);
+    alert("예기치 못한 오류가 발생했습니다.");
+  }
+}
 
-      if (res.ok) {
-        alert("수정되었습니다.");
-      } else {
-        alert("수정 실패: " + (await res.text()));
-      }
-    } catch (err) {
-      console.error("수정 요청 실패:", err);
-      alert("오류가 발생했습니다.");
-    }
   };
+
 
   return (
     <Box

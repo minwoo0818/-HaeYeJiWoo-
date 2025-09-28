@@ -42,10 +42,10 @@ const handleDelete = async (e: React.MouseEvent) => {
 };
   
 // 수정 버튼 클릭
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); // 카드 클릭 이벤트 방지
-    navigate(`/edit/${post.id}`);
-  };
+  // const handleEdit = (e: React.MouseEvent) => {
+  //   e.stopPropagation(); // 카드 클릭 이벤트 방지
+  //   navigate(`/edit/${post.id}`);
+  // };
 
   return (
     <div
@@ -81,7 +81,7 @@ const handleDelete = async (e: React.MouseEvent) => {
           <span
             onClick={(e) => {
               e.stopPropagation(); // 카드 클릭 방지
-              handleLikeToggle();
+              handleLikeToggle(e);
             }}
             style={{
               cursor: "pointer",
@@ -113,19 +113,6 @@ const handleDelete = async (e: React.MouseEvent) => {
           src={`${import.meta.env.VITE_API_URL}${post.image}`}
           style={{ width: "80%", borderRadius: "8px" }}
         />
-        <button
-          style={{
-            backgroundColor: "#474747",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "4px",
-            padding: "6px 12px",
-            cursor: "pointer",
-          }} 
-          onClick={handleDelete}
-        >
-          삭제
-        </button>
       </div>
 
       {/* 수정 및 삭제 버튼: 닉네임이 같을 때만 표시 */}
@@ -151,7 +138,7 @@ const handleDelete = async (e: React.MouseEvent) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleDelete();
+              handleDelete(e);
             }}
             style={{
               backgroundColor: "#474747",

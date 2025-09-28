@@ -13,54 +13,41 @@ import {
   ListItemText,
   Dialog,
 } from "@mui/material";
-
+import { getAdminSettings, updateAdminSettings } from "../api/AdminApi";
 export default function AdminPage() {
   const [open, setOpen] = useState(false);
-
-  // 업로드 개수 상태 (최소 1 ~ 최대 5)
   const [uploadCount, setUploadCount] = useState(1);
-
-  // 업로드 용량 상태 (단위: MB)
   const [uploadSize, setUploadSize] = useState(10);
-
-  // 허용 파일 확장자 상태 (쉼표로 구분된 문자열)
   const [fileExtensions, setFileExtensions] = useState("jpg, png, pdf");
 
   useEffect(() => {
-    if (!open) return;
+  if (!open) return;
 
-    const fetchSettings = async () => {
-      const token = sessionStorage.getItem("jwt");
-      try {
-        const res = await fetch("http://localhost:8080/admin/main", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const fetchSettings = async () => {
+    const token = sessionStorage.getItem("jwt");
+    if (!token) {
+      console.warn("JWT 토큰이 없습니다. 설정을 불러올 수 없습니다.");
+      return;
+    }
 
-        if (res.ok) {
-          const data = await res.json();
-          setUploadCount(data.file_max_num);
-          setUploadSize(data.file_size);
-          setFileExtensions(data.file_type);
-        } else {
-          console.warn("설정 불러오기 실패:", await res.text());
-        }
-      } catch (err) {
-        console.error("설정 불러오기 에러:", err);
-      }
-    };
+    try {
+      const data = await getAdminSettings(token);
+      setUploadCount(data.file_max_num);
+      setUploadSize(data.file_size);
+      setFileExtensions(data.file_type);
+    } catch (err) {
+      console.error("설정 불러오기 에러:", err);
+    }
+  };
 
-    fetchSettings();
-  }, [open]);
+  fetchSettings();
+}, [open]);
 
-  // 취소 버튼 클릭 시 모달 닫기
+
   const handleCancel = () => {
     setOpen(false);
   };
 
-  // 저장 버튼 클릭 시 설정값을 서버에 PUT 요청으로 전송
   const handleSave = async () => {
     const payload = {
       file_max_num: uploadCount,
@@ -69,16 +56,16 @@ export default function AdminPage() {
     };
 
     const token = sessionStorage.getItem("jwt");
+if (!token) {
+  alert("로그인이 필요합니다.");
+  return;
+}
+
+await updateAdminSettings(token, payload);
+
 
     try {
-      await fetch("http://localhost:8080/admin/main", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      await updateAdminSettings(token, payload);
       alert("설정이 저장되었습니다.");
       setOpen(false);
     } catch (error) {
@@ -86,6 +73,7 @@ export default function AdminPage() {
       alert("저장 중 오류가 발생했습니다.");
     }
   };
+
 
   return (
     <>

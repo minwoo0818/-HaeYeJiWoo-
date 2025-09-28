@@ -108,10 +108,10 @@ public class PostController {
 //    }
 //
 
-    @PostUpdate("/post/{id}")
-    public void updatePost(@PathVariable Long postId, @RequestBody PostCreateDto ) {
-        return postsService.updatePost(Id, post)
-    }
+//    @PostUpdate("/post/{id}")
+//    public void updatePost(@PathVariable Long postId, @RequestBody PostCreateDto ) {
+//        return postsService.updatePost(Id, post)
+//    }
 
 
 

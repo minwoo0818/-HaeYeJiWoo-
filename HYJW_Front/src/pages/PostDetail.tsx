@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 import { getPostDetail, getCommentsByPostId } from "../postDetailApi";
 import type { Comment } from "../type";
 import type { Post } from "../types/PostType";
-import { useNavigate } from "react-router-dom";
 
 const formatDateTime = (isoString: string) => {
   const date = new Date(isoString);

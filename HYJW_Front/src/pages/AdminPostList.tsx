@@ -15,7 +15,7 @@ export default function AdminPostList() {
  // 삭제된 게시글 불러오기
   const loadDeletedPosts = async () => {
     try {
-      const res = await fetch("http://localhost:8080/posts/admin/deleted");
+      const res = await fetch("api/posts/admin/deleted");
       const data = await res.json();
       // PostCardDto -> Post 형태로 변환
       const formattedPosts: Post[] = data.map((post: any) => ({
@@ -56,7 +56,7 @@ export default function AdminPostList() {
   const handleHardDelete = async (id: number) => {
     if (!window.confirm("정말 영구 삭제하시겠습니까?")) return;
     try {
-      const res = await fetch(`http://localhost:8080/posts/admin/${id}`, {
+      const res = await fetch(`api/posts/admin/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("삭제 실패");
