@@ -1,6 +1,5 @@
 package com.hyjw_back.service;
 
-import com.fasterxml.classmate.AnnotationOverrides;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,7 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.sql.Date;
+import java.util.Date;
 
 @Service
 public class JwtService {
@@ -20,7 +19,7 @@ public class JwtService {
     // 토큰의 만료시간 (24시간)
     static final long EXPIRATIONTIME = 24 * 60 * 60 * 1000; // 1Day (86400000ms)
     // JWT 서명에 사용할 비밀키 (HS256 알고리즘 기반으로 랜덤 생성)
-    static final Key SINING_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    static final Key SIGNING_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     // username(ID)를 받아서 JWT 토큰을 생성한다.
     public String generateToken(String email) {
@@ -30,7 +29,7 @@ public class JwtService {
                 // 만료 시간 설정 (현재시간 + 유효시간)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                 // 비밀키로 서명 (HS256방식)
-                .signWith(SINING_KEY)
+                .signWith(SIGNING_KEY)
                 // 최종적으로 compact()를 호출해 문자열 형태의 토큰 생성
                 .compact();
     }
@@ -43,7 +42,7 @@ public class JwtService {
         if (header != null && header.startsWith(PREFIX)) {
             // JWT 파서 객체 생성 (서명 검증용 키 세팅)
             JwtParser parser = Jwts.parserBuilder()
-                    .setSigningKey(SINING_KEY)
+                    .setSigningKey(SIGNING_KEY)
                     .build();
             // "Bearer " 접두어를 제거하고 순수 토큰만 남김
             // → parser로 파싱 및 서명 검증 수행

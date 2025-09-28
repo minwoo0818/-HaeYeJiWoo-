@@ -136,11 +136,7 @@ public class PostsService {
         dto.setCreatedAt(savedPost.getCreatedAt());
         dto.setViews(savedPost.getViews());
         dto.setLikesCount(0); // 새 게시글이므로 좋아요 0
-        dto.setUser(new UserDto(
-                user.getUserId(),
-                user.getUserNickname(),
-                user.getEmail()
-        ));
+        dto.setUser(new UserDto(user));
 
         // UserDto 생성
         dto.setHashtags(postCreateIncludeFIleDto.getHashtags());
@@ -207,11 +203,7 @@ public class PostsService {
         dto.setCreatedAt(savedPost.getCreatedAt());
         dto.setViews(savedPost.getViews());
         dto.setLikesCount(0); // 새 게시글이므로 좋아요 0
-        dto.setUser(new UserDto(
-                user.getUserId(),
-                user.getUserNickname(),
-                user.getEmail()
-        ));
+        dto.setUser(new UserDto(user));
 
         // UserDto 생성
         dto.setHashtags(postCreateDto.getHashtags());

@@ -22,4 +22,13 @@ public class FileDto {
     private String fileType;
     private Integer fileSize;
     private Integer downloads;
+
+    public FileDto(Files file) {
+        this.filesId = file.getFilesId();
+        this.fileOriginalName = file.getFileOriginalName();
+        this.url = file.getUrl();
+        this.fileType = file.getFileType();
+        this.fileSize = file.getFileSize();
+        this.downloads = file.getDownloads();
+    }
 }
