@@ -110,7 +110,9 @@ export default function Comments({
       const updated = await updateComment(commentId, editedContent);
       setComments(
         comments.map((c) =>
-          c.id === commentId ? { ...c, content: updated.content } : c
+          c.id === commentId
+            ? { ...c, content: updated.content, updateAt: updated.updateAt }
+            : c
         )
       );
       setEditingCommentId(null);
@@ -147,6 +149,13 @@ export default function Comments({
             <span className="pd-timestamp">
               {new Date(comment.createAt).toLocaleString()}
             </span>
+            {comment.updateAt &&
+              new Date(comment.createAt).getTime() !==
+                new Date(comment.updateAt).getTime() && (
+                <span className="pd-timestamp">
+                  (수정: {new Date(comment.updateAt).toLocaleString()})
+                </span>
+              )}
             {parentId === null && (
               <button
                 className="pd-write-recomment"

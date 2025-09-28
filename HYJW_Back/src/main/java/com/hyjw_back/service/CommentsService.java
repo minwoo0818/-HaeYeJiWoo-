@@ -41,6 +41,7 @@ public class CommentsService {
                 comment.setPost(post);
                 comment.setUser(user);
                 comment.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+                comment.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
                 if (commentCreateDto.getParentCommentId() != null) {
                         Comments parentComment = commentsRepository.findById(commentCreateDto.getParentCommentId())
@@ -60,8 +61,7 @@ public class CommentsService {
                                 .parentCommentId(savedComment.getParentComment() != null
                                                 ? savedComment.getParentComment().getCommentsId()
                                                 : null)
-                                .createAt(savedComment.getCreatedAt().toLocalDateTime()) // Convert Timestamp to
-                                                                                         // LocalDateTime
+                                .createAt(savedComment.getCreatedAt().toLocalDateTime()) // Convert Timestamp to// LocalDateTime
                                 .updateAt(savedComment.getUpdatedAt() != null
                                                 ? savedComment.getUpdatedAt().toLocalDateTime()
                                                 : null) // Convert Timestamp to LocalDateTime
