@@ -96,6 +96,12 @@ export default function PostTable() {
               align="center"
               sx={{ border: "1px solid black", backgroundColor: "skyblue" }}
             >
+              해시태그
+            </TableCell>
+            <TableCell
+              align="center"
+              sx={{ border: "1px solid black", backgroundColor: "skyblue" }}
+            >
               작성일시
             </TableCell>
             <TableCell
@@ -131,6 +137,9 @@ export default function PostTable() {
                 {post.files && post.files.length > 0
                   ? post.files[0].fileName
                   : "없음"}
+              </TableCell>
+              <TableCell align="center" sx={{ border: "1px solid black" }}>
+                {post.hashtags}
               </TableCell>
               <TableCell align="center" sx={{ border: "1px solid black" }}>
                 {formatDateTime(post.createdAt)}
