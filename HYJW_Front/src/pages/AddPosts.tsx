@@ -30,10 +30,22 @@ const navItems = [
 ];
 
 const SENSITIVE_PATTERNS: { name: string; regex: RegExp; label: string }[] = [
-  { name: "email", label: "이메일", regex: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g },
-  { name: "phone", label: "전화번호", regex: /(?:0\d{1,2}[- ]?\d{3,4}[- ]?\d{4})/g },
+  {
+    name: "email",
+    label: "이메일",
+    regex: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
+  },
+  {
+    name: "phone",
+    label: "전화번호",
+    regex: /(?:0\d{1,2}[- ]?\d{3,4}[- ]?\d{4})/g,
+  },
   { name: "rrn", label: "주민등록번호", regex: /\b\d{6}[- ]?\d{7}\b/g },
-  { name: "creditcard", label: "신용카드번호", regex: /\b(?:\d[ -]*?){13,16}\b/g },
+  {
+    name: "creditcard",
+    label: "신용카드번호",
+    regex: /\b(?:\d[ -]*?){13,16}\b/g,
+  },
 ];
 
 type SensitiveFound = {
@@ -49,7 +61,7 @@ export default function AddPosts() {
     content: "",
     categoryId: "",
     hashtags: "",
-    files: null as File | null,
+    files: null as File | File[] | null,
   });
 
   const [previewShowSensitive, setPreviewShowSensitive] = useState(false);
@@ -57,12 +69,18 @@ export default function AddPosts() {
   const [sensitiveFound, setSensitiveFound] = useState<SensitiveFound[]>([]);
   const [autoMaskOnProceed, setAutoMaskOnProceed] = useState(true);
 
+  const [uploadLimit, setUploadLimit] = useState(1);
+  const [uploadSize, setUploadSize] = useState(10); // MB
+  const [allowedExtensions, setAllowedExtensions] = useState("jpg, png, pdf");
+
   // refs for overlay sync
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
 
   // keep textarea height auto-adjust
-  const [textareaHeight, setTextareaHeight] = useState<number | undefined>(undefined);
+  const [textareaHeight, setTextareaHeight] = useState<number | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     // update height on content change to match preview
@@ -74,7 +92,25 @@ export default function AddPosts() {
     setTextareaHeight(newHeight);
   }, [form.content]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    const token = sessionStorage.getItem("jwt");
+    fetch("/api/admin/main", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setUploadLimit(data.file_max_num);
+        setUploadSize(data.file_size);
+        setAllowedExtensions(data.file_type);
+      })
+      .catch((err) => {
+        console.error("설정값 불러오기 실패:", err);
+      });
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -84,11 +120,58 @@ export default function AddPosts() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setForm((prev) => ({ ...prev, files: e.target.files![0] }));
-    }
-  };
+    const selectedFiles = Array.from(e.target.files || []);
+    const allowed = allowedExtensions
+      .split(",")
+      .map((ext) => ext.trim().toLowerCase());
 
+    const validFiles: File[] = [];
+    const rejectedMessages: string[] = [];
+
+    for (const file of selectedFiles) {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      const sizeMB = file.size / (1024 * 1024);
+
+      if (!ext || !allowed.includes(ext)) {
+        rejectedMessages.push(`- ${file.name}: 허용되지 않은 확장자 (.${ext})`);
+        continue;
+      }
+
+      if (sizeMB > uploadSize) {
+        rejectedMessages.push(
+          `- ${file.name}: ${uploadSize}MB 초과 (${sizeMB.toFixed(2)}MB)`
+        );
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    if (rejectedMessages.length > 0) {
+      alert(
+        `다음 파일은 조건에 맞지 않아 제외되었습니다:\n\n${rejectedMessages.join(
+          "\n"
+        )}`
+      );
+    }
+
+    if (validFiles.length === 0) {
+      alert("조건에 맞는 파일이 없습니다. 확장자 또는 용량을 확인해주세요.");
+      e.target.value = ""; // ✅ input 초기화
+      return;
+    }
+
+    if (validFiles.length > uploadLimit) {
+      alert(`최대 ${uploadLimit}개의 파일만 업로드할 수 있습니다.`);
+      e.target.value = ""; // ✅ input 초기화
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      files: validFiles.length === 1 ? validFiles[0] : validFiles,
+    }));
+  };
   const findSensitiveMatches = (text: string): SensitiveFound[] => {
     const results: Record<string, Set<string>> = {};
     for (const { name, regex } of SENSITIVE_PATTERNS) {
@@ -103,7 +186,11 @@ export default function AddPosts() {
     const out: SensitiveFound[] = [];
     for (const def of SENSITIVE_PATTERNS) {
       if (results[def.name] && results[def.name].size > 0) {
-        out.push({ name: def.name, label: def.label, matches: Array.from(results[def.name]) });
+        out.push({
+          name: def.name,
+          label: def.label,
+          matches: Array.from(results[def.name]),
+        });
       }
     }
     return out;
@@ -114,7 +201,9 @@ export default function AddPosts() {
     for (const { regex } of SENSITIVE_PATTERNS) {
       const flags = regex.flags.includes("g") ? regex.flags : regex.flags + "g";
       const re = new RegExp(regex.source, flags);
-      masked = masked.replace(re, (m) => maskChar.repeat(Math.max(4, m.length)));
+      masked = masked.replace(re, (m) =>
+        maskChar.repeat(Math.max(4, m.length))
+      );
     }
     return masked;
   };
@@ -128,8 +217,14 @@ export default function AddPosts() {
 
   // renderPreview used in modal/etc (keeps previous behavior)
   const renderPreview = (text: string) => {
-    if (!text) return <span style={{ color: "#666" }}>미리보기: 본문을 입력하면 민감정보가 자동 감지됩니다.</span>;
-    if (previewShowSensitive) return <span style={{ whiteSpace: "pre-wrap" }}>{text}</span>;
+    if (!text)
+      return (
+        <span style={{ color: "#666" }}>
+          미리보기: 본문을 입력하면 민감정보가 자동 감지됩니다.
+        </span>
+      );
+    if (previewShowSensitive)
+      return <span style={{ whiteSpace: "pre-wrap" }}>{text}</span>;
     // simple masked rendering
     const masked = getOverlayText(text);
     return <span style={{ whiteSpace: "pre-wrap" }}>{masked}</span>;
@@ -143,11 +238,7 @@ export default function AddPosts() {
 
   const handleSubmit = async () => {
     const userId = 1;
-    const hasFile = form.files && form.files.size > 0; //파일 존재 여부 확인 
 
-    const url = hasFile ? `/api/posts/create/file/${userId}` : `/api/posts/create/no_file/${userId}`;
-
-    // 해시태그 쉼표로 구분해서 배열로 변환
     const hashtagsArray = form.hashtags
       .split(",")
       .map((tag) => tag.trim())
@@ -160,40 +251,28 @@ export default function AddPosts() {
       return;
     }
 
-    await proceedSubmit({ categoryId: form.categoryId, title: form.title, content: form.content, hashtags: hashtagsArray, files: form.files }, userId);
-      //FormDate 생성
-    const formdata = new FormData();
-    formdata.append("categoryId", form.categoryId);
-    formdata.append("title", form.title);
-    formdata.append("content", form.content);
-    hashtagsArray.forEach((h) => {
-      formdata.append("hashtags", h);
-    })
-    // formdata.append("files", form.files ?? "");
-
-    if (hasFile) {
-      formdata.append("files", form.files as File);
-    }
-
-    try {
-      const res = await axios.post( url, formdata, {
-        headers: {
-          'Content-Type': 'multipart/form-data' 
-        }
-    });
-
-      console.log("게시글 등록 성공:", res.data);
-      alert("게시글이 등록되었습니다!");
-      //작성 완료 후 PostList로 이동
-      navigate("/posts/all");
-
-    } catch (err) { 
-      console.error("게시글 등록 실패:", err);
-      alert("등록에 실패했습니다.");
-    } 
+    await proceedSubmit(
+      {
+        categoryId: form.categoryId,
+        title: form.title,
+        content: form.content,
+        hashtags: hashtagsArray,
+        files: form.files,
+      },
+      userId
+    );
   };
 
-  const proceedSubmit = async (payload: { categoryId: string; title: string; content: string; hashtags: string[]; files: File | null }, userId: number) => {
+  const proceedSubmit = async (
+    payload: {
+      categoryId: string;
+      title: string;
+      content: string;
+      hashtags: string[];
+      files: File | File[] | null;
+    },
+    userId: number
+  ) => {
     try {
       if (!payload.files) {
         const body = {
@@ -203,9 +282,10 @@ export default function AddPosts() {
           hashtags: payload.hashtags,
         };
         const res = await axios.post(`${BASE_URL}/posts/${userId}`, body, {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`
-  }});
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         console.log("게시글 등록 성공:", res.data);
       } else {
         const fd = new FormData();
@@ -213,9 +293,21 @@ export default function AddPosts() {
         fd.append("title", payload.title);
         fd.append("content", payload.content);
         fd.append("hashtags", JSON.stringify(payload.hashtags));
-        fd.append("file", payload.files);
+
+        // ✅ 파일 처리: 단일 vs 다중 분기
+        if (Array.isArray(payload.files)) {
+          payload.files.forEach((file) => {
+            fd.append("files", file); // 여러 파일 처리
+          });
+        } else if (payload.files) {
+          fd.append("files", payload.files); // 단일 파일 처리
+        }
+
         const res = await axios.post(`${BASE_URL}/posts/${userId}`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
         console.log("게시글 등록 성공 (with file):", res.data);
       }
@@ -232,19 +324,36 @@ export default function AddPosts() {
     setSensitiveModalOpen(false);
 
     let finalContent = form.content;
-    if (autoMaskOnProceed) finalContent = maskSensitiveInText(finalContent || "");
+    if (autoMaskOnProceed)
+      finalContent = maskSensitiveInText(finalContent || "");
 
     const hashtagsArray = form.hashtags
       .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag !== "");
 
-    await proceedSubmit({ categoryId: form.categoryId, title: form.title, content: finalContent || "", hashtags: hashtagsArray, files: form.files }, 1);
+    await proceedSubmit(
+      {
+        categoryId: form.categoryId,
+        title: form.title,
+        content: finalContent || "",
+        hashtags: hashtagsArray,
+        files: form.files,
+      },
+      1
+    );
   };
 
   return (
     <Box sx={{ padding: 4, maxWidth: 800, margin: "auto" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Typography variant="h4">게시글 작성</Typography>
         <TextField
           select
@@ -263,7 +372,13 @@ export default function AddPosts() {
       </Box>
 
       <Stack spacing={3}>
-        <TextField label="제목" name="title" value={form.title} onChange={handleChange} fullWidth />
+        <TextField
+          label="제목"
+          name="title"
+          value={form.title}
+          onChange={handleChange}
+          fullWidth
+        />
 
         {/* ---------- 여기부터 오버레이 방식 입력 영역 ---------- */}
         <div style={{ position: "relative", width: "100%" }}>
@@ -328,15 +443,39 @@ export default function AddPosts() {
           />
         </div>
         {/* ---------- 오버레이 입력 영역 끝 ---------- */}
-
+        <div>
+          <input type="file" multiple onChange={handleFileChange} />
+          <p>
+            최대 {uploadLimit}개 / 파일당 {uploadSize}MB / 허용 확장자:{" "}
+            {allowedExtensions}
+          </p>
+        </div>
         <FormControlLabel
-          control={<Checkbox checked={previewShowSensitive} onChange={(e) => setPreviewShowSensitive(e.target.checked)} />}
+          control={
+            <Checkbox
+              checked={previewShowSensitive}
+              onChange={(e) => setPreviewShowSensitive(e.target.checked)}
+            />
+          }
           label="민감정보 보기(미리보기에서 원문 표시)"
         />
 
-        <TextField label="해시태그 (쉼표로 구분)" name="hashtags" value={form.hashtags} onChange={handleChange} fullWidth />
+        <TextField
+          label="해시태그 (쉼표로 구분)"
+          name="hashtags"
+          value={form.hashtags}
+          onChange={handleChange}
+          fullWidth
+        />
 
-        <input type="file" onChange={handleFileChange} />
+        <input
+          type="file"
+          onChange={handleFileChange}
+          accept={allowedExtensions
+            .split(",")
+            .map((ext) => `.${ext.trim()}`)
+            .join(",")}
+        />
 
         <Button
           variant="contained"
@@ -357,18 +496,30 @@ export default function AddPosts() {
         </Button>
       </Stack>
 
-      <Dialog open={sensitiveModalOpen} onClose={() => setSensitiveModalOpen(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={sensitiveModalOpen}
+        onClose={() => setSensitiveModalOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>민감정보가 감지되었습니다</DialogTitle>
         <DialogContent>
           <Typography variant="body1" sx={{ mb: 2 }}>
-            작성하신 본문에서 다음과 같은 민감정보가 감지되었습니다. 계속 진행하면 이 게시글이 공개됩니다.
+            작성하신 본문에서 다음과 같은 민감정보가 감지되었습니다. 계속
+            진행하면 이 게시글이 공개됩니다.
           </Typography>
 
           <List dense>
             {sensitiveFound.map((s) => (
               <div key={s.name}>
                 <ListItem>
-                  <ListItemText primary={`${s.label} (${s.matches.length}건)`} secondary={s.matches.slice(0, 3).join(", ") + (s.matches.length > 3 ? " 등" : "")} />
+                  <ListItemText
+                    primary={`${s.label} (${s.matches.length}건)`}
+                    secondary={
+                      s.matches.slice(0, 3).join(", ") +
+                      (s.matches.length > 3 ? " 등" : "")
+                    }
+                  />
                 </ListItem>
                 <Divider />
               </div>
@@ -376,16 +527,32 @@ export default function AddPosts() {
           </List>
 
           <FormControlLabel
-            control={<Checkbox checked={autoMaskOnProceed} onChange={(e) => setAutoMaskOnProceed(e.target.checked)} />}
+            control={
+              <Checkbox
+                checked={autoMaskOnProceed}
+                onChange={(e) => setAutoMaskOnProceed(e.target.checked)}
+              />
+            }
             label="자동 마스킹 적용 후 등록 (민감정보를 ●로 대체)"
           />
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-            참고: 클라이언트 마스킹은 브라우저 개발자도구로 원문 확인을 완전히 막을 수 없습니다. 서버에서도 동일한 검사를 수행하고 마스킹 또는 제지를 권장합니다.
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            display="block"
+            sx={{ mt: 1 }}
+          >
+            참고: 클라이언트 마스킹은 브라우저 개발자도구로 원문 확인을 완전히
+            막을 수 없습니다. 서버에서도 동일한 검사를 수행하고 마스킹 또는
+            제지를 권장합니다.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSensitiveModalOpen(false)}>취소</Button>
-          <Button onClick={handleModalProceed} variant="contained" color="primary">
+          <Button
+            onClick={handleModalProceed}
+            variant="contained"
+            color="primary"
+          >
             계속 (등록)
           </Button>
         </DialogActions>
