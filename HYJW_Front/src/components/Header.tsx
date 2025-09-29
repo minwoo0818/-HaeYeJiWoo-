@@ -117,8 +117,8 @@ function ResponsiveAppBar() {
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="/"
+            component="div" // ✅ a → div
+            onClick={() => navigate("/")}
             sx={{
               mr: 4,
               fontFamily: "monospace",
