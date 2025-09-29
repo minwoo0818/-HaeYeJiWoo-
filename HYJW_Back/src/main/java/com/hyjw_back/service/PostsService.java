@@ -38,7 +38,7 @@ public class PostsService {
     private HashtagsRepository hashtagRepository;
 
     @Autowired
-    private PostHashtagsRepository postHashtagRepository;
+    private PostHashtagsRepository postHashtagsRepository;
 
     @Autowired
     private PostLikesRepository postLikesRepository;
@@ -49,7 +49,7 @@ public class PostsService {
     @Autowired
     private FilesRepository filesRepository;
 
-    private final EntityManager em; // 2. 필드 주입 확인 (RequiredArgsConstructor를 사용하므로 이 형태가 맞습니다)
+    private final EntityManager em;
 
     //========================================== 첨부파일포함 ==========================================
     @Transactional
@@ -71,10 +71,6 @@ public class PostsService {
 
         post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
-//        if (postCreateDto.getFiles() != null && !postCreateDto.getFiles().isEmpty()) {
-//            post.setUrl(postCreateDto.getFiles().getFirst().getUrl());
-//        }
-
 
         Posts savedPost = postsRepository.save(post);
 
@@ -88,11 +84,11 @@ public class PostsService {
                             return hashtagRepository.save(newTag);
                         });
                 PostHashtags postHashtag = new PostHashtags(savedPost, hashtag);
-                postHashtagRepository.save(postHashtag);
+                postHashtagsRepository.save(postHashtag);
             }
         }
 
-//         3. 첨부파일 저장 (여기 부분은 그대로)
+//         3. 첨부파일 저장
         if (postCreateIncludeFIleDto.getFiles() != null) {
             for (MultipartFile multipartFile : postCreateIncludeFIleDto.getFiles()) {
                 String originalFileName = multipartFile.getOriginalFilename();
@@ -112,13 +108,14 @@ public class PostsService {
                 // 파일 저장
                 try (FileOutputStream fos = new FileOutputStream(fileUploadFullUrl)) {
                     // fileDto.getFiles()에서 실제 파일 byte[] 가져와서 write
-                    byte[] fileData = multipartFile.getBytes(); // MultipartFile이 1개라고 가정
+                    byte[] fileData = multipartFile.getBytes();
                     fos.write(fileData);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                String imgUrl = "/images/" + savedFileName;
+                // 💡 수정된 부분: DB에 저장되는 경로를 '/files/'로 통일
+                String imgUrl = "/files/" + savedFileName;
 
                 if(savedPost.getUrl()==null){
                     savedPost.setUrl(imgUrl);
@@ -127,10 +124,10 @@ public class PostsService {
                 Files file = new Files();
                 file.setPost(savedPost);
                 file.setFileOriginalName(originalFileName);
-                file.setUrl(imgUrl);  //파일 저장 경로 => 파일 저장 폴더 이름 + 파일 uuid 이름
+                file.setUrl(imgUrl);  //파일 저장 경로 => /files/ + 파일 uuid 이름
                 file.setFileType(extension.substring(1));
                 file.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-                file.setFileSize((int) multipartFile.getSize()); // Add this line
+                file.setFileSize((int) multipartFile.getSize());
                 filesRepository.save(file);
             }
         }
@@ -142,10 +139,9 @@ public class PostsService {
         dto.setContent(savedPost.getContent());
         dto.setCreatedAt(savedPost.getCreatedAt());
         dto.setViews(savedPost.getViews());
-        dto.setLikesCount(0); // 새 게시글이므로 좋아요 0
+        dto.setLikesCount(0);
         dto.setUser(new UserDto(user));
 
-        // UserDto 생성
         dto.setHashtags(postCreateIncludeFIleDto.getHashtags());
         // 첨부파일 DTO 변환
         List<FileDto> fileDtos = savedPost.getFiles().stream().map(f -> {
@@ -156,7 +152,7 @@ public class PostsService {
             return fd;
         }).collect(Collectors.toList());
         dto.setFiles(fileDtos);
-        dto.setComments(Collections.emptyList()); // 새 글이므로 댓글 없음
+        dto.setComments(Collections.emptyList());
 
         return dto;
     }
@@ -181,10 +177,6 @@ public class PostsService {
 
         post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 
-//        if (postCreateDto.getFiles() != null && !postCreateDto.getFiles().isEmpty()) {
-//            post.setUrl(postCreateDto.getFiles().getFirst().getUrl());
-//        }
-
         Posts savedPost = postsRepository.save(post);
 
 
@@ -198,7 +190,7 @@ public class PostsService {
                             return hashtagRepository.save(newTag);
                         });
                 PostHashtags postHashtag = new PostHashtags(savedPost, hashtag);
-                postHashtagRepository.save(postHashtag);
+                postHashtagsRepository.save(postHashtag);
             }
         }
 
@@ -209,18 +201,13 @@ public class PostsService {
         dto.setContent(savedPost.getContent());
         dto.setCreatedAt(savedPost.getCreatedAt());
         dto.setViews(savedPost.getViews());
-        dto.setLikesCount(0); // 새 게시글이므로 좋아요 0
+        dto.setLikesCount(0);
         dto.setUser(new UserDto(user));
 
-        // UserDto 생성
         dto.setHashtags(postCreateDto.getHashtags());
 
-        // 첨부파일 DTO 변환 (파일이 없으므로 빈 리스트로 설정)
         dto.setFiles(Collections.emptyList());
-        // 혹은 savedPost.getFiles()가 빈 컬렉션을 반환하도록 설정되어 있다면
-        // List<FileDto> fileDtos = savedPost.getFiles().stream().map(...).collect(...)을 사용해도 됩니다.
-        // 여기서는 명시적으로 빈 리스트를 반환합니다.
-        dto.setComments(Collections.emptyList()); // 새 글이므로 댓글 없음
+        dto.setComments(Collections.emptyList());
 
         return dto;
     }
@@ -234,31 +221,26 @@ public class PostsService {
                 .collect(Collectors.toList());
     }
 
-    // PostsService.java (PostsService 클래스 내부에 추가)
     @Transactional(readOnly = true)
     public List<PostCardDto> getDeletedPosts() {
-        // PostsRepository에 정의된 findByIsDeleteTrue()를 사용
         List<Posts> posts = postsRepository.findByIsDeleteTrue();
 
-        // 아래 private convertToPostCardDto 메서드를 재사용합니다.
         return posts.stream()
                 .map(this::convertToPostCardDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<PostCardDto> getPostsByCategory(String type) { // <-- CategoryId -> String으로 변경
+    public List<PostCardDto> getPostsByCategory(String type) {
         System.out.println("PostsService.getPostsByCategory 호출, type: " + type);
 
         if ("all".equalsIgnoreCase(type)) {
-            // all 타입일 경우 getAllPosts() 메서드를 재사용
             return getAllPosts();
         }
 
         CategoryId categoryId = CategoryId.valueOf(type.toUpperCase());
         List<Posts> posts = postsRepository.findByCategoryId(categoryId);
 
-        // ... DTO 변환 및 반환
         return posts.stream().map(this::convertToPostCardDto)
                 .collect(Collectors.toList());
     }
@@ -307,7 +289,6 @@ public class PostsService {
             }
         }
 
-        // 검색 결과를 DTO로 변환하는 공통 로직
         return searchResults.stream().map(this::convertToPostCardDto)
                 .collect(Collectors.toList());
     }
@@ -342,7 +323,7 @@ public class PostsService {
         dto.setUser(userDto);
 
         // 해시태그 목록
-        List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
+        List<String> hashtags = postHashtagsRepository.findHashtagTagsByPostId(post.getPostId());
         dto.setHashtags(hashtags);
 
         // 첨부파일 목록
@@ -350,7 +331,11 @@ public class PostsService {
                 .map(file -> {
                     FileDto fileDto = new FileDto();
                     fileDto.setFileOriginalName(file.getFileOriginalName());
-                    fileDto.setUrl(file.getUrl());
+
+                    // 💡 수정된 부분: DB에 /images/로 저장된 경로를 /files/로 치환하여 클라이언트에 전달
+                    String fileUrl = file.getUrl().replace("/images/", "/files/");
+                    fileDto.setUrl(fileUrl);
+
                     fileDto.setFileType(file.getFileType());
                     fileDto.setFileSize(file.getFileSize());
                     fileDto.setDownloads(file.getDownloads());
@@ -417,7 +402,7 @@ public class PostsService {
         postLikesRepository.deleteByPost(post);
 
         // 2. 해시태그 삭제
-        postHashtagRepository.deleteByPost(post);
+        postHashtagsRepository.deleteByPost(post);
 
         // 3. 게시글 삭제
         postsRepository.delete(post);
@@ -471,7 +456,7 @@ public class PostsService {
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
         if ("anonymousUser".equals(userEmail)) {
-            return false; // 익명 사용자는 좋아요 상태를 가질 수 없음
+            return false;
         }
 
         Users user = usersRepository.findByEmail(userEmail)
@@ -494,9 +479,8 @@ public class PostsService {
                 postUpdateDto.getContent()
         );
 
-        // 4. 변경된 엔티티 -> DTO 변환 후 반환
         // 2. 해시태그 업데이트: 기존 연결 DB에서 삭제 후 새로 저장
-        postHashtagRepository.deleteByPost(postEntity); // ⭐️ DB에서 기존 연결 명시적 삭제
+        postHashtagsRepository.deleteByPost(postEntity); // ⭐️ DB에서 기존 연결 명시적 삭제
         em.flush();
         postEntity.getPostHashtags().clear();
 
@@ -513,7 +497,7 @@ public class PostsService {
                 postHashtag.setPost(postEntity);
                 postHashtag.setHashtag(hashtag);
 
-                postHashtagRepository.save(postHashtag);
+                postHashtagsRepository.save(postHashtag);
                 postEntity.getPostHashtags().add(postHashtag);
             });
         }
@@ -524,6 +508,7 @@ public class PostsService {
                 Files fileEntity = filesRepository.findById(fileId)
                         .orElseThrow(() -> new EntityNotFoundException("삭제할 파일을 찾을 수 없습니다. File ID: " + fileId));
 
+                // 💡 파일 삭제 경로 수정: DB URL의 /files/ 부분을 제거하여 로컬 파일 시스템 경로 생성
                 String filePath = itemImgLocation + fileEntity.getUrl().replace("/files/", "");
 
                 try {
@@ -557,7 +542,7 @@ public class PostsService {
 
                     Files files = new Files();
                     files.setFileOriginalName(originalFileName);
-                    files.setUrl("/files/" + savedFileName);
+                    files.setUrl("/files/" + savedFileName); // 💡 새 파일 저장 경로도 /files/로 통일
                     files.setFileType(extension.replace(".", ""));
                     files.setPost(postEntity);
 
@@ -580,13 +565,17 @@ public class PostsService {
         dto.setPostId(post.getPostId());
         dto.setTitle(post.getTitle());
         dto.setUserNickname(post.getUser().getUserNickname());
-        dto.setUrl(post.getUrl());
+
+        // 💡 PostCardDto의 url 필드도 변환하여 전달 (썸네일 이미지라고 가정)
+        String postUrl = post.getUrl() != null ? post.getUrl().replace("/images/", "/files/") : null;
+        dto.setUrl(postUrl);
+
         dto.setCategoryId(post.getCategoryId());
         dto.setCreatedAt(post.getCreatedAt());
         dto.setViews(post.getViews());
         dto.setUpdatedAt(post.getUpdatedAt());
         dto.setContent(post.getContent());
-        dto.setHashtags(postHashtagRepository.findHashtagTagsByPostId(post.getPostId()));
+        dto.setHashtags(postHashtagsRepository.findHashtagTagsByPostId(post.getPostId()));
         dto.setLikesCount(postLikesRepository.countByPost_PostId(post.getPostId()));
         return dto;
     }

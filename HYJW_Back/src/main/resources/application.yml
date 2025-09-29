@@ -24,10 +24,13 @@ jwt:
 
 #팀원마다 경로가 틀리니 수정하면서 작업하십시오. (주의)
 #코하 컴퓨타 경로
-uploadPath: file:///C:/typeapp/-HaYeJiWoo-/images/
-itemImgLocation: C:/typeapp/-HaYeJiWoo-/images
+#uploadPath: file:///C:/typeapp/-HaYeJiWoo-/images/
+#itemImgLocation: C:/typeapp/-HaYeJiWoo-/images
 # 지수컴퓨타 경로
 #uploadPath: file:C:///-HaeYeJiWoo-/
 #itemImgLocation: C:/-HaeYeJiWoo-/
 #uploadPath: file:C:/-HaeYeJiWoo-/images/
 #itemImgLocation: C:/-HaeYeJiWoo-/images
+
+#민우 컴퓨터 경로
+itemImgLocation: D:\CodeHows\-HaeYeJiWoo-\files

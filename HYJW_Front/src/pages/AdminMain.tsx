@@ -12,48 +12,102 @@ import {
   ListItemIcon,
   ListItemText,
   Dialog,
+  Paper, // 그래프를 담을 Paper 컴포넌트 추가
 } from "@mui/material";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from "recharts"; // Recharts 라이브러리 import
+
+const BASE_URL = import.meta.env.VITE_API_URL;
+
+// 가상의 방문자 통계 데이터 구조 (서버 응답을 시뮬레이션)
+const mockDailyData = [
+  { day: '9/24', visitors: 150 },
+  { day: '9/25', visitors: 220 },
+  { day: '9/26', visitors: 180 },
+  { day: '9/27', visitors: 250 },
+  { day: '9/28', visitors: 300 },
+];
+
+const mockMonthlyData = [
+  { month: 'Jan', visitors: 4000 },
+  { month: 'Feb', visitors: 3000 },
+  { month: 'Mar', visitors: 5500 },
+  { month: 'Apr', visitors: 4500 },
+  { month: 'May', visitors: 6000 },
+];
+
 
 export default function AdminPage() {
   const [open, setOpen] = useState(false);
 
-  // 업로드 개수 상태 (최소 1 ~ 최대 5)
+  // 첨부파일 설정 상태
   const [uploadCount, setUploadCount] = useState(1);
-
-  // 업로드 용량 상태 (단위: MB)
   const [uploadSize, setUploadSize] = useState(10);
-
-  // 허용 파일 확장자 상태 (쉼표로 구분된 문자열)
   const [fileExtensions, setFileExtensions] = useState("jpg, png, pdf");
 
+  // 💡 방문자 통계 상태 추가
+  const [dailyVisitors, setDailyVisitors] = useState([]);
+  const [monthlyVisitors, setMonthlyVisitors] = useState([]);
+
+
   useEffect(() => {
-    if (!open) return;
-
-    const fetchSettings = async () => {
+    // 💡 초기 로딩 시와 모달이 열릴 때 모두 설정 및 통계 데이터 불러오기
+    const fetchSettingsAndStats = async () => {
       const token = sessionStorage.getItem("jwt");
-      try {
-        const res = await fetch("/api/admin/main", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const headers = { Authorization: `Bearer ${token}` };
 
-        if (res.ok) {
-          const data = await res.json();
+      // 1. 첨부파일 설정 불러오기
+      try {
+        const settingsRes = await fetch(`${BASE_URL}/admin/main`, { method: "GET", headers });
+
+        if (settingsRes.ok) {
+          const data = await settingsRes.json();
           setUploadCount(data.file_max_num);
           setUploadSize(data.file_size);
           setFileExtensions(data.file_type);
         } else {
-          console.warn("설정 불러오기 실패:", await res.text());
+          console.warn("설정 불러오기 실패:", await settingsRes.text());
         }
       } catch (err) {
         console.error("설정 불러오기 에러:", err);
       }
+      
+      // 2. 💡 방문자 통계 데이터 불러오기
+      try {
+        // 서버의 통계 엔드포인트를 /api/admin/stats로 가정
+        const statsRes = await fetch(`${BASE_URL}/admin/stats`, { method: "GET", headers });
+        
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          // 서버 응답 구조가 { daily: [], monthly: [] }라고 가정
+          setDailyVisitors(statsData.daily || mockDailyData);
+          setMonthlyVisitors(statsData.monthly || mockMonthlyData);
+        } else {
+          console.warn("통계 불러오기 실패:", await statsRes.text());
+          // 통계 실패 시 Mock 데이터 사용 (개발 편의를 위해)
+          setDailyVisitors(mockDailyData);
+          setMonthlyVisitors(mockMonthlyData);
+        }
+      } catch (err) {
+        console.error("통계 불러오기 에러:", err);
+        setDailyVisitors(mockDailyData);
+        setMonthlyVisitors(mockMonthlyData);
+      }
     };
 
-    fetchSettings();
-  }, [open]);
+    fetchSettingsAndStats();
+  }, []); // 💡 open 대신 초기 로딩 시점에 실행되도록 수정 (모달 외부의 그래프를 위해)
+
 
   // 취소 버튼 클릭 시 모달 닫기
   const handleCancel = () => {
@@ -71,7 +125,7 @@ export default function AdminPage() {
     const token = sessionStorage.getItem("jwt");
 
     try {
-      await fetch("/api/admin/main", {
+      const res = await fetch("/api/admin/main", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -79,38 +133,89 @@ export default function AdminPage() {
         },
         body: JSON.stringify(payload),
       });
-      alert("설정이 저장되었습니다.");
-      setOpen(false);
+
+      if (res.ok) {
+          alert("설정이 저장되었습니다.");
+          setOpen(false);
+      } else {
+          console.error("저장 실패 응답:", await res.text());
+          alert("저장 중 오류가 발생했습니다.");
+      }
+
     } catch (error) {
-      console.error("저장 실패:", error);
+      console.error("저장 실패 에러:", error);
       alert("저장 중 오류가 발생했습니다.");
     }
   };
 
   return (
-    <>
-      {/* 설정 열기 버튼 */}
-      <Box display="flex" justifyContent="flex-end" mt={3}>
+    <Box sx={{ p: 3 }}>
+      {/* 첨부파일 설정 버튼 영역 */}
+      <Box display="flex" justifyContent="flex-end" mb={4}>
         <Button
           variant="contained"
           onClick={() => setOpen(true)}
           sx={{
             backgroundColor: "#474747",
             color: "#fff",
-            height: "10px", // 버튼 높이 설정
-            minHeight: "10px", // MUI 기본 높이 무시
-            padding: 3, // 내부 여백 제거
-            fontSize: "20px", // 텍스트 크기 조절 (선택)
+            // minHeight, padding, fontSize 등 스타일 조정
+            padding: '8px 16px', 
+            fontSize: "14px", 
             "&:hover": {
               backgroundColor: "#333",
             },
           }}
         >
-          첨부파일 설정
+          첨부파일 설정 변경
         </Button>
       </Box>
 
-      {/* 모달 다이얼로그 */}
+      {/* ----------------------------- 💡 방문자 수 통계 그래프 영역 ----------------------------- */}
+
+      <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: 'bold' }}>
+        사이트 방문자 통계
+      </Typography>
+
+      <Box display="flex" gap={4}>
+        {/* 일별 방문자 수 (Line Chart) */}
+        <Paper elevation={3} sx={{ flex: 1, padding: 3 }}>
+          <Typography variant="h6" gutterBottom>일별 방문자 수 (최근 5일)</Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={dailyVisitors}
+              margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="visitors" stroke="#8884d8" name="방문자 수" activeDot={{ r: 8 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </Paper>
+
+        {/* 월별 방문자 수 (Bar Chart) */}
+        <Paper elevation={3} sx={{ flex: 1, padding: 3 }}>
+          <Typography variant="h6" gutterBottom>월별 방문자 수 (최근 5개월)</Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={monthlyVisitors}
+              margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="visitors" fill="#82ca9d" name="방문자 수" />
+            </BarChart>
+          </ResponsiveContainer>
+        </Paper>
+      </Box>
+
+
+      {/* ----------------------------- 첨부파일 설정 모달 다이얼로그 ----------------------------- */}
       <Dialog open={open} onClose={handleCancel} maxWidth="sm" fullWidth>
         <Box
           sx={{
@@ -171,7 +276,7 @@ export default function AdminPage() {
 
           {/* 버튼 영역: 취소 및 저장 */}
           <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
-            {/* 취소 버튼: 테두리 + 텍스트 색상 변경 */}
+            {/* 취소 버튼 */}
             <Button
               variant="outlined"
               onClick={handleCancel}
@@ -186,7 +291,7 @@ export default function AdminPage() {
               취소
             </Button>
 
-            {/* 저장 버튼: 배경 + 텍스트 색상 변경 */}
+            {/* 저장 버튼 */}
             <Button
               variant="contained"
               onClick={handleSave}
@@ -203,6 +308,6 @@ export default function AdminPage() {
           </Box>
         </Box>
       </Dialog>
-    </>
+    </Box>
   );
 }
