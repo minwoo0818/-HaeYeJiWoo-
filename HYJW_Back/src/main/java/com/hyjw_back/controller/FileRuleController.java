@@ -49,9 +49,12 @@ public class FileRuleController { // 클래스 이름을 FileRuleController 대�
     }
 
     @GetMapping("/main")
-    public ResponseEntity<FileRuleDto> getFileRule() {
+    // public ResponseEntity<FileRuleDto> getFileRule() {
+    //     try {
+    //         FileRuleDto dto = fileRuleService.getCurrentRule();
+    public ResponseEntity<FileSettingsDto> getFileRule() {
         try {
-            FileRuleDto dto = fileRuleService.getCurrentRule();
+            FileSettingsDto dto = fileRuleService.getCurrentRule();
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             // 상세 오류 로깅 필요
