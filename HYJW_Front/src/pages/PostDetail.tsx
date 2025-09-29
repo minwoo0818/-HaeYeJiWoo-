@@ -14,6 +14,7 @@ import type { Post } from "../types/PostType";
 import type { Comment } from "../type";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { useAuthStore } from "../authStore";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -36,6 +37,7 @@ export default function PostDetail() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [liked, setLiked] = useState(false);
   const [currentLikesCount, setCurrentLikesCount] = useState(0);
+  const currentNickname = useAuthStore((state) => state.nickname);
 
   // 수정 모드 상태
   const [isEditing, setIsEditing] = useState(false);

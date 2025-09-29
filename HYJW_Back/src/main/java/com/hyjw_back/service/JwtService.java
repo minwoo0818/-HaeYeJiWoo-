@@ -7,7 +7,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -19,15 +18,17 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    @Autowired
-    private UsersRepository usersRepository;
+    private final UsersRepository usersRepository;
 
     @Value("${jwt.secret}")
-    private String secret;  // 환경변수에서 가져오기
+    private String secret;
 
-    static final String PREFIX = "Bearer ";
-    // 토큰의 만료시간 (24시간)
-    static final long EXPIRATIONTIME = 24 * 60 * 60 * 1000; // 1Day (86400000ms)
+    private static final String PREFIX = "Bearer ";
+    private static final long EXPIRATION_TIME = 24 * 60 * 60 * 1000; // 1 Day
+
+    public JwtService(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -36,14 +37,11 @@ public class JwtService {
     public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("role", role) //
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
-                // 비밀키로 서명 (HS256방식)
+                .claim("role", role)
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                // 최종적으로 compact()를 호출해 문자열 형태의 토큰 생성
                 .compact();
     }
-
 
     public String parseToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -51,12 +49,9 @@ public class JwtService {
             JwtParser parser = Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build();
-            String username = parser.parseClaimsJws(header.replace(PREFIX,""))
+            return parser.parseClaimsJws(header.replace(PREFIX, ""))
                     .getBody()
                     .getSubject();
-            if(username != null){
-                return username;
-            }
         }
         return null;
     }
