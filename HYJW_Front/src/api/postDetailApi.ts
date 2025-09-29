@@ -216,3 +216,15 @@ export const updatePost = async (postId: number, updatedPost: Post): Promise<Pos
     throw error;
   }
 };
+
+export const deletePost = async (postId: number): Promise<void> => {
+  const token = sessionStorage.getItem("jwt");
+  if (!token) {
+    throw new Error("Authentication token not found.");
+  }
+  await axios.delete(`${BASE_URL}/posts/${postId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Comments from "../components/Comments";
 import '../css/PostDetail.css';
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   getPostDetail,
   getCommentsByPostId,
@@ -9,6 +9,7 @@ import {
   unlikePost,
   getPostLikeStatus,
   updatePost,
+  deletePost,
 } from "../api/postDetailApi";
 import type { Post } from "../types/PostType";
 import type { Comment } from "../type";
@@ -33,6 +34,7 @@ const formatDateTime = (isoString: string) => {
 
 export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [liked, setLiked] = useState(false);
@@ -136,6 +138,20 @@ export default function PostDetail() {
     setIsEditing(false);
   };
 
+  const handleDelete = async () => {
+    if (!post) return;
+    if (window.confirm("게시글을 정말로 삭제하시겠습니까?")) {
+      try {
+        await deletePost(post.id);
+        alert("게시글이 삭제되었습니다.");
+        navigate("/");
+      } catch (err) {
+        console.error("게시글 삭제 실패:", err);
+        alert("게시글 삭제에 실패했습니다.");
+      }
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files || []);
     const tempFileObjects = newFiles.map(file => ({
@@ -235,7 +251,7 @@ export default function PostDetail() {
               ) : (
                 <>
                   <button onClick={handleToggleEdit}>수정</button>
-                  <button>삭제</button>
+                  <button onClick={handleDelete}>삭제</button>
                 </>
               )}
             </div>
