@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
+// import axios from "axios";
 import {
   TextField,
   Button,
@@ -19,8 +19,9 @@ import {
   Divider,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { createPostNoFile, createPostWithFile, PostNoFileRequest } from "../api/postDetailApi"; 
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+// const BASE_URL = import.meta.env.VITE_API_URL;
 
 const navItems = [
   { name: "게임", id: "GAME" },
@@ -44,6 +45,7 @@ type SensitiveFound = {
 
 export default function AddPosts() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -141,17 +143,65 @@ export default function AddPosts() {
     previewRef.current.scrollTop = textareaRef.current.scrollTop;
   };
 
-  const handleSubmit = async () => {
-    const userId = 1;
-    const hasFile = form.files && form.files.size > 0; //파일 존재 여부 확인 
+  // 최종 제출 로직 (API 호출)
+  const handleFinalSubmit = async (finalContent: string) => {
+    setIsLoading(true);
+    const hasFile = form.files instanceof File && form.files.size > 0;
 
-    const url = hasFile ? `/api/posts/create/file/${userId}` : `/api/posts/create/no_file/${userId}`;
-
-    // 해시태그 쉼표로 구분해서 배열로 변환
     const hashtagsArray = form.hashtags
       .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag !== "");
+
+    try {
+      if (hasFile) {
+        // 1. 파일 포함 게시글 등록
+        const formData = new FormData();
+        formData.append("title", form.title);
+        formData.append("content", finalContent);
+        formData.append("categoryId", form.categoryId);
+        formData.append("file", form.files as File);
+        // 해시태그는 배열로 보내야 할 경우:
+        hashtagsArray.forEach((h) => formData.append("hashtags", h));
+
+        await createPostWithFile(formData);
+        console.log("게시글 등록 성공 (파일 포함)");
+      } else {
+        // 2. 파일 없는 게시글 등록
+        const postData: PostNoFileRequest = {
+          title: form.title,
+          content: finalContent,
+          categoryId: form.categoryId,
+          hashtags: hashtagsArray,
+        };
+        await createPostNoFile(postData);
+        console.log("게시글 등록 성공 (파일 없음)");
+      }
+
+      alert("게시글이 등록되었습니다!");
+      navigate("/posts/all");
+    } catch (err : any) {
+      console.error("게시글 등록 실패:", err);
+      // Axios 에러 처리 (예: 401 Unauthorized)
+      let errorMessage = "등록에 실패했습니다. 서버 또는 네트워크 상태를 확인하세요.";
+      if (err.response && err.response.status === 401) {
+        errorMessage = "등록 실패: 인증 정보가 유효하지 않습니다. 다시 로그인해 주세요.";
+      }
+      alert(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 제출 버튼 클릭 시 호출되는 함수 (민감 정보 검사 및 분기)
+  const handleSubmit = async () => {
+    // 폼 필수 입력값 검사
+    if (!form.title || !form.content || !form.categoryId) {
+        alert("제목, 내용, 카테고리를 모두 입력해주세요.");
+        return;
+    }
+    
+    if (isLoading) return;
 
     const found = findSensitiveMatches(form.content || "");
     if (found.length > 0) {
@@ -160,86 +210,20 @@ export default function AddPosts() {
       return;
     }
 
-    await proceedSubmit({ categoryId: form.categoryId, title: form.title, content: form.content, hashtags: hashtagsArray, files: form.files }, userId);
-      //FormDate 생성
-    const formdata = new FormData();
-    formdata.append("categoryId", form.categoryId);
-    formdata.append("title", form.title);
-    formdata.append("content", form.content);
-    hashtagsArray.forEach((h) => {
-      formdata.append("hashtags", h);
-    })
-    // formdata.append("files", form.files ?? "");
-
-    if (hasFile) {
-      formdata.append("files", form.files as File);
-    }
-
-    try {
-      const res = await axios.post( url, formdata, {
-        headers: {
-          'Content-Type': 'multipart/form-data' 
-        }
-    });
-
-      console.log("게시글 등록 성공:", res.data);
-      alert("게시글이 등록되었습니다!");
-      //작성 완료 후 PostList로 이동
-      navigate("/posts/all");
-
-    } catch (err) { 
-      console.error("게시글 등록 실패:", err);
-      alert("등록에 실패했습니다.");
-    } 
+    // 민감 정보가 없으면 바로 최종 제출 진행
+    await handleFinalSubmit(form.content);
   };
 
-  const proceedSubmit = async (payload: { categoryId: string; title: string; content: string; hashtags: string[]; files: File | null }, userId: number) => {
-    try {
-      if (!payload.files) {
-        const body = {
-          categoryId: payload.categoryId,
-          title: payload.title,
-          content: payload.content,
-          hashtags: payload.hashtags,
-        };
-        const res = await axios.post(`${BASE_URL}/posts/${userId}`, body, {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`
-  }});
-        console.log("게시글 등록 성공:", res.data);
-      } else {
-        const fd = new FormData();
-        fd.append("categoryId", payload.categoryId);
-        fd.append("title", payload.title);
-        fd.append("content", payload.content);
-        fd.append("hashtags", JSON.stringify(payload.hashtags));
-        fd.append("file", payload.files);
-        const res = await axios.post(`${BASE_URL}/posts/${userId}`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        console.log("게시글 등록 성공 (with file):", res.data);
-      }
-
-      alert("게시글이 등록되었습니다!");
-      navigate("/posts/all");
-    } catch (err) {
-      console.error("게시글 등록 실패:", err);
-      alert("등록에 실패했습니다.");
-    }
-  };
-
+  // 민감 정보 모달에서 '진행' 버튼 클릭 시 호출되는 함수
   const handleModalProceed = async () => {
     setSensitiveModalOpen(false);
 
     let finalContent = form.content;
+    // 마스킹 옵션이 켜져 있으면 내용 마스킹
     if (autoMaskOnProceed) finalContent = maskSensitiveInText(finalContent || "");
 
-    const hashtagsArray = form.hashtags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag !== "");
-
-    await proceedSubmit({ categoryId: form.categoryId, title: form.title, content: finalContent || "", hashtags: hashtagsArray, files: form.files }, 1);
+    // 최종 제출 로직을 handleFinalSubmit으로 통일
+    await handleFinalSubmit(finalContent);
   };
 
   return (
