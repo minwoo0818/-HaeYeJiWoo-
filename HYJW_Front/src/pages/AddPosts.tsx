@@ -93,8 +93,9 @@ export default function AddPosts() {
   }, [form.content]);
 
   useEffect(() => {
-    const token = sessionStorage.getItem("jwt");
-    fetch("/api/admin/main", {
+    // 💡 JWT 토큰 키가 'jwt'라고 가정하고 통일하여 사용
+    const token = sessionStorage.getItem("jwt"); 
+    fetch(`${BASE_URL}/admin/main`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -263,62 +264,71 @@ export default function AddPosts() {
     );
   };
 
-  const proceedSubmit = async (
-    payload: {
-      categoryId: string;
-      title: string;
-      content: string;
-      hashtags: string[];
-      files: File | File[] | null;
-    },
-    userId: number
-  ) => {
-    try {
-      if (!payload.files) {
-        const body = {
-          categoryId: payload.categoryId,
-          title: payload.title,
-          content: payload.content,
-          hashtags: payload.hashtags,
-        };
-        const res = await axios.post(`${BASE_URL}/posts/${userId}`, body, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        console.log("게시글 등록 성공:", res.data);
-      } else {
-        const fd = new FormData();
-        fd.append("categoryId", payload.categoryId);
-        fd.append("title", payload.title);
-        fd.append("content", payload.content);
-        fd.append("hashtags", JSON.stringify(payload.hashtags));
+ // AddPosts.tsx 파일에서 proceedSubmit 함수만 아래와 같이 수정하세요.
 
-        // ✅ 파일 처리: 단일 vs 다중 분기
-        if (Array.isArray(payload.files)) {
-          payload.files.forEach((file) => {
-            fd.append("files", file); // 여러 파일 처리
-          });
-        } else if (payload.files) {
-          fd.append("files", payload.files); // 단일 파일 처리
-        }
+// AddPosts.tsx 파일에서 proceedSubmit 함수만 아래와 같이 수정하세요.
 
-        const res = await axios.post(`${BASE_URL}/posts/${userId}`, fd, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        console.log("게시글 등록 성공 (with file):", res.data);
-      }
+const proceedSubmit = async (
+  payload: {
+    categoryId: string;
+    title: string;
+    content: string;
+    hashtags: string[]; // ['태그1', '태그2', ...]
+    files: File | File[] | null;
+  },
+  userId: number
+) => {
+  const token = sessionStorage.getItem("jwt");
 
-      alert("게시글이 등록되었습니다!");
-      navigate("/posts/all");
-    } catch (err) {
-      console.error("게시글 등록 실패:", err);
-      alert("등록에 실패했습니다.");
+  if (!token) {
+    console.error("JWT 토큰이 sessionStorage에 없어 요청을 중단합니다.");
+    alert("로그인이 필요합니다.");
+    navigate("/login");
+    return;
+  }
+
+  const hasFiles = payload.files && (Array.isArray(payload.files) ? payload.files.length > 0 : true);
+  const endpoint = hasFiles ? `/posts/create/file/${userId}` : `/posts/create/no_file/${userId}`;
+  const url = `${BASE_URL}${endpoint}`;
+
+  // 1. 서버의 @ModelAttribute에 맞게 FormData 객체 생성
+  const fd = new FormData();
+  fd.append("categoryId", payload.categoryId);
+  fd.append("title", payload.title);
+  fd.append("content", payload.content);
+  
+  // 💡 수정된 부분: 해시태그 배열의 각 요소를 개별적으로 append
+  // 서버의 List<String> hashtags 필드에 자동으로 바인딩됩니다.
+  payload.hashtags.forEach(tag => {
+      fd.append("hashtags", tag);
+  });
+  
+  // 2. 파일이 있을 경우만 FormData에 추가 (기존 로직 유지)
+  if (hasFiles) {
+    if (Array.isArray(payload.files)) {
+      payload.files.forEach((file) => {
+        fd.append("files", file);
+      });
+    } else if (payload.files) {
+      fd.append("files", payload.files);
     }
+  }
+  
+  const headers = {
+    Authorization: `Bearer ${token}`,
   };
+
+  try {
+    const res = await axios.post(url, fd, { headers });
+
+    console.log("게시글 등록 성공:", res.data);
+    alert("게시글이 등록되었습니다!");
+    navigate("/posts/all");
+  } catch (err) {
+    console.error("게시글 등록 실패:", err);
+    alert("등록에 실패했습니다. 콘솔을 확인하세요.");
+  }
+};
 
   const handleModalProceed = async () => {
     setSensitiveModalOpen(false);
