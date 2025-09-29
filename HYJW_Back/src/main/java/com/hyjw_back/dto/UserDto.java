@@ -1,13 +1,17 @@
 package com.hyjw_back.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hyjw_back.constant.ADMIN;
+
+import com.hyjw_back.constant.Role;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import jakarta.validation.constraints.NotNull;
+
 
 @Data
 public class UserDto {
@@ -24,5 +28,7 @@ public class UserDto {
     private String hashedPassword;
 
     @Enumerated(EnumType.STRING)
-    private ADMIN userRole = ADMIN.USER;
+    @Column(name = "user_role", nullable = false)
+    private Role userRole = Role.USER;
+
 }

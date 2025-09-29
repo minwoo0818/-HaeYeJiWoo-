@@ -68,6 +68,7 @@ public class UserController {
             return ResponseEntity.ok("사용 가능한 닉네임입니다.");
         }
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody AccountCredentials credentials) {
         // 1~5: 인증 처리
@@ -75,18 +76,19 @@ public class UserController {
                 new UsernamePasswordAuthenticationToken(credentials.getEmail(), credentials.getPassword());
 
         Authentication authentication = authenticationManager.authenticate(token);
-        String jwtToken = jwtService.generateToken(authentication.getName());
-
+        Users user = jwtService.loadUserByEmail(authentication.getName());
+        String jwtToken = jwtService.generateToken(user.getEmail(), user.getUserRole().name());
         // ✅ 닉네임 조회 (DB에서 사용자 정보 가져오기)
-        Users user = usersRepository.findByEmail(credentials.getEmail())
+        Users users = usersRepository.findByEmail(credentials.getEmail())
                 .orElseThrow(() -> new RuntimeException("사용자 정보를 찾을 수 없습니다."));
 
         // ✅ 응답 본문에 nickname과 token 포함
         Map<String, String> response = new HashMap<>();
         response.put("nickname", user.getUserNickname());
         response.put("token", "Bearer " + jwtToken);
+        response.put("role", user.getUserRole().name());
 
-        return ResponseEntity.ok(response); // ✅ JSON 응답
+        return ResponseEntity.ok(response);
+
     }
-
 }

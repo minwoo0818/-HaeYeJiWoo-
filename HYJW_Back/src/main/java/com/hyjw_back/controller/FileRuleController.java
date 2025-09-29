@@ -1,6 +1,7 @@
 package com.hyjw_back.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -9,9 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.hyjw_back.dto.FileRuleDto;
 import com.hyjw_back.service.FileRuleService;
 
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/admin/main")
 public class FileRuleController {
+
 
     @Autowired
     private FileRuleService fileRuleService;
