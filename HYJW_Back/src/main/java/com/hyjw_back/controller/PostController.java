@@ -4,6 +4,7 @@ import com.hyjw_back.dto.*;
 import com.hyjw_back.entity.Users;
 import com.hyjw_back.service.CommentsService;
 import com.hyjw_back.service.PostsService;
+import com.hyjw_back.service.UsersService;
 import jakarta.persistence.Id;
 import jakarta.persistence.PostUpdate;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,9 @@ public class PostController {
 
     @Autowired
     private CommentsService commentsService;
+
+    @Autowired
+    private UsersService usersService;
 
     // 첨부파일 있을때
     @PostMapping("/create/file/{userId}")
@@ -153,28 +157,27 @@ public class PostController {
 
     @PostMapping("/{postId}/like")
     public ResponseEntity<Void> likePost(@PathVariable Long postId, Authentication authentication) {
-        //String userEmail = authentication.getName();
-        Users user = (Users) authentication.getPrincipal();
-        String userEmail = user.getEmail();
-        postsService.addLike(postId, userEmail);
-        System.out.println(userEmail);
+        String userEmail = authentication.getName();
+        Users user = usersService.findByEmail(userEmail);
+        postsService.addLike(postId, user.getEmail());
+        System.out.println(user.getEmail());
 
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{postId}/like")
     public ResponseEntity<Void> unlikePost(@PathVariable Long postId, Authentication authentication) {
-        Users user = (Users) authentication.getPrincipal();
-        String userEmail = user.getEmail();
-        postsService.removeLike(postId, userEmail);
+        String userEmail = authentication.getName();
+        Users user = usersService.findByEmail(userEmail);
+        postsService.removeLike(postId, user.getEmail());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{postId}/like/status")
     public ResponseEntity<Boolean> getPostLikeStatus(@PathVariable Long postId, Authentication authentication) {
-        Users user = (Users) authentication.getPrincipal();
-        String userEmail = user.getEmail();
-        boolean isLiked = postsService.getPostLikeStatus(postId, userEmail);
+        String userEmail = authentication.getName();
+        Users user = usersService.findByEmail(userEmail);
+        boolean isLiked = postsService.getPostLikeStatus(postId, user.getEmail());
         return ResponseEntity.ok(isLiked);
     }
 }

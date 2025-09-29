@@ -29,14 +29,10 @@ public class CommentController {
     @PostMapping("")
     public ResponseEntity<CommentResponseDto> createComment(@RequestBody CommentCreateDto commentCreateDto,
             Principal principal) { // Changed return type
-        String userEmail;
-        if (principal != null) {
-            userEmail = principal.getName();
-        } else {
-            // For testing purposes when no user is logged in
-            userEmail = "anonymous@example.com"; // Or a specific test user email
-            System.out.println("Warning: No principal found, using anonymous@example.com for comment creation.");
+        if (principal == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
         }
+        String userEmail = principal.getName();
         CommentResponseDto createdCommentResponse = commentsService.createComment(commentCreateDto, userEmail); // Changed
                                                                                                                 // variable
                                                                                                                 // name

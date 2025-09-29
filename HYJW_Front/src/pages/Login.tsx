@@ -42,13 +42,16 @@ const Login = () => {
           console.log("👉 nickname:", data.nickname);
 
           const nickname = data.nickname;
-          const token = data.token || res.headers.get("Authorization");
+          const rawToken = data.token || res.headers.get("Authorization");
           const isAdmin = data.role === "ADMIN";
           console.log("👉 isAdmin 판단 결과:", isAdmin);
 
-          if (token && nickname) {
+          if (rawToken && nickname) {
+            const token = rawToken.startsWith("Bearer ")
+              ? rawToken.substring(7)
+              : rawToken;
             sessionStorage.setItem("jwt", token);
-            login(nickname, isAdmin);
+            login(nickname, isAdmin, token);
           }
         } else {
           console.warn("JSON 응답이 아님:", contentType);

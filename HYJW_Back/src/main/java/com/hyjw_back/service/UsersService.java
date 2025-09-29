@@ -65,4 +65,8 @@ public class UsersService {
         return userDtoList;
     }
 
+    public Users findByEmail(String email) {
+        return usersRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+    }
 }

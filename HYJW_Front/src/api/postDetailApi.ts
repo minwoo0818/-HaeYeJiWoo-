@@ -35,28 +35,51 @@ export const getCommentsByPostId = async (postId: number): Promise<Comment[]> =>
 
 
                                                                                                                                                                                                                         
- interface AddCommentPayload {                                                                                                                                                                                         
-    content: string;                                                                                                                                                                                                    
-    postId: number;                                                                                                                                                                                                     
-    parentCommentId?: number;                                                                                                                                                                                           
- }                                                                                                                                                                                                                    
-                                                                                                                                                                                                                        
-         //  export const addComment = async (payload: AddCommentPayload): Promise<Comment> => {
-         //  const response = await axios.post(`${BASE_URL}/comments`, payload, {
-         //     headers: {
-         //       // TODO: 실제 인증 토큰 또는 사용자 ID로 교체해야 합니다.
-         //      'x-user-id': '1' // 임시 사용자 ID
-         //      }
-         //  });
-         //    return response.data;
-         // };    
 
-export const addComment = async (payload: AddCommentPayload): Promise<Comment> => {
-    const response = await axios.post(`${BASE_URL}/comments`, payload);
-    console.log(response);
-    console.log(payload);
+//          //       // TODO: 실제 인증 토큰 또는 사용자 ID로 교체해야 합니다.
+//          //      'x-user-id': '1' // 임시 사용자 ID
+//          //      }
+//          //  });
+//          //    return response.data;
+//          // };    
+
+
+ //import { CommentType } from '../type';
+
+// const API_BASE_URL = 'http://localhost:8080/api';
+
+export const addComment = async (
+  postId: number,
+  content: string,
+  parentCommentId: number | null = null
+): Promise<Comment> => {
+  try {
+    const token = sessionStorage.getItem("jwt");
+    if (!token) {
+      throw new Error("Authentication token not found.");
+    }
+
+    const payload: { postId: number; content: string; parentCommentId?: number } = {
+      postId,
+      content,
+    };
+
+    if (parentCommentId !== null) {
+      payload.parentCommentId = parentCommentId;
+    }
+
+    const response = await axios.post(`${BASE_URL}/comments`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
+  } catch (error) {
+    console.error("댓글 추가 실패:", error);
+    throw error;
+  }
 };
+
 
 export const deleteComment = async (commentId: number): Promise<void> => {
     await axios.delete(`${BASE_URL}/comments/${commentId}`);

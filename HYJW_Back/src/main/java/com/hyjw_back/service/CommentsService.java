@@ -28,7 +28,7 @@ public class CommentsService {
 
         @Transactional
         public CommentResponseDto createComment(CommentCreateDto commentCreateDto, String userEmail) { // Changed return
-                                                                                                       // type
+                System.out.println("CommentsService - createComment: Received userEmail: " + userEmail);
                 Users user = usersRepository.findByEmail(userEmail)
                                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
