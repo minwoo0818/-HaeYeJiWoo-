@@ -21,6 +21,7 @@ public class UserUpdateController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @GetMapping("/me")
     public ResponseEntity<UserDto> getUserInfo(Authentication authentication) {
         Users user = (Users) authentication.getPrincipal();
@@ -42,5 +43,14 @@ public class UserUpdateController {
         usersRepository.save(users);
 
         return ResponseEntity.ok("수정 완료");
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verify(@AuthenticationPrincipal Users users, @RequestBody UserUpdateDto dto) {
+        // 1. 비밀번호 확인
+        if (!passwordEncoder.matches(dto.getPassword(), users.getHashedPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
