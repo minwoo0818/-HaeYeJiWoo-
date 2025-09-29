@@ -86,7 +86,19 @@ export const deleteComment = async (commentId: number): Promise<void> => {
 };
 
 export const updateComment = async (commentId: number, content: string): Promise<Comment> => {
-    const response = await axios.put(`${BASE_URL}/comments/${commentId}`, { content });
+    const token = sessionStorage.getItem("jwt");
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
+    const response = await axios.put(
+        `${BASE_URL}/comments/${commentId}`,
+        { content },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
     return response.data;
 };
 
