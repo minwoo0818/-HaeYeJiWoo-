@@ -223,6 +223,7 @@ export default function PostDetail() {
             <div className="pd-post-title-area">
               {isEditing ? <input value={editTitle} onChange={e=>setEditTitle(e.target.value)} /> : <h2>{post.title}</h2>}
             </div>
+            {currentNickname === post.nickname && (
             <div className="action-buttons">
               {isEditing ? (
                 <>
@@ -236,6 +237,7 @@ export default function PostDetail() {
                 </>
               )}
             </div>
+            )}
           </div>
 
           {/* 작성자/날짜 */}

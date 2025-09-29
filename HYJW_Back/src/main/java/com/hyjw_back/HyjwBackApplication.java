@@ -1,7 +1,7 @@
 package com.hyjw_back;
 
-import com.hyjw_back.constant.ADMIN;
 import com.hyjw_back.constant.CategoryId;
+import com.hyjw_back.constant.Role;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.sql.Timestamp;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 
 @SpringBootApplication
 public class HyjwBackApplication implements CommandLineRunner {
@@ -105,7 +104,7 @@ public class HyjwBackApplication implements CommandLineRunner {
 //        post2.setCreatedAt(new Timestamp(System.currentTimeMillis() - 86400000));
 //        postRepository.save(post2);
 //
-//// Files 더미 데이터
+        //// Files 더미 데이터
 //        Files file1 = new Files();
 //        file1.setPost(post1);
 //        file1.setFileOriginalName("메인페이지.png");

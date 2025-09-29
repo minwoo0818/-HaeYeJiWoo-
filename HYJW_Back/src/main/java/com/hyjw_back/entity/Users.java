@@ -1,9 +1,10 @@
 package com.hyjw_back.entity;
 
-import com.hyjw_back.constant.ADMIN;
+
+import com.hyjw_back.constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
+
 
 @Entity
 @Table(name = "users")
@@ -29,6 +30,6 @@ public class Users {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false)
-    private ADMIN userRole = ADMIN.USER;
+    private Role userRole = Role.USER;
 
 }

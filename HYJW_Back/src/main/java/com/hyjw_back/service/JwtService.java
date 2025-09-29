@@ -1,6 +1,5 @@
 package com.hyjw_back.service;
 
-import com.fasterxml.classmate.AnnotationOverrides;
 import com.hyjw_back.entity.Users;
 import com.hyjw_back.entity.repository.UsersRepository;
 import io.jsonwebtoken.JwtParser;
@@ -27,15 +26,17 @@ public class JwtService {
     // JWT 서명에 사용할 비밀키 (HS256 알고리즘 기반으로 랜덤 생성)
     static final Key SIGNING_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role) //
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                 // 비밀키로 서명 (HS256방식)
                 .signWith(SIGNING_KEY)
                 // 최종적으로 compact()를 호출해 문자열 형태의 토큰 생성
                 .compact();
     }
+
 
     public String parseToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -53,7 +54,6 @@ public class JwtService {
         return null;
     }
 
-    // ✅ 여기에 넣어야 합니다!
     public Users loadUserByEmail(String email) {
         return usersRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));

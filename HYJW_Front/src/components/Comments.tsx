@@ -7,6 +7,7 @@ import {
   getCommentsByPostId,
   updateComment,
 } from "../api/postDetailApi";
+import { useAuthStore } from "../authStore";
 
 interface CommentsProps {
   postId: number;
@@ -26,6 +27,7 @@ export default function Comments({
   }>({});
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState<string>("");
+  const currentNickname = useAuthStore((state) => state.nickname);
 
   // 새로운 댓글 등록
   const handleAddComment = async () => {
@@ -195,6 +197,7 @@ export default function Comments({
             ) : (
               <p>{comment.content}</p>
             )}
+            {currentNickname === comment.userNickname && (
             <div className="comment-actions">
               {editingCommentId !== comment.id && (
                 <button onClick={() => handleEditComment(comment)}>수정</button>
@@ -205,6 +208,7 @@ export default function Comments({
                 </button>
               )}
             </div>
+            )}
           </div>
         </div>
         <hr />

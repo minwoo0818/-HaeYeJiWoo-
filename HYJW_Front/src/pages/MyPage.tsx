@@ -1,6 +1,7 @@
 // src/pages/MyPage.tsx
 import { Box, Typography, Button, TextField, Stack } from "@mui/material";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const MyPage = () => {
   const [form, setForm] = useState({
@@ -36,6 +37,7 @@ const MyPage = () => {
         console.error("유저 정보 불러오기 실패:", err.message);
       });
   }, []);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -45,21 +47,22 @@ const MyPage = () => {
     const token = sessionStorage.getItem("jwt");
 
     try {
-      const res = await fetch("http://localhost:8080/users/update", {
+      const res = await fetch("/api/user/update", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           email: form.email,
-          nickname: form.nickname,
+          userNickname: form.nickname,
           password: form.password,
         }),
       });
 
       if (res.ok) {
         alert("수정되었습니다.");
+        navigate("/posts/all");
       } else {
         alert("수정 실패: " + (await res.text()));
       }

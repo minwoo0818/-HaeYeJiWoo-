@@ -1,5 +1,5 @@
 package com.hyjw_back.constant;
 
-public enum ADMIN {
+public enum Role {
     USER, ADMIN
 }

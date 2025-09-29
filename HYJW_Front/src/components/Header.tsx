@@ -54,6 +54,7 @@ function ResponsiveAppBar() {
   };
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAdmin = useAuthStore((state) => state.isAdmin); // ✅ 관리자 여부 가져오기
 
   const navItems = [
     { name: "게임", path: "/posts/GAME" },
@@ -64,7 +65,6 @@ function ResponsiveAppBar() {
       ? [{ name: "마이페이지", path: "/category/mypage" }]
       : []),
   ];
-
   return (
     <AppBar
       position="static"
@@ -155,9 +155,8 @@ function ResponsiveAppBar() {
           {/* 로그인 / 로그아웃 + 관리자 버튼 */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
-            {isAuthenticated && (
+            {isAdmin && (
               <>
-                {/* ✅ 관리자 버튼 먼저 */}
                 <Button
                   variant="outlined"
                   onClick={handleAdminMenuOpen}
@@ -196,7 +195,6 @@ function ResponsiveAppBar() {
               </>
             )}
 
-            {/* ✅ 로그인 또는 로그아웃 버튼 뒤에 배치 */}
             {!isAuthenticated ? (
               <Button
                 variant="outlined"

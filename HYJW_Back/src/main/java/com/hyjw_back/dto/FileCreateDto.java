@@ -7,7 +7,13 @@ import java.util.ArrayList; // 1. ArrayList import 추가
 import java.util.List;
 
 @Data
-public class FileCreateDto {
+public class
+
+
+
+
+
+FileCreateDto {
     private String fileOriginalName;
     private String url;
     private String fileType;

@@ -1,7 +1,10 @@
 package com.hyjw_back.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hyjw_back.constant.ADMIN;
+
+import com.hyjw_back.constant.Role;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
@@ -17,6 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
+
     private Long userId;
 
     @NotNull(message = "닉네임은 필수 입력 값입니다.")
@@ -38,4 +42,7 @@ public class UserDto {
         this.userNickname = user.getUserNickname(); // Users 엔티티에 getUserNickname()이 있다고 가정
         this.email = user.getEmail(); // Users 엔티티에 getEmail()이 있다고 가정
     }
+    @Column(name = "user_role", nullable = false)
+    private Role userRole = Role.USER;
+
 }
