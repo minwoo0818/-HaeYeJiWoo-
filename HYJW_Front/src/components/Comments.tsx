@@ -28,19 +28,15 @@ export default function Comments({
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState<string>("");
   const currentNickname = useAuthStore((state) => state.nickname);
-  const { token } = useAuthStore();
-  console.log('Current token:', token);
+
+
 
   // 새로운 댓글 등록
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
     try {
-      const createdComment = await addComment(
-        postId,
-        newComment,
-        null
-      );
+      const createdComment = await addComment(postId, newComment, null);
       setComments([...comments, createdComment]);
       setNewComment("");
     } catch (error) {
@@ -200,7 +196,7 @@ export default function Comments({
             ) : (
               <p>{comment.content}</p>
             )}
-            {currentNickname === comment.userNickname && (
+            {currentNickname === comment.nickname && (
             <div className="comment-actions">
               {editingCommentId !== comment.id && (
                 <button onClick={() => handleEditComment(comment)}>수정</button>
