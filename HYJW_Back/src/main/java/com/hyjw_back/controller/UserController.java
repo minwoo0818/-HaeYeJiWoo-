@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -68,11 +69,12 @@ public class UserController {
             return ResponseEntity.ok("사용 가능한 닉네임입니다.");
         }
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody AccountCredentials credentials) {
         // 1~5: 인증 처리
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(credentials.getEmail(), credentials.getPassword());
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(credentials.getEmail(),
+                credentials.getPassword());
 
         Authentication authentication = authenticationManager.authenticate(token);
         String jwtToken = jwtService.generateToken(authentication.getName());
@@ -87,6 +89,12 @@ public class UserController {
         response.put("token", "Bearer " + jwtToken);
 
         return ResponseEntity.ok(response); // ✅ JSON 응답
+    }
+
+    @GetMapping("getuserinfo")
+    public ResponseEntity<?> getUser() {
+        List<UserDto> userDto = usersService.getUser();
+        return ResponseEntity.ok(userDto);
     }
 
 }

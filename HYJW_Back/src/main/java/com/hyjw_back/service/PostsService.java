@@ -4,16 +4,25 @@ import com.hyjw_back.constant.CategoryId;
 import com.hyjw_back.dto.*;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class PostsService {
+    @Value("${itemImgLocation}")
+    String itemImgLocation;
 
     @Autowired
     private PostsRepository postsRepository;
@@ -36,22 +45,142 @@ public class PostsService {
     @Autowired
     private FilesRepository filesRepository;
 
+    //========================================== 첨부파일포함 ==========================================
+    @Transactional
+    public PostDetailDto createPost(PostCreateIncludeFIleDto postCreateIncludeFIleDto, Long userId) {
+        // 1. 게시글 엔티티 생성 및 저장
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Posts post = new Posts();
+        post.setTitle(postCreateIncludeFIleDto.getTitle());
+        post.setContent(postCreateIncludeFIleDto.getContent());
+        post.setUser(user);
+
+        // 여기가 중요
+        if(postCreateIncludeFIleDto.getCategoryId() == null) {
+            throw new IllegalArgumentException("카테고리를 선택하세요.");
+        }
+        post.setCategoryId(postCreateIncludeFIleDto.getCategoryId());
+
+        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+
+//        if (postCreateDto.getFiles() != null && !postCreateDto.getFiles().isEmpty()) {
+//            post.setUrl(postCreateDto.getFiles().getFirst().getUrl());
+//        }
+
+
+        Posts savedPost = postsRepository.save(post);
+
+        // 2. 해시태그 저장 및 연결
+        if (postCreateIncludeFIleDto.getHashtags() != null) {
+            for (String tag : postCreateIncludeFIleDto.getHashtags()) {
+                Hashtags hashtag = hashtagRepository.findByTag(tag)
+                        .orElseGet(() -> {
+                            Hashtags newTag = new Hashtags();
+                            newTag.setTag(tag);
+                            return hashtagRepository.save(newTag);
+                        });
+                PostHashtags postHashtag = new PostHashtags(savedPost, hashtag);
+                postHashtagRepository.save(postHashtag);
+            }
+        }
+
+//         3. 첨부파일 저장 (여기 부분은 그대로)
+        if (postCreateIncludeFIleDto.getFiles() != null) {
+            for (MultipartFile multipartFile : postCreateIncludeFIleDto.getFiles()) {
+                String originalFileName = multipartFile.getOriginalFilename();
+
+                // UUID 생성
+                UUID uuid = UUID.randomUUID();
+
+                // 확장자 추출 (".png" 형태)
+                String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+
+                // 저장할 파일 이름
+                String savedFileName = uuid.toString() + extension;
+
+                // 실제 업로드 경로 (예: /uploads/uuid.png)
+                String fileUploadFullUrl = itemImgLocation + "/" + savedFileName;
+
+                // 파일 저장
+                try (FileOutputStream fos = new FileOutputStream(fileUploadFullUrl)) {
+                    // fileDto.getFiles()에서 실제 파일 byte[] 가져와서 write
+                    byte[] fileData = multipartFile.getBytes(); // MultipartFile이 1개라고 가정
+                    fos.write(fileData);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                String imgUrl = "/images/" + savedFileName;
+
+                if(savedPost.getUrl()==null){
+                    savedPost.setUrl(imgUrl);
+                }
+
+                Files file = new Files();
+                file.setPost(savedPost);
+                file.setFileOriginalName(originalFileName);
+                file.setUrl(imgUrl);  //파일 저장 경로 => 파일 저장 폴더 이름 + 파일 uuid 이름
+                file.setFileType(extension.substring(1));
+                file.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+                file.setFileSize((int) multipartFile.getSize()); // Add this line
+                filesRepository.save(file);
+            }
+        }
+
+        // 4. PostDetailDto 생성 및 반환
+        PostDetailDto dto = new PostDetailDto();
+        dto.setPostId(savedPost.getPostId());
+        dto.setTitle(savedPost.getTitle());
+        dto.setContent(savedPost.getContent());
+        dto.setCreatedAt(savedPost.getCreatedAt());
+        dto.setViews(savedPost.getViews());
+        dto.setLikesCount(0); // 새 게시글이므로 좋아요 0
+        dto.setUser(new UserDto(user));
+
+        // UserDto 생성
+        dto.setHashtags(postCreateIncludeFIleDto.getHashtags());
+        // 첨부파일 DTO 변환
+        List<FileDto> fileDtos = savedPost.getFiles().stream().map(f -> {
+            FileDto fd = new FileDto();
+            fd.setFileOriginalName(f.getFileOriginalName());
+            fd.setUrl(f.getUrl());
+            fd.setFileType(f.getFileType());
+            return fd;
+        }).collect(Collectors.toList());
+        dto.setFiles(fileDtos);
+        dto.setComments(Collections.emptyList()); // 새 글이므로 댓글 없음
+
+        return dto;
+    }
+
+    //========================================= 첨부파일없음 =============================================
     @Transactional
     public PostDetailDto createPost(PostCreateDto postCreateDto, Long userId) {
-        // 1. DTO로부터 게시글 엔티티 생성
-        Users user = usersRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        // 1. 게시글 엔티티 생성 및 저장
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Posts post = new Posts();
         post.setTitle(postCreateDto.getTitle());
         post.setContent(postCreateDto.getContent());
         post.setUser(user);
-        post.setCategoryId(postCreateDto.getCategoryId());
-        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-        // URL은 첨부파일 DTO에서 첫 번째 파일의 URL을 가져와서 설정
-        if (postCreateDto.getFiles() != null && !postCreateDto.getFiles().isEmpty()) {
-            post.setUrl(postCreateDto.getFiles().get(0).getUrl());
+
+        // 여기가 중요
+        if(postCreateDto.getCategoryId() == null) {
+            throw new IllegalArgumentException("카테고리를 선택하세요.");
         }
+        post.setCategoryId(postCreateDto.getCategoryId());
+
+        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+
+//        if (postCreateDto.getFiles() != null && !postCreateDto.getFiles().isEmpty()) {
+//            post.setUrl(postCreateDto.getFiles().getFirst().getUrl());
+//        }
+
         Posts savedPost = postsRepository.save(post);
+
 
         // 2. 해시태그 저장 및 연결
         if (postCreateDto.getHashtags() != null) {
@@ -67,47 +196,36 @@ public class PostsService {
             }
         }
 
-        // 3. 첨부파일 저장
-        if (postCreateDto.getFiles() != null) {
-            for (FileCreateDto fileDto : postCreateDto.getFiles()) {
-                Files file = new Files();
-                file.setPost(savedPost);
-                file.setFileOriginalName(fileDto.getFileOriginalName());
-                file.setUrl(fileDto.getUrl());
-                file.setFileType(fileDto.getFileType());
-                file.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-                filesRepository.save(file);
-            }
-        }
+        // 4. PostDetailDto 생성 및 반환
+        PostDetailDto dto = new PostDetailDto();
+        dto.setPostId(savedPost.getPostId());
+        dto.setTitle(savedPost.getTitle());
+        dto.setContent(savedPost.getContent());
+        dto.setCreatedAt(savedPost.getCreatedAt());
+        dto.setViews(savedPost.getViews());
+        dto.setLikesCount(0); // 새 게시글이므로 좋아요 0
+        dto.setUser(new UserDto(user));
 
-        // 4. PostDetailDto로 변환하여 반환
-        return convertToPostDetailDto(savedPost);
+        // UserDto 생성
+        dto.setHashtags(postCreateDto.getHashtags());
+
+        // 첨부파일 DTO 변환 (파일이 없으므로 빈 리스트로 설정)
+        dto.setFiles(Collections.emptyList());
+        // 혹은 savedPost.getFiles()가 빈 컬렉션을 반환하도록 설정되어 있다면
+        // List<FileDto> fileDtos = savedPost.getFiles().stream().map(...).collect(...)을 사용해도 됩니다.
+        // 여기서는 명시적으로 빈 리스트를 반환합니다.
+        dto.setComments(Collections.emptyList()); // 새 글이므로 댓글 없음
+
+        return dto;
     }
+
+
 
     @Transactional(readOnly = true)
     public List<PostCardDto> getAllPosts() {
         List<Posts> posts = postsRepository.findByIsDeleteFalse();
-
-        return posts.stream().map(post -> {
-            PostCardDto dto = new PostCardDto();
-            dto.setPostId(post.getPostId());
-            dto.setTitle(post.getTitle());
-            dto.setUserNickname(post.getUser().getUserNickname());
-            dto.setUrl(post.getUrl());
-            dto.setCategoryId(post.getCategoryId());
-            dto.setCreatedAt(post.getCreatedAt());
-            dto.setViews(post.getViews());
-
-            // 해시태그 목록 조회 및 매핑
-            List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
-            dto.setHashtags(hashtags);
-
-            // 좋아요 수 조회
-            Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
-            dto.setLikesCount(likesCount);
-
-            return dto;
-        }).collect(Collectors.toList());
+        return posts.stream().map(this::convertToPostCardDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -123,24 +241,8 @@ public class PostsService {
         List<Posts> posts = postsRepository.findByCategoryId(categoryId);
 
         // ... DTO 변환 및 반환
-        return posts.stream().map(post -> {
-            PostCardDto dto = new PostCardDto();
-            dto.setPostId(post.getPostId());
-            dto.setTitle(post.getTitle());
-            dto.setUserNickname(post.getUser().getUserNickname());
-            dto.setUrl(post.getUrl());
-            dto.setCategoryId(post.getCategoryId());
-            dto.setCreatedAt(post.getCreatedAt());
-            dto.setViews(post.getViews());
-
-            List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
-            dto.setHashtags(hashtags);
-
-            Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
-            dto.setLikesCount(likesCount);
-
-            return dto;
-        }).collect(Collectors.toList());
+        return posts.stream().map(this::convertToPostCardDto)
+                .collect(Collectors.toList());
     }
 
     public List<PostCardDto> searchPosts(String type, String searchType, String searchText) {
@@ -176,7 +278,8 @@ public class PostsService {
                     searchResults = postsRepository.findByCategoryIdAndContentContaining(categoryId, searchText);
                     break;
                 case "userId":
-                    searchResults = postsRepository.findByCategoryIdAndUserUserNicknameContaining(categoryId, searchText);
+                    searchResults = postsRepository.findByCategoryIdAndUserUserNicknameContaining(categoryId,
+                            searchText);
                     break;
                 case "hashtag":
                     searchResults = postsRepository.findByCategoryIdAndTagContaining(categoryId, searchText);
@@ -187,27 +290,8 @@ public class PostsService {
         }
 
         // 검색 결과를 DTO로 변환하는 공통 로직
-        return searchResults.stream().map(post -> {
-            PostCardDto dto = new PostCardDto();
-            dto.setPostId(post.getPostId());
-            dto.setTitle(post.getTitle());
-            dto.setUserNickname(post.getUser().getUserNickname());
-            dto.setUrl(post.getUrl());
-            dto.setCategoryId(post.getCategoryId());
-            dto.setCreatedAt(post.getCreatedAt());
-            dto.setViews(post.getViews());
-
-            // 해시태그와 좋아요 수는 별도의 쿼리를 통해 가져와야 합니다.
-            // 기존의 getAllPosts와 getPostsByCategory 메서드에 있는 로직을 재사용하세요.
-            List<String> hashtags = postHashtagRepository.findHashtagTagsByPostId(post.getPostId());
-            dto.setHashtags(hashtags);
-
-            // 좋아요 수 조회
-            Integer likesCount = postLikesRepository.countByPost_PostId(post.getPostId());
-            dto.setLikesCount(likesCount);
-
-            return dto;
-        }).collect(Collectors.toList());
+        return searchResults.stream().map(this::convertToPostCardDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -230,6 +314,7 @@ public class PostsService {
         dto.setContent(post.getContent());
         dto.setViews(post.getViews());
         dto.setCreatedAt(post.getCreatedAt());
+        dto.setUpdatedAt(post.getUpdatedAt());
 
         // 작성자 정보
         UserDto userDto = new UserDto();
@@ -249,6 +334,8 @@ public class PostsService {
                     fileDto.setFileOriginalName(file.getFileOriginalName());
                     fileDto.setUrl(file.getUrl());
                     fileDto.setFileType(file.getFileType());
+                    fileDto.setFileSize(file.getFileSize());
+                    fileDto.setDownloads(file.getDownloads());
                     return fileDto;
                 })
                 .collect(Collectors.toList());
@@ -280,7 +367,7 @@ public class PostsService {
         return dto;
     }
 
-    //유저 : 소프트 삭제 (isDelete = true)
+    // 유저 : 소프트 삭제 (isDelete = true)
     @Transactional
     public void softDeletePost(Long postId) {
         Posts post = postsRepository.findById(postId)
@@ -305,8 +392,6 @@ public class PostsService {
         postsRepository.delete(post);
     }
 
-
-
     @Transactional
     public void addLike(Long postId, String userEmail) {
         Posts post = postsRepository.findById(postId)
@@ -327,8 +412,7 @@ public class PostsService {
                     newPostLike.setPost(post);
                     newPostLike.setUser(user);
                     postLikesRepository.save(newPostLike);
-                }
-        );
+                });
     }
 
     @Transactional
@@ -344,8 +428,7 @@ public class PostsService {
                 postLike -> {
                     // Like exists, delete it
                     postLikesRepository.delete(postLike);
-                }
-        );
+                });
     }
 
     @Transactional(readOnly = true)
@@ -367,6 +450,29 @@ public class PostsService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public PostDetailDto updatePost(Long id, PostUpdateDto postUpdateDto) {
+
+        // 1. DB에서 Posts 엔티티 조회 -> findById는 Optional을 반환하므로, orElseThrow를 사용해 없으면 예외를 발생
+        Posts postEntity = postsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. id=" + id));
+
+        // 2. 수정 권한 검사 (나중에 시큐리티 등록후)
+        // 예: if (!postEntity.getUser().getUserId()
+        // .equals(currentUserId)) { throw new AccessDeniedException(); }
+
+        // 3. 엔티티의 update 메서드를 호출하여 DTO의 값으로 엔티티 필드를 변경
+        postEntity.updatePost(
+                postUpdateDto.getTitle(),
+                postUpdateDto.getContent()
+                // DTO에 파일 수정 로직이 있다면 여기서 추가
+        );
+
+        // 4. 변경된 엔티티 -> DTO 변환 후 반환
+        return new PostDetailDto(postEntity);
+        // PostDetailDto 생성자에 Posts 엔티티를 받아 DTO로 변환하는 로직이 있다고 가정
+    }
+
     // 변환 공통 메서드
     private PostCardDto convertToPostCardDto(Posts post) {
         PostCardDto dto = new PostCardDto();
@@ -377,6 +483,8 @@ public class PostsService {
         dto.setCategoryId(post.getCategoryId());
         dto.setCreatedAt(post.getCreatedAt());
         dto.setViews(post.getViews());
+        dto.setUpdatedAt(post.getUpdatedAt());
+        dto.setContent(post.getContent());
         dto.setHashtags(postHashtagRepository.findHashtagTagsByPostId(post.getPostId()));
         dto.setLikesCount(postLikesRepository.countByPost_PostId(post.getPostId()));
         return dto;

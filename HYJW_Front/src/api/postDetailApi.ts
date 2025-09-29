@@ -14,7 +14,8 @@ export const getPostDetail = async (id: number): Promise<Post> => {
         nickname: backendPost.user.userNickname,
         image: backendPost.url,
         category: backendPost.categoryId,
-        date: backendPost.createdAt,
+        createdAt: backendPost.createdAt,
+        updatedAt: backendPost.updatedAt,
         views: backendPost.views,
         hashtags: backendPost.hashtags,
         likes: backendPost.likesCount,
@@ -62,6 +63,11 @@ export const deleteComment = async (commentId: number): Promise<void> => {
 
 export const updateComment = async (commentId: number, content: string): Promise<Comment> => {
     const response = await axios.put(`${BASE_URL}/comments/${commentId}`, { content });
+    return response.data;
+};
+
+export const updatePost = async (postId: number, data: { title: string, content: string }): Promise<Post> => {
+    const response = await axios.put(`${BASE_URL}/posts/${postId}`, data);
     return response.data;
 };
 

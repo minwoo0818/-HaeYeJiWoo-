@@ -109,11 +109,16 @@ export function PostCard({ post, onDelete }: PostCardProps) {
       </div>
       {/* 카테고리, 날짜, 조회수 */}
       <div style={{ fontSize: "12px", color: "#555", marginBottom: "8px" }}>
-        {post.category} | {post.date} | {post.views}명
+                {post.category} |{" "}
+        {post.updatedAt &&
+        new Date(post.createdAt).getTime() !== new Date(post.updatedAt).getTime()
+          ? `(수정: ${new Date(post.updatedAt).toLocaleString()})`
+          : new Date(post.createdAt).toLocaleString()}{" "}
+        | {post.views}명
       </div>
       {/* 해시태그 목록 */}
       <div style={{ fontSize: "12px", marginBottom: "8px" }}>
-        {post.hashtags.map((tag: string) => `#${tag} `)}
+        {post.hashtags && post.hashtags.map((tag: string) => `#${tag} `)}
       </div>
 
       {/* 게시글 이미지 */}
@@ -122,6 +127,19 @@ export function PostCard({ post, onDelete }: PostCardProps) {
           src={`http://localhost:8080${post.image}`}
           style={{ width: "80%", borderRadius: "8px" }}
         />
+        {/* <button
+          style={{
+            backgroundColor: "#474747",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "4px",
+            padding: "6px 12px",
+            cursor: "pointer",
+          }}
+          onClick={handleDelete}
+        >
+          삭제
+        </button> */}
       </div>
 
       {/* 수정 및 삭제 버튼: 닉네임이 같을 때만 표시 */}

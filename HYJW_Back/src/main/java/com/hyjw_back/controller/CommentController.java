@@ -32,7 +32,8 @@ public class CommentController {
     private final CommentsService commentsService;
 
     @PostMapping("")
-    public ResponseEntity<CommentResponseDto> createComment(@RequestBody CommentCreateDto commentCreateDto, Principal principal) { // Changed return type
+    public ResponseEntity<CommentResponseDto> createComment(@RequestBody CommentCreateDto commentCreateDto,
+            Principal principal) { // Changed return type
         String userEmail;
         if (principal != null) {
             userEmail = principal.getName();
@@ -41,7 +42,9 @@ public class CommentController {
             userEmail = "anonymous@example.com"; // Or a specific test user email
             System.out.println("Warning: No principal found, using anonymous@example.com for comment creation.");
         }
-        CommentResponseDto createdCommentResponse = commentsService.createComment(commentCreateDto, userEmail); // Changed variable name
+        CommentResponseDto createdCommentResponse = commentsService.createComment(commentCreateDto, userEmail); // Changed
+                                                                                                                // variable
+                                                                                                                // name
         return ResponseEntity.ok(createdCommentResponse); // Return the DTO
     }
 
@@ -58,9 +61,16 @@ public class CommentController {
     }
 
     @PutMapping("/{commentId}")
-    public ResponseEntity<CommentResponseDto> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateDto commentUpdateDto) {
+    public ResponseEntity<CommentResponseDto> updateComment(@PathVariable Long commentId,
+            @RequestBody CommentUpdateDto commentUpdateDto) {
         CommentResponseDto updatedComment = commentsService.updateComment(commentId, commentUpdateDto.getContent());
         return ResponseEntity.ok(updatedComment);
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<?> getCommentsForAdmin() {
+
+        return ResponseEntity.ok(commentsService.getCommentsForAdmin());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

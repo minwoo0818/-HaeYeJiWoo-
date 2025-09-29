@@ -8,11 +8,14 @@ import {
   likePost,
   unlikePost,
   getPostLikeStatus,
+  updatePost,
 } from "../api/postDetailApi";
 import type { Post } from "../types/PostType";
 import type { Comment } from "../type";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const formatDateTime = (isoString: string) => {
   const date = new Date(isoString);
@@ -43,7 +46,6 @@ export default function PostDetail () {
   const [comments, setComments] = useState<Comment[]>([]);
   const [liked, setLiked] = useState(false);
   const [currentLikesCount, setCurrentLikesCount] = useState(0);
-  const [isEditing, setIsEditing] = useState(false);
   const [editingContent, setEditingContent] = useState<string>("");
   const [showAllSensitiveInPreview, setShowAllSensitiveInPreview] = useState(false);
 
@@ -57,13 +59,24 @@ export default function PostDetail () {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const [textareaHeight, setTextareaHeight] = useState<number | undefined>(undefined);
 
+  // 1. ✅ 수정 모드 상태 추가
+  const [isEditing, setIsEditing] = useState(false);
+  // 2. ✅ 수정 중인 내용을 위한 상태 추가
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [showImageMap, setShowImageMap] = useState<{ [key: number]: boolean }>({});
+
   useEffect(() => {
     if (id) {
       const postId = parseInt(id);
       getPostDetail(postId).then((postData) => {
         setPost(postData);
-        setCurrentLikesCount(postData.likes ?? 0);
-        setEditingContent(postData.content ?? "");
+        setCurrentLikesCount(postData.likes);
+        // 3. ✅ 기존 데이터를 수정 상태의 초기값으로 설정
+        if (postData) {
+          setEditTitle(postData.title);
+          setEditContent(postData.content);
+        }
       });
       getCommentsByPostId(postId).then((commentsData) => {
         setComments(commentsData);
@@ -102,6 +115,47 @@ export default function PostDetail () {
       console.error("좋아요 토글 실패:", error);
       alert("좋아요 상태를 변경하는 중 오류가 발생했습니다.");
     }
+  };
+  // 4. ✅ 수정 모드 토글 함수
+  const handleToggleEdit = () => {
+    setIsEditing((prev) => !prev);
+  };
+
+  // 5. ✅ 저장(수정) 버튼 핸들러
+  const handleSave = async () => {
+    if (!post) return;
+
+    const postId = parseInt(id as string);
+    const updatedData = {
+      title: editTitle,
+      content: editContent,
+    };
+
+    try {
+      const response = await updatePost(postId, updatedData);
+
+      setPost(prevPost => {
+        if (prevPost) {
+          return { ...prevPost, ...response };
+        }
+        return response;
+      }); // 서버에서 받은 최신 데이터로 업데이트
+      setIsEditing(false); // 읽기 모드로 전환
+      alert("게시글이 성공적으로 수정되었습니다.");
+    } catch (error) {
+      console.error("게시글 수정 실패:", error);
+      alert("게시글 수정에 실패했습니다.");
+    }
+  };
+
+  // 6. ✅ 취소 버튼 핸들러
+  const handleCancel = () => {
+    // 기존 데이터로 복원하고 읽기 모드로 전환
+    if (post) {
+      setEditTitle(post.title);
+      setEditContent(post.content);
+    }
+    setIsEditing(false);
   };
 
   // 편집용: overlay에 보여줄 텍스트 (마스킹/원문 토글)
@@ -322,14 +376,41 @@ export default function PostDetail () {
             <div className="pd-post-title-bt">
               <div className="pd-post-title"><h2>{post.title}</h2></div>
               <div className="action-buttons">
+                {/* 지수, 민우 수정  */}
                 <button className="postupdate" onClick={startEditing}>수정</button>
                 <button>삭제</button>
+                {/* === 버튼 그룹 전환 === */}
+                {isEditing ? (
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button className="postsave" onClick={handleSave}>
+                      저장
+                    </button>
+                    <button className="postcancel" onClick={handleCancel}>
+                      취소
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button className="postupdate" onClick={handleToggleEdit}>
+                      수정
+                    </button>
+                    <button>삭제</button>
+                  </>
+                )}
               </div>
             </div>
 
             <div className="pd-post-info">
-              <span className="author"><h3>작성자: {post.nickname}</h3></span>
-              <span className="date">{formatDateTime(post.date)}</span>
+              <span className="author">
+                <h3>작성자: {post.nickname}</h3>
+              </span>
+                            <span className="date">
+                {post.updatedAt &&
+                new Date(post.createdAt).getTime() !==
+                  new Date(post.updatedAt).getTime()
+                  ? `(수정) ${formatDateTime(post.updatedAt)} `
+                  : formatDateTime(post.createdAt)}
+              </span>
             </div>
 
             <div className="pd-post-body">
@@ -424,46 +505,118 @@ export default function PostDetail () {
               <hr/>
             }
 
+
+      
             {post.files && post.files.length > 0 && (
               <div className="pd-attachment">
                 첨부파일:
                 {post.files.map((file, index) => {
-                  if (!file || !file.url || !file.fileName) return null;
+                  // if (!file || !file.url || !file.fileName) return null;
 
-                  const fileExtension = file.fileName.split('.').pop()?.toLowerCase();
-                  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
+                  // const fileExtension = file.fileName.split('.').pop()?.toLowerCase();
+                  // const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
 
-                  const urlKey = `${file.url}-${index}`;
+                  // const urlKey = `${file.url}-${index}`;
 
+
+                  // return (
+                  //   <div key={urlKey} className="attachment-item">
+                  //     {isImage ? (
+                  //       <div className="pd-image-wrapper">
+                  //         <img
+                  //           src={file.url}
+                  //           alt={file.fileName}
+                  //           className={`pd-attachment-image ${revealedImageUrls[urlKey] ? "pd-unblur" : "pd-blur"}`}
+                  //           onClick={() => setRevealedImageUrls(prev => ({ ...prev, [urlKey]: !prev[urlKey] }))}
+                  //         />
+                  //         <div className="pd-image-controls">
+                  //           <button
+                  //             onClick={() => setRevealedImageUrls(prev => ({ ...prev, [urlKey]: true }))}
+                  //           >
+                  //             이미지 보기
+                  //           </button>
+                  //           <button
+                  //             onClick={() => setRevealedImageUrls(prev => ({ ...prev, [urlKey]: false }))}
+                  //           >
+                  //             다시 블러
+                  //           </button>
+                  //         </div>
+                  //       </div>
+                  //     ) : (
+                  //       <a href={file.url} target="_blank" rel="noopener noreferrer">{file.fileName}</a>
+                  // console.log("확인", file);
                   return (
-                    <div key={urlKey} className="attachment-item">
-                      {isImage ? (
-                        <div className="pd-image-wrapper">
-                          <img
-                            src={file.url}
-                            alt={file.fileName}
-                            className={`pd-attachment-image ${revealedImageUrls[urlKey] ? "pd-unblur" : "pd-blur"}`}
-                            onClick={() => setRevealedImageUrls(prev => ({ ...prev, [urlKey]: !prev[urlKey] }))}
-                          />
-                          <div className="pd-image-controls">
-                            <button
-                              onClick={() => setRevealedImageUrls(prev => ({ ...prev, [urlKey]: true }))}
-                            >
-                              이미지 보기
-                            </button>
-                            <button
-                              onClick={() => setRevealedImageUrls(prev => ({ ...prev, [urlKey]: false }))}
-                            >
-                              다시 블러
-                            </button>
-                          </div>
-                        </div>
+                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      {file.fileType && file.fileType.startsWith('image/') ? (
+                        <>
+                          <a
+                            href={`${BASE_URL}${file.url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              e.preventDefault(); // Prevent default link behavior
+                              setShowImageMap(prev => ({ ...prev, [index]: !prev[index] }));
+                            }}
+                          >
+                            {`${file.fileOriginalName} (${
+                              file.fileSize === null || file.fileSize === undefined
+                                ? "크기 정보 없음"
+                                : `${(file.fileSize / (1024 * 1024)).toFixed(3)}MB`
+                            })`}
+                          </a>
+                          <button
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = `${BASE_URL}${file.url}`;
+                              link.download = file.fileOriginalName || 'download';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                            style={{ padding: '4px 8px', cursor: 'pointer' }}
+                          >
+                            다운로드
+                          </button>
+                          {showImageMap[index] && (
+                            <img
+                              src={`${BASE_URL}${file.url}`}
+                              alt={file.fileOriginalName}
+                              style={{ maxWidth: "100%", height: "auto", display: "block", marginTop: "8px", border: "1px solid #eee" }}
+                            />
+                          )}
+                        </>
                       ) : (
-                        <a href={file.url} target="_blank" rel="noopener noreferrer">{file.fileName}</a>
+                        <>
+                          <a
+                            href={`${BASE_URL}${file.url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {`${file.fileOriginalName} (${
+                              file.fileSize === null || file.fileSize === undefined
+                                ? "크기 정보 없음"
+                                : `${(file.fileSize / (1024 * 1024)).toFixed(3)}MB`
+                            })`}
+                          </a>
+                          <button
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = `${BASE_URL}${file.url}`;
+                              link.download = file.fileOriginalName || 'download';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                            style={{ padding: '4px 8px', cursor: 'pointer' }}
+                          >
+                            다운로드
+                          </button>
+                        </>
                       )}
                     </div>
                   );
                 })}
+                
               </div>
             )}
 
