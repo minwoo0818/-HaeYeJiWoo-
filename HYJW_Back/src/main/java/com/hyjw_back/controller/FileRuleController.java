@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hyjw_back.dto.FileRuleDto;
+import com.hyjw_back.dto.FileSettingsDto; // FileSettingsDto import 추가
 import com.hyjw_back.service.FileRuleService;
 
 @PreAuthorize("hasRole('ADMIN')")
@@ -29,9 +30,9 @@ public class FileRuleController {
         }
     }
     @GetMapping
-    public ResponseEntity<FileRuleDto> getFileRule() {
+    public ResponseEntity<FileSettingsDto> getFileRule() { // 반환 타입 변경
         try {
-            FileRuleDto dto = fileRuleService.getCurrentRule(); // DB에서 설정값 가져오기
+            FileSettingsDto dto = fileRuleService.getCurrentRule(); // 타입 변경
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.status(500).build(); // 실패 시 500 응답

@@ -93,10 +93,12 @@ public class UserController {
 
     }
 
-    @GetMapping("getuserinfo")
-    public ResponseEntity<?> getUser() {
-        List<UserDto> userDto = usersService.getUser();
-        return ResponseEntity.ok(userDto);
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
+        System.out.println("✅ UserController.getCurrentUser() 메서드 호출됨");
+        String userEmail = authentication.getName();
+        Users user = usersService.findByEmail(userEmail);
+        return ResponseEntity.ok(new UserDto(user));
     }
 
 }

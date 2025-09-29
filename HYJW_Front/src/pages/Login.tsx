@@ -1,8 +1,8 @@
-// React 및 필요한 라이브러리 import
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextField, Button, Stack, Typography, Box } from "@mui/material";
 import { useAuthStore } from "../authStore";
+import { getCurrentUser } from "../api/UserApi"; // getCurrentUser import
 
 // 환경 변수에서 API 기본 URL 가져오기
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -46,14 +46,19 @@ const Login = () => {
           const isAdmin = data.role === "ADMIN";
           console.log("👉 isAdmin 판단 결과:", isAdmin);
 
-          if (rawToken && nickname) {
-            const token = rawToken.startsWith("Bearer ")
-              ? rawToken.substring(7)
-              : rawToken;
-            sessionStorage.setItem("jwt", token);
-            login(nickname, isAdmin, token);
-          }
-        } else {
+                        if (rawToken && nickname) {
+                          const token = rawToken.startsWith("Bearer ")
+                            ? rawToken.substring(7)
+                            : rawToken;
+          
+                          console.log("Login.tsx: getCurrentUser에 전달될 토큰:", token); // 추가된 로그
+          
+                          // /users/me API 호출하여 userId 가져오기
+                          const currentUser = await getCurrentUser(token);
+                          const userId = currentUser.userId;
+          
+                          login(nickname, isAdmin, token, userId); // userId 추가하여 login 함수 호출
+                        }        } else {
           console.warn("JSON 응답이 아님:", contentType);
         }
 
@@ -63,7 +68,8 @@ const Login = () => {
         alert("이메일 또는 비밀번호가 잘못되었습니다."); //
       } else if (res.status === 500) {
         alert("서버 오류입니다. 잠시 후 다시 시도해주세요."); //
-      } else {
+      }
+      else {
         const msg = await res.text();
         alert(msg); // 기타 오류 메시지
       }

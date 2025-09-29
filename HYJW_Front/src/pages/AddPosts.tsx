@@ -19,6 +19,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../authStore"; // useAuthStore import
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -93,19 +94,22 @@ export default function AddPosts() {
   }, [form.content]);
 
   useEffect(() => {
-    // 💡 JWT 토큰 키가 'jwt'라고 가정하고 통일하여 사용
-    const token = sessionStorage.getItem("jwt"); 
-    fetch(`${BASE_URL}/admin/main`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    // /files/settings 엔드포인트는 인증 없이 접근 가능하므로 토큰 체크 및 isAdmin 조건 불필요
+    fetch(`${BASE_URL}/files/settings`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
         setUploadLimit(data.file_max_num);
         setUploadSize(data.file_size);
         setAllowedExtensions(data.file_type);
       })
       .catch((err) => {
-        console.error("설정값 불러오기 실패:", err);
+        console.error("파일 업로드 설정값 불러오기 실패:", err);
+        alert("파일 업로드 설정값을 불러오지 못했습니다. 기본값이 적용됩니다.");
       });
   }, []);
 
@@ -237,10 +241,18 @@ export default function AddPosts() {
     previewRef.current.scrollTop = textareaRef.current.scrollTop;
   };
 
-  const handleSubmit = async () => {
-    const userId = 1;
+  const { userId } = useAuthStore(); // userId 가져오기
 
-    const hashtagsArray = form.hashtags
+  const handleSubmit = async () => {
+    // const userId = 1; // 하드코딩된 userId 제거
+
+    if (!userId) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    const hashtagsArray = (form.hashtags || "")
       .split(",")
       .map((tag) => tag.trim())
       .filter((tag) => tag !== "");
@@ -350,8 +362,8 @@ const proceedSubmit = async (
         hashtags: hashtagsArray,
         files: form.files,
       },
-      1
-    );
+      userId
+    ); // 하드코딩된 1 대신 userId 사용
   };
 
   return (

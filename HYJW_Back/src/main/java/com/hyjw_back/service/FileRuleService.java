@@ -1,6 +1,7 @@
 package com.hyjw_back.service;
 
 import com.hyjw_back.dto.FileRuleDto;
+import com.hyjw_back.dto.FileSettingsDto;
 import com.hyjw_back.entity.FileRule;
 import com.hyjw_back.entity.repository.FileRuleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,10 @@ public class FileRuleService {
         fileRuleRepository.save(rule); // 덮어쓰기
     }
 
-    public FileRuleDto getCurrentRule() {
+    public FileSettingsDto getCurrentRule() {
         FileRule rule = fileRuleRepository.findById(1L).orElse(new FileRule());
 
-        FileRuleDto dto = new FileRuleDto();
+        FileSettingsDto dto = new FileSettingsDto();
         dto.setFile_max_num(rule.getFileMaxNum());
         dto.setFile_size(rule.getFileSize());
         dto.setFile_type(rule.getFileType());

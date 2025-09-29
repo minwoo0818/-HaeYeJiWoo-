@@ -44,11 +44,13 @@ public class SecurityConfig {
                                 "/users/checkEmail",
                                 "/users/checkNickname",
                                 "/users/signup",
-                                "/users/**",
-                                "/postdetail/**",
                                 "/files/**",
-                                "/favicon.ico"
+                                "/favicon.ico",
+                                "/error"
                         ).permitAll()
+
+                        // /users/me 엔드포인트는 인증 필요
+                        .requestMatchers("/users/me").authenticated()
 
                         // 댓글 관련 엔드포인트 보안 설정
                         .requestMatchers(HttpMethod.POST, "/comments").authenticated()

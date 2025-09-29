@@ -33,10 +33,12 @@ public class JwtFilter extends OncePerRequestFilter {
         System.out.println("🔐 JwtFilter 요청 URI: " + uri);
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        System.out.println("🔍 Authorization 헤더: " + authHeader);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
                 String email = jwtService.parseToken(request);
+                System.out.println("📧 토큰에서 추출된 이메일: " + email);
                 if (email != null) {
                     Users user = jwtService.loadUserByEmail(email);
 
