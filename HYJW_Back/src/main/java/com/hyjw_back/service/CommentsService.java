@@ -1,7 +1,6 @@
 package com.hyjw_back.service;
 
 import com.hyjw_back.dto.AdminCommentDto;
-import com.hyjw_back.dto.AdminCommentDto.AdminCommentDtoBuilder;
 import com.hyjw_back.dto.CommentCreateDto;
 import com.hyjw_back.dto.CommentResponseDto; // Import the new DTO
 import com.hyjw_back.entity.Comments;

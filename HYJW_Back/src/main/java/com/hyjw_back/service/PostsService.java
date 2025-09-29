@@ -460,13 +460,7 @@ public class PostsService {
         return postLikesRepository.findByPostAndUser(post, user).isPresent();
     }
 
-    @Transactional(readOnly = true)
-    public List<PostCardDto> getDeletedPosts() {
-        List<Posts> posts = postsRepository.findByIsDeleteTrue(); // 삭제된 것만
-        return posts.stream()
-                .map(this::convertToPostCardDto)
-                .collect(Collectors.toList());
-    }
+
 
     @Transactional
     public PostDetailDto updatePost(Long id, PostUpdateDto postUpdateDto) {

@@ -63,7 +63,8 @@ public class PostController {
     // 관리자: 삭제된 게시글 목록 확인
     @GetMapping("/admin/deleted")
     public ResponseEntity<List<PostCardDto>> getDeletedPosts() {
-        return ResponseEntity.ok(postsService.getDeletedPosts());
+        List<PostCardDto> searchResults = postsService.getDeletedPosts();
+        return ResponseEntity.ok(searchResults);
     }
 
     // getAllPosts, getPostDetail 등 다른 메서드는 기존과 동일

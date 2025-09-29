@@ -20,6 +20,8 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const navItems = [
   { name: "게임", id: "GAME" },
   { name: "맛집", id: "GOOD_RESTAURANT" },
@@ -200,7 +202,10 @@ export default function AddPosts() {
           content: payload.content,
           hashtags: payload.hashtags,
         };
-        const res = await axios.post(`/api/posts/${userId}`, body);
+        const res = await axios.post(`${BASE_URL}/posts/${userId}`, body, {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem('token')}`
+  }});
         console.log("게시글 등록 성공:", res.data);
       } else {
         const fd = new FormData();
@@ -209,7 +214,7 @@ export default function AddPosts() {
         fd.append("content", payload.content);
         fd.append("hashtags", JSON.stringify(payload.hashtags));
         fd.append("file", payload.files);
-        const res = await axios.post(`/api/posts/${userId}`, fd, {
+        const res = await axios.post(`${BASE_URL}/posts/${userId}`, fd, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         console.log("게시글 등록 성공 (with file):", res.data);
