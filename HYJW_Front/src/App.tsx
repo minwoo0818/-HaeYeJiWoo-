@@ -10,6 +10,7 @@ import AdminPostList from "./pages/AdminPostList";
 import AdminMain from "./pages/AdminMain";
 import AdminDataTables from "./pages/AdminDataTables";
 import AdminRoute from "./AdminRoute";
+import Unauthorized from "./pages/Unauthorized";
 
 function App() {
   return (
@@ -23,12 +24,13 @@ function App() {
         <Route path="/posts/:type" element={<PostListApp />} />
         <Route path="/addposts" element={<AddPosts />} />
         <Route path="/postdetail/:id" element={<PostDetail />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
         {/* Admin Routes */}
         <Route element={<AdminRoute />}>
-          <Route path="/admin/postlist" element={<AdminPostList />} />
-          <Route path="/admin/main" element={<AdminMain />} />
-          <Route path="/admin/table" element={<AdminDataTables />} />
+          <Route path="/admin/postlist/*" element={<AdminPostList />} />
+          <Route path="/admin/main/*" element={<AdminMain />} />
+          <Route path="/admin/table/*" element={<AdminDataTables />} />
         </Route>
       </Routes>
     </>
