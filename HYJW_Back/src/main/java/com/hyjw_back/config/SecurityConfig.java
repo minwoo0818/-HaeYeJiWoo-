@@ -64,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/posts/*/like").authenticated()
                         .requestMatchers(HttpMethod.GET, "/posts/*/like/status").authenticated()
                         .requestMatchers("/user/update").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/posts/*/restore").hasRole("ADMIN")
 
                         // 나머지 전부 인증 필요
                         .anyRequest().authenticated()

@@ -61,6 +61,13 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
+    // 유저: 소프트 삭제된 게시물 복구 (isDelete = false)
+    @PutMapping("/{postId}/restore")
+    public ResponseEntity<Void> restorePost(@PathVariable Long postId) {
+        postsService.restorePost(postId);
+        return ResponseEntity.ok().build();
+    }
+
     // 관리자: 하드 삭제 (DB에서 완전히 삭제)
     @DeleteMapping("/admin/{postId}")
     public ResponseEntity<Void> hardDeletePost(@PathVariable Long postId) {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getDeletedPosts, restorePost, hardDeletePost } from "../api/postDetailApi";
 
 interface Post {
   id: number;
@@ -15,8 +16,7 @@ export default function AdminPostList() {
  // 삭제된 게시글 불러오기
   const loadDeletedPosts = async () => {
     try {
-      const res = await fetch("http://localhost:8080/posts/admin/deleted");
-      const data = await res.json();
+      const data = await getDeletedPosts();
       // PostCardDto -> Post 형태로 변환
       const formattedPosts: Post[] = data.map((post: any) => ({
         id: post.postId,
@@ -41,9 +41,8 @@ export default function AdminPostList() {
   // 복구
   const handleRestore = async (id: number) => {
     try {
-      await fetch(`http://localhost:8080/posts/admin/restore/${id}`, {
-        method: "PATCH",
-      });
+      await restorePost(id);
+      alert("게시글이 복구되었습니다.");
       // 화면에서 제거
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
@@ -56,14 +55,12 @@ export default function AdminPostList() {
   const handleHardDelete = async (id: number) => {
     if (!window.confirm("정말 영구 삭제하시겠습니까?")) return;
     try {
-      const res = await fetch(`http://localhost:8080/posts/admin/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error("삭제 실패");
+      await hardDeletePost(id);
+      alert("게시글이 영구적으로 삭제되었습니다.");
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch (err: any) {
       console.error(err);
-      alert(err.message);
+      alert("영구 삭제 실패");
     }
   };
 

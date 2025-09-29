@@ -394,6 +394,19 @@ public class PostsService {
         postsRepository.save(post);
     }
 
+    // 유저 : 소프트 삭제된 게시물 복구 (isDelete = false)
+    @Transactional
+    public void restorePost(Long postId) {
+        Posts post = postsRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        if (!post.getIsDelete()) {
+            throw new IllegalArgumentException("게시글이 삭제 상태가 아닙니다.");
+        }
+        post.setIsDelete(false); // 복구 처리
+        postsRepository.save(post);
+    }
+
     // 관리자 : 하드 삭제 (DB에서 완전히 삭제) 로직
     @Transactional
     public void hardDeletePost(Long postId) {

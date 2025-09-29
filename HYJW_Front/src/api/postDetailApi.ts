@@ -253,3 +253,40 @@ export const deletePost = async (postId: number): Promise<void> => {
     },
   });
 };
+
+export const restorePost = async (postId: number): Promise<void> => {
+    const token = sessionStorage.getItem("jwt");
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
+    await axios.put(`${BASE_URL}/posts/${postId}/restore`, null, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+};
+
+export const getDeletedPosts = async (): Promise<Post[]> => {
+    const token = sessionStorage.getItem("jwt");
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
+    const response = await axios.get(`${BASE_URL}/posts/admin/deleted`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
+export const hardDeletePost = async (postId: number): Promise<void> => {
+    const token = sessionStorage.getItem("jwt");
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
+    await axios.delete(`${BASE_URL}/posts/admin/${postId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+};
