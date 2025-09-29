@@ -35,8 +35,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/images/**", "/users/login", "/users/checkEmail", "/users/checkNickname",
-                                "/users/signup", "users/**", "postdetail/**", "posts/**", "/comments/**",
-                                "/comments/**")
+                                "/users/signup", "users/**", "/postdetail/**", "/posts/**", "/comments/**",
+                                "/comments/**","/files/**")
                         .permitAll()
                         .anyRequest().authenticated())
 

@@ -32,7 +32,7 @@ export default function AdminPage() {
     const fetchSettings = async () => {
       const token = sessionStorage.getItem("jwt");
       try {
-        const res = await fetch("/admin/main", {
+        const res = await fetch("/api/admin/main", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
