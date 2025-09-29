@@ -141,106 +141,122 @@ export default function AddPosts() {
     previewRef.current.scrollTop = textareaRef.current.scrollTop;
   };
 
-  const handleSubmit = async () => {
-    const userId = 1;
-    const hasFile = form.files && form.files.size > 0; //파일 존재 여부 확인 
+ // handleSubmit: 민감정보 검사 후 proceedSubmit만 호출 (중복 요청 제거)
+const handleSubmit = async () => {
+  const userId = 1;
 
-    const url = hasFile ? `/api/posts/create/file/${userId}` : `/api/posts/create/no_file/${userId}`;
+  const hashtagsArray = form.hashtags
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => tag !== "");
 
-    // 해시태그 쉼표로 구분해서 배열로 변환
-    const hashtagsArray = form.hashtags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag !== "");
+  const found = findSensitiveMatches(form.content || "");
+  if (found.length > 0) {
+    setSensitiveFound(found);
+    setSensitiveModalOpen(true);
+    return;
+  }
 
-    const found = findSensitiveMatches(form.content || "");
-    if (found.length > 0) {
-      setSensitiveFound(found);
-      setSensitiveModalOpen(true);
-      return;
+  // 이제 실제 요청은 proceedSubmit에서만 보냄
+  const result = await proceedSubmit(
+    { categoryId: form.categoryId, title: form.title, content: form.content, hashtags: hashtagsArray, files: form.files },
+    userId
+  );
+
+  if (result.success) {
+    alert("게시글이 등록되었습니다!");
+    navigate("/posts/all");
+  } else {
+    console.error("등록 실패 상세:", result.error);
+    alert("등록에 실패했습니다. 콘솔을 확인하세요.");
+  }
+};
+
+// proceedSubmit: 토큰이 있을 때만 Authorization 헤더를 추가하고, FormData 전송 시 Content-Type 미지정
+const proceedSubmit = async (
+  payload: { categoryId: string; title: string; content: string; hashtags: string[]; files: File | null },
+  userId: number
+) => {
+  const hasFile = !!payload.files;
+  const url = hasFile
+    ? `/api/posts/create/file/${userId}`
+    : `/api/posts/create/no_file/${userId}`;
+
+  try {
+    const token = localStorage.getItem("token");
+    const headers: Record<string, string> = {};
+    if (token) {
+      // 토큰이 있을 때만 Authorization 추가
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
-    await proceedSubmit({ categoryId: form.categoryId, title: form.title, content: form.content, hashtags: hashtagsArray, files: form.files }, userId);
-      //FormDate 생성
-    const formdata = new FormData();
-    formdata.append("categoryId", form.categoryId);
-    formdata.append("title", form.title);
-    formdata.append("content", form.content);
-    hashtagsArray.forEach((h) => {
-      formdata.append("hashtags", h);
-    })
-    // formdata.append("files", form.files ?? "");
-
+    let res;
     if (hasFile) {
-      formdata.append("files", form.files as File);
+      const fd = new FormData();
+      fd.append("categoryId", payload.categoryId);
+      fd.append("title", payload.title);
+      fd.append("content", payload.content);
+      payload.hashtags.forEach((h) => fd.append("hashtags", h));
+      // 서버가 기대하는 필드명이 'files'라면 그대로 유지
+      fd.append("files", payload.files as File);
+
+      // Content-Type 직접 설정하지 마세요.
+      res = await axios.post(url, fd, {
+        headers,
+        withCredentials: true,
+      });
+    } else {
+      const body = {
+        categoryId: payload.categoryId,
+        title: payload.title,
+        content: payload.content,
+        hashtags: payload.hashtags,
+      };
+
+      res = await axios.post(url, body, {
+        headers: { ...headers, "Content-Type": "application/json" },
+        withCredentials: true,
+      });
     }
 
-    try {
-      const res = await axios.post( url, formdata, {
-        headers: {
-          'Content-Type': 'multipart/form-data' 
-        }
-    });
-
-      console.log("게시글 등록 성공:", res.data);
-      alert("게시글이 등록되었습니다!");
-      //작성 완료 후 PostList로 이동
-      navigate("/posts/all");
-
-    } catch (err) { 
-      console.error("게시글 등록 실패:", err);
-      alert("등록에 실패했습니다.");
-    } 
-  };
-
-  const proceedSubmit = async (payload: { categoryId: string; title: string; content: string; hashtags: string[]; files: File | null }, userId: number) => {
-    try {
-      if (!payload.files) {
-        const body = {
-          categoryId: payload.categoryId,
-          title: payload.title,
-          content: payload.content,
-          hashtags: payload.hashtags,
-        };
-        const res = await axios.post(`${BASE_URL}/posts/${userId}`, body, {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`
-  }});
-        console.log("게시글 등록 성공:", res.data);
-      } else {
-        const fd = new FormData();
-        fd.append("categoryId", payload.categoryId);
-        fd.append("title", payload.title);
-        fd.append("content", payload.content);
-        fd.append("hashtags", JSON.stringify(payload.hashtags));
-        fd.append("file", payload.files);
-        const res = await axios.post(`${BASE_URL}/posts/${userId}`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        console.log("게시글 등록 성공 (with file):", res.data);
-      }
-
-      alert("게시글이 등록되었습니다!");
-      navigate("/posts/all");
-    } catch (err) {
-      console.error("게시글 등록 실패:", err);
-      alert("등록에 실패했습니다.");
+    console.log("게시글 등록 성공:", res.data);
+    return { success: true, data: res.data };
+  } catch (err: any) {
+    console.error("proceedSubmit 에러:", err);
+    if (err.response) {
+      console.error("서버 응답 status:", err.response.status);
+      console.error("서버 응답 data:", err.response.data);
     }
-  };
+    return { success: false, error: err };
+  }
+};
 
-  const handleModalProceed = async () => {
-    setSensitiveModalOpen(false);
+// handleModalProceed: 모달에서 계속 누르면 proceedSubmit 호출
+const handleModalProceed = async () => {
+  setSensitiveModalOpen(false);
 
-    let finalContent = form.content;
-    if (autoMaskOnProceed) finalContent = maskSensitiveInText(finalContent || "");
+  const userId = 1;
+  let finalContent = form.content;
+  if (autoMaskOnProceed) finalContent = maskSensitiveInText(finalContent || "");
 
-    const hashtagsArray = form.hashtags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag !== "");
+  const hashtagsArray = form.hashtags
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => tag !== "");
 
-    await proceedSubmit({ categoryId: form.categoryId, title: form.title, content: finalContent || "", hashtags: hashtagsArray, files: form.files }, 1);
-  };
+  const result = await proceedSubmit(
+    { categoryId: form.categoryId, title: form.title, content: finalContent || "", hashtags: hashtagsArray, files: form.files },
+    userId
+  );
+
+  if (result.success) {
+    alert("게시글이 등록되었습니다!");
+    navigate("/posts/all");
+  } else {
+    console.error("등록 실패 상세:", result.error);
+    alert("등록에 실패했습니다. 콘솔을 확인하세요.");
+  }
+};
 
   return (
     <Box sx={{ padding: 4, maxWidth: 800, margin: "auto" }}>
