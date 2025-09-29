@@ -31,14 +31,20 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/images/**", "/users/login", "/users/checkEmail", "/users/checkNickname",
-                                "/users/signup", "users/**", "/postdetail/**", "/posts/**", "/comments/**",
-                                "/comments/**","/files/**","/favicon.ico")
-                        .permitAll()
-                        .anyRequest().authenticated())
+                  .authorizeHttpRequests(request -> request
+                          .requestMatchers("/admin/**").hasRole("ADMIN")
+                          // 인증 없이 접근 가능한 공개 엔드포인트
+                          .requestMatchers("/images/**", "/users/login", "/users/checkEmail", "/users/checkNickname",
+                                  "/users/signup", "users/", "/postdetail/", "/comments/", "/files/", "/favicon.ico")
+                          .permitAll()
+                          .requestMatchers(HttpMethod.GET, "/posts/**").permitAll() // GET 요청은 모든 /posts 경로에 대해 허용 (예: 목록, 상세, 좋아요 수 조회)
+                          // 인증이 필요한 엔드포인트
+                          .requestMatchers(HttpMethod.POST, "/posts/{postId}/like").authenticated() // 게시물 좋아요
+                          .requestMatchers(HttpMethod.DELETE, "/posts/{postId}/like").authenticated() // 게시물 좋아요 취소
+                          .requestMatchers(HttpMethod.GET, "/posts/{postId}/like/status").authenticated() // 사용자 좋아요 상태 확인
+                          .anyRequest().authenticated()) // 위에 명시되지 않은 모든 요청은 인증 필요
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint));

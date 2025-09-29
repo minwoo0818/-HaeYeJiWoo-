@@ -12,6 +12,10 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+
+jwt:
+  secret: your-very-long-secret-key-string-your-very-long-secret-key-at-least-32-bytes
+
 #  web:
 #    resources:
 #      static-locations: file:///C:/-HaYeJiWoo-/images/

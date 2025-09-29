@@ -454,6 +454,10 @@ public class PostsService {
         Posts post = postsRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
+        if ("anonymousUser".equals(userEmail)) {
+            return false; // 익명 사용자는 좋아요 상태를 가질 수 없음
+        }
+
         Users user = usersRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userEmail));
 
