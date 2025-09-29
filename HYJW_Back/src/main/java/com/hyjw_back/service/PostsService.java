@@ -412,6 +412,8 @@ public class PostsService {
 
     @Transactional
     public void addLike(Long postId, String userEmail) {
+        System.out.println("addLike called with postId: " + postId + ", userEmail: " + userEmail);
+
         Posts post = postsRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
@@ -422,7 +424,7 @@ public class PostsService {
         postLikesRepository.findByPostAndUser(post, user).ifPresentOrElse(
                 postLike -> {
                     // Like already exists, do nothing or log
-                    System.out.println("User " + userEmail + " already liked post " + postId);
+                    System.out.println("User " + userEmail + " already liked post " + postId + ". Not adding new like.");
                 },
                 () -> {
                     // Like does not exist, create it
@@ -430,6 +432,7 @@ public class PostsService {
                     newPostLike.setPost(post);
                     newPostLike.setUser(user);
                     postLikesRepository.save(newPostLike);
+                    System.out.println("New like added for user " + userEmail + " on post " + postId);
                 });
     }
 
