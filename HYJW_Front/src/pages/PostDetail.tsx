@@ -224,8 +224,8 @@ export default function PostDetail() {
           {/* Header */}
           <div className="pd-post-header">
             <div className="pd-post-meta">
-              <div>글 번호: {post.id}</div>
-              <div>조회수 {post.views}</div>
+              <div className="pd-post-num">글 번호: {post.id}</div>
+              <div className="pd-view">조회수 {post.views}</div>
               <div style={{display:'flex', alignItems:'center', gap:'4px'}}>
                 <span onClick={handleLikeToggle} style={{cursor:'pointer', color:liked?'red':'black'}}>
                   {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
