@@ -35,7 +35,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request -> request
                 // Preflight 허용
-                .anyRequest().authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/images/**","/users/login","/users/checkEmail","/users/checkNickname","/users/signup","/postdetail/**","/posts/**","/comments/**", "/files/**").permitAll()
                         .requestMatchers("/user/update").authenticated()

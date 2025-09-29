@@ -33,15 +33,13 @@ public class UserDto {
     @NotBlank(message = "비밀번호는' 필수입니다.")
     private String hashedPassword;
 
-    @Enumerated(EnumType.STRING)
-    private ADMIN userRole = ADMIN.USER;
-
     // ✅ Users 엔티티를 인자로 받는 생성자 추가
     public UserDto(Users user) {
         this.userId = user.getUserId(); // Users 엔티티에 getUserId()가 있다고 가정
         this.userNickname = user.getUserNickname(); // Users 엔티티에 getUserNickname()이 있다고 가정
         this.email = user.getEmail(); // Users 엔티티에 getEmail()이 있다고 가정
     }
+    @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false)
     private Role userRole = Role.USER;
 

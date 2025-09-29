@@ -69,7 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 if (email != null) {
                     Users user = jwtService.loadUserByEmail(email);
 
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             user,
                             null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().name()))
