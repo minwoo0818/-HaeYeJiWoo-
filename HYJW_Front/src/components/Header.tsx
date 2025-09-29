@@ -10,10 +10,14 @@ import MenuItem from "@mui/material/MenuItem";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuIcon from "@mui/icons-material/Menu";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useAuthStore } from "../authStore";
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
+  const [adminAnchorEl, setAdminAnchorEl] = React.useState<null | HTMLElement>(
     null
   );
   const navigate = useNavigate();
@@ -21,14 +25,21 @@ function ResponsiveAppBar() {
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
-
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
+  };
+
+  const handleAdminMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAdminAnchorEl(event.currentTarget);
+  };
+  const handleAdminMenuClose = () => {
+    setAdminAnchorEl(null);
   };
 
   const handleClick = (path: To) => {
     navigate(path);
     handleCloseNavMenu();
+    handleAdminMenuClose();
   };
 
   const handleLoginClick = () => {
@@ -44,7 +55,6 @@ function ResponsiveAppBar() {
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  // ✅ 로그인 상태에 따라 마이페이지 버튼 조건부 포함
   const navItems = [
     { name: "게임", path: "/posts/GAME" },
     { name: "맛집", path: "/posts/GOOD_RESTAURANT" },
@@ -82,7 +92,6 @@ function ResponsiveAppBar() {
               <MenuIcon fontSize="large" />
             </IconButton>
 
-            {/* 모바일 메뉴 */}
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
@@ -91,12 +100,7 @@ function ResponsiveAppBar() {
               transformOrigin={{ vertical: "top", horizontal: "left" }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
-              PaperProps={{
-                sx: {
-                  minWidth: 220,
-                  paddingY: 1.5,
-                },
-              }}
+              PaperProps={{ sx: { minWidth: 220, paddingY: 1.5 } }}
             >
               {navItems.map((item) => (
                 <MenuItem
@@ -148,15 +152,57 @@ function ResponsiveAppBar() {
             ))}
           </Box>
 
-          {/* 로그인 / 로그아웃 버튼 */}
+          {/* 로그인 / 로그아웃 + 관리자 버튼 */}
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ flexGrow: 0 }}>
+          <Box sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
+            {isAuthenticated && (
+              <>
+                {/* ✅ 관리자 버튼 먼저 */}
+                <Button
+                  variant="outlined"
+                  onClick={handleAdminMenuOpen}
+                  sx={{
+                    mr: 2,
+                    backgroundColor: "#fff",
+                    color: "#747474",
+                    borderColor: "#747474",
+                    "&:hover": {
+                      backgroundColor: "#f0f0f0",
+                      borderColor: "#747474",
+                    },
+                  }}
+                  endIcon={<ArrowDropDownIcon />}
+                >
+                  관리자
+                </Button>
+
+                <Menu
+                  anchorEl={adminAnchorEl}
+                  open={Boolean(adminAnchorEl)}
+                  onClose={handleAdminMenuClose}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  transformOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  <MenuItem onClick={() => handleClick("/admin/main")}>
+                    관리자 메인
+                  </MenuItem>
+                  <MenuItem onClick={() => handleClick("/admin/table")}>
+                    데이터 조회
+                  </MenuItem>
+                  <MenuItem onClick={() => handleClick("/admin/postList")}>
+                    삭제이력 관리
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+
+            {/* ✅ 로그인 또는 로그아웃 버튼 뒤에 배치 */}
             {!isAuthenticated ? (
               <Button
                 variant="outlined"
                 color="inherit"
                 onClick={handleLoginClick}
-                sx={{ ml: 2 }}
+                sx={{ mr: 2 }}
               >
                 로그인
               </Button>
@@ -165,7 +211,7 @@ function ResponsiveAppBar() {
                 variant="outlined"
                 color="inherit"
                 onClick={handleLogoutClick}
-                sx={{ ml: 2 }}
+                sx={{ mr: 2 }}
               >
                 로그아웃
               </Button>

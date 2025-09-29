@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FileRuleRepository extends JpaRepository<FileRule, Long> {
+    FileRule findTopByOrderByIdDesc();
 }

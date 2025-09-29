@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -27,6 +27,35 @@ export default function AdminPage() {
   // 허용 파일 확장자 상태 (쉼표로 구분된 문자열)
   const [fileExtensions, setFileExtensions] = useState("jpg, png, pdf");
 
+  useEffect(() => {
+    if (!open) return;
+
+    const fetchSettings = async () => {
+      const token = sessionStorage.getItem("jwt");
+      try {
+        const res = await fetch("http://localhost:8080/admin/main", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setUploadCount(data.file_max_num);
+          setUploadSize(data.file_size);
+          setFileExtensions(data.file_type);
+        } else {
+          console.warn("설정 불러오기 실패:", await res.text());
+        }
+      } catch (err) {
+        console.error("설정 불러오기 에러:", err);
+      }
+    };
+
+    fetchSettings();
+  }, [open]);
+
   // 취소 버튼 클릭 시 모달 닫기
   const handleCancel = () => {
     setOpen(false);
@@ -40,12 +69,14 @@ export default function AdminPage() {
       file_type: fileExtensions,
     };
 
+    const token = sessionStorage.getItem("jwt");
+
     try {
-      await fetch("/api/file-rule", {
+      await fetch("http://localhost:8080/admin/main", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${Token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
