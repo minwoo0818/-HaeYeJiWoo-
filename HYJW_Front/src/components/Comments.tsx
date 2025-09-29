@@ -39,8 +39,7 @@ export default function Comments({
       const createdComment = await addComment(
         postId,
         newComment,
-        null,
-        token
+        null
       );
       setComments([...comments, createdComment]);
       setNewComment("");
@@ -59,8 +58,7 @@ export default function Comments({
       const createdReply = await addComment(
         postId,
         replyContent,
-        parentId,
-        token
+        parentId
       );
       setComments([...comments, createdReply]);
       setReplyInputs({ ...replyInputs, [parentId]: "" });
