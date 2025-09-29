@@ -1,6 +1,5 @@
 package com.hyjw_back.service;
 
-import com.fasterxml.classmate.AnnotationOverrides;
 import com.hyjw_back.entity.Users;
 import com.hyjw_back.entity.repository.UsersRepository;
 import io.jsonwebtoken.JwtParser;
@@ -25,13 +24,15 @@ public class JwtService {
     static final long EXPIRATIONTIME = 24 * 60 * 60 * 1000;
     static final Key SINING_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role) //
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
                 .signWith(SINING_KEY)
                 .compact();
     }
+
 
     public String parseToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -49,7 +50,6 @@ public class JwtService {
         return null;
     }
 
-    // ✅ 여기에 넣어야 합니다!
     public Users loadUserByEmail(String email) {
         return usersRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));

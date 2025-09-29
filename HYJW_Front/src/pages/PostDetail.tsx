@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { getPostDetail, getCommentsByPostId } from "../postDetailApi";
 import type { Comment } from "../type";
 import type { Post } from "../types/PostType";
+import { useAuthStore } from "../authStore";
 const formatDateTime = (isoString: string) => {
   const date = new Date(isoString);
   const year = date.getFullYear();
@@ -19,6 +20,7 @@ export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const currentNickname = useAuthStore((state) => state.nickname);
   useEffect(() => {
     if (id) {
       const postId = parseInt(id);
@@ -49,10 +51,12 @@ export default function PostDetail() {
             <div className="pd-post-title">
               <h2>{post.title}</h2>
             </div>
-            <div className="action-buttons">
-              <button className="postupdate">수정</button>
-              <button>삭제</button>
-            </div>
+            {currentNickname === post.nickname && (
+              <div className="action-buttons">
+                <button className="postupdate">수정</button>
+                <button>삭제</button>
+              </div>
+            )}
           </div>
           <div className="pd-post-info">
             <span className="author">
@@ -60,6 +64,7 @@ export default function PostDetail() {
             </span>
             <span className="date">{formatDateTime(post.date)}</span>
           </div>
+
           <div className="pd-post-body">{post.content}</div>
           <div className="pd-hashtags">
             {post.hashtags.map((tag: string) => `#${tag} `)}

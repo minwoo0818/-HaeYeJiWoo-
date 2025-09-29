@@ -36,12 +36,19 @@ const Login = () => {
         const contentType = res.headers.get("Content-Type");
         if (contentType?.includes("application/json")) {
           const data = await res.json(); // ✅ JSON 응답일 때만 파싱
+
+          console.log("✅ 로그인 응답:", data);
+          console.log("👉 role:", data.role);
+          console.log("👉 nickname:", data.nickname);
+
           const nickname = data.nickname;
           const token = data.token || res.headers.get("Authorization");
+          const isAdmin = data.role === "ADMIN";
+          console.log("👉 isAdmin 판단 결과:", isAdmin);
 
           if (token && nickname) {
             sessionStorage.setItem("jwt", token);
-            login(nickname);
+            login(nickname, isAdmin);
           }
         } else {
           console.warn("JSON 응답이 아님:", contentType);

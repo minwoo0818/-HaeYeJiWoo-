@@ -6,6 +6,7 @@ import {
   deleteComment,
   getCommentsByPostId,
 } from "../postDetailApi";
+import { useAuthStore } from "../authStore";
 
 interface CommentsProps {
   postId: number;
@@ -23,6 +24,7 @@ export default function Comments({
   const [showReplyInput, setShowReplyInput] = useState<{
     [key: number]: boolean;
   }>({});
+  const currentNickname = useAuthStore((state) => state.nickname);
 
   // 새로운 댓글 등록
   const handleAddComment = async () => {
@@ -112,12 +114,14 @@ export default function Comments({
           </p>
           <div className="pd-ex-comment-content">
             <p>{comment.content}</p>
-            <div className="comment-actions">
-              <button>수정</button>
-              <button onClick={() => handleDeleteComment(comment.id)}>
-                삭제
-              </button>
-            </div>
+            {currentNickname === comment.userNickname && (
+              <div className="comment-actions">
+                <button>수정</button>
+                <button onClick={() => handleDeleteComment(comment.id)}>
+                  삭제
+                </button>
+              </div>
+            )}
           </div>
           <hr />
         </div>

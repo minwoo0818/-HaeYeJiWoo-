@@ -1,7 +1,6 @@
 package com.hyjw_back;
-
-import com.hyjw_back.constant.ADMIN;
 import com.hyjw_back.constant.CategoryId;
+import com.hyjw_back.constant.Role;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,7 @@ public class HyjwBackApplication implements CommandLineRunner {
         user1.setUserNickname("개발자A");
         user1.setEmail("wjdgotjd10@naver.com");
         user1.setHashedPassword(passwordEncoder.encode("1234"));
-        user1.setUserRole(ADMIN.ADMIN); //
+        user1.setUserRole(Role.ADMIN); //
         usersRepository.save(user1);
 
 
