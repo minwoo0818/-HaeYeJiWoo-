@@ -153,6 +153,7 @@ export function PostCard({ post, onDelete }: PostCardProps) {
               padding: "6px 12px",
               cursor: "pointer",
             }}
+            onClick={handleEdit}
           >
             수정
           </button>
