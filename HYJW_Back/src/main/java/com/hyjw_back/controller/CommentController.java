@@ -2,6 +2,7 @@ package com.hyjw_back.controller;
 
 import com.hyjw_back.dto.CommentCreateDto;
 import com.hyjw_back.dto.CommentResponseDto;
+import com.hyjw_back.dto.CommentUpdateDto;
 import com.hyjw_back.service.CommentsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,13 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-class CommentUpdateDto {
-    private String content;
-}
+
 
 @RestController
 @RequestMapping("/comments")
