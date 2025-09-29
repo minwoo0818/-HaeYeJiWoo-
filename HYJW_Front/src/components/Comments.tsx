@@ -28,16 +28,20 @@ export default function Comments({
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState<string>("");
   const currentNickname = useAuthStore((state) => state.nickname);
+  const { token } = useAuthStore();
+  console.log('Current token:', token);
 
   // 새로운 댓글 등록
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
     try {
-      const createdComment = await addComment({
-        content: newComment,
-        postId: postId,
-      });
+      const createdComment = await addComment(
+        postId,
+        newComment,
+        null,
+        token
+      );
       setComments([...comments, createdComment]);
       setNewComment("");
     } catch (error) {
@@ -52,11 +56,12 @@ export default function Comments({
     if (!replyContent?.trim()) return;
 
     try {
-      const createdReply = await addComment({
-        content: replyContent,
-        postId: postId,
-        parentCommentId: parentId,
-      });
+      const createdReply = await addComment(
+        postId,
+        replyContent,
+        parentId,
+        token
+      );
       setComments([...comments, createdReply]);
       setReplyInputs({ ...replyInputs, [parentId]: "" });
       setShowReplyInput({ ...showReplyInput, [parentId]: false });

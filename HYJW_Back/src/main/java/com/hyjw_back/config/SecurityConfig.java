@@ -46,10 +46,15 @@ public class SecurityConfig {
                                 "/users/signup",
                                 "/users/**",
                                 "/postdetail/**",
-                                "/comments/**",
                                 "/files/**",
                                 "/favicon.ico"
                         ).permitAll()
+
+                        // 댓글 관련 엔드포인트 보안 설정
+                        .requestMatchers(HttpMethod.POST, "/comments").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/comments/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/comments/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/comments/**").authenticated()
 
                         // GET /posts/**는 전체 공개
                         .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()

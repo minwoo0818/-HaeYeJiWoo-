@@ -48,7 +48,7 @@ const Login = () => {
 
           if (token && nickname) {
             sessionStorage.setItem("jwt", token);
-            login(nickname, isAdmin);
+            login(nickname, isAdmin, token);
           }
         } else {
           console.warn("JSON 응답이 아님:", contentType);
