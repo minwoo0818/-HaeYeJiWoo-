@@ -66,10 +66,10 @@ export const updateComment = async (commentId: number, content: string): Promise
     return response.data;
 };
 
-export const updatePost = async (postId: number, data: { title: string, content: string }): Promise<Post> => {
-    const response = await axios.put(`${BASE_URL}/posts/${postId}`, data);
-    return response.data;
-};
+// export const updatePost = async (postId: number, data: { title: string, content: string }): Promise<Post> => {
+//     const response = await axios.put(`${BASE_URL}/posts/${postId}`, data);
+//     return response.data;
+// };
 
 // Post Like APIs
 export const likePost = async (postId: number): Promise<void> => {
@@ -96,4 +96,48 @@ export const getPostLikeStatus = async (postId: number): Promise<boolean> => {
 export const getPostLikesCount = async (postId: number): Promise<number> => {
     const response = await axios.get(`${BASE_URL}/posts/${postId}/likes/count`);
     return response.data.count; // Assuming backend returns { count: number }
+}
+// 게시글 수정 (PUT 요청) 함수
+export const updatePost = async (postId: number, updatedPost: Post): Promise<Post> => {
+  try {
+    const formData = new FormData();
+
+    // 문자열 데이터 추가
+    formData.append("title", updatedPost.title);
+    formData.append("content", updatedPost.content);
+
+    // 해시태그 배열 → JSON 문자열로 변환해서 전송
+    if (updatedPost.hashtags) {
+      formData.append("hashtags", JSON.stringify(updatedPost.hashtags));
+    }
+
+    // 파일 데이터 처리
+    if (updatedPost.files) {
+      updatedPost.files.forEach((fileObj: any) => {
+        // 새로 업로드한 파일이면 `file` 속성이 있을 것이고,
+        // 기존 파일이면 url만 있을 수 있음
+        if (fileObj.file) {
+          formData.append("files", fileObj.file);
+        } else {
+          // 기존 파일은 그대로 유지할 수 있도록 id나 url을 따로 전송
+          formData.append("existingFiles", JSON.stringify(fileObj));
+        }
+      });
+    }
+
+    const response = await axios.put<Post>(
+      `${BASE_URL}/posts/${postId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("API Error updating post:", error);
+    throw error;
+  }
 };

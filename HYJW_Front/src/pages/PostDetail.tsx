@@ -48,6 +48,11 @@ export default function PostDetail () {
   const [currentLikesCount, setCurrentLikesCount] = useState(0);
   const [editingContent, setEditingContent] = useState<string>("");
   const [showAllSensitiveInPreview, setShowAllSensitiveInPreview] = useState(false);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+
+  // 수정 모드 상태
+  const [editFiles, setEditFiles] = useState<Post['files']>([]); 
+  const [editHashtags, setEditHashtags] = useState<string[]>([]); 
 
   // 블러 토글 관리를 위해 id 세트 사용 (읽기 전용 뷰에서 사용)
   const [revealedTextIds, setRevealedTextIds] = useState<Record<string, boolean>>({});
@@ -67,23 +72,36 @@ export default function PostDetail () {
   const [showImageMap, setShowImageMap] = useState<{ [key: number]: boolean }>({});
 
   useEffect(() => {
-    if (id) {
-      const postId = parseInt(id);
-      getPostDetail(postId).then((postData) => {
-        setPost(postData);
-        setCurrentLikesCount(postData.likes);
-        // 3. ✅ 기존 데이터를 수정 상태의 초기값으로 설정
-        if (postData) {
-          setEditTitle(postData.title);
-          setEditContent(postData.content);
-        }
-      });
-      getCommentsByPostId(postId).then((commentsData) => {
-        setComments(commentsData);
-      });
-      getPostLikeStatus(postId).then(setLiked);
-    }
-  }, [id]);
+  if (!id) return;
+  const postId = parseInt(id);
+  console.log('현재 요청하는 게시글 ID:', postId);
+
+  // setTimeout을 사용하여 0.5초 지연
+  const timer = setTimeout(() => {
+    // 게시글 상세 조회
+    getPostDetail(postId).then(postData => {
+      setPost(postData);
+      setCurrentLikesCount(postData?.likes || 0);
+
+      if (postData) {
+        // 수정 모드 초기값
+        setEditTitle(postData.title);
+        setEditContent(postData.content);
+        setEditFiles(postData.files || []);
+        setEditHashtags(postData.hashtags || []);
+      }
+    });
+
+    // 댓글 조회
+    getCommentsByPostId(postId).then(setComments);
+
+    // 좋아요 상태 조회
+    getPostLikeStatus(postId).then(setLiked);
+  }, 500);
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  return () => clearTimeout(timer);
+}, [id]);
 
   useEffect(() => {
     // textarea 높이 자동 조절 (편집 중)
@@ -124,36 +142,49 @@ export default function PostDetail () {
   // 5. ✅ 저장(수정) 버튼 핸들러
   const handleSave = async () => {
     if (!post) return;
-
     const postId = parseInt(id as string);
     const updatedData = {
       title: editTitle,
       content: editContent,
+       files: editFiles,
+      hashtags: editHashtags, 
     };
 
-    try {
-      const response = await updatePost(postId, updatedData);
+    //(함수 호출 담당)
+      try {
+      const response = await updatePost(postId, updatedData); 
+      setPost(response); 
+      setIsEditing(false); 
+      setNewFiles([]); // 새로운 파일 상태 초기화
+      alert('게시글이 성공적으로 수정되었습니다.');
+      } catch (error) {
+      console.error('게시글 수정 실패:', error);
+      alert('게시글 수정에 실패했습니다.');
+      }
+      }; 
 
-      setPost(prevPost => {
-        if (prevPost) {
-          return { ...prevPost, ...response };
-        }
-        return response;
-      }); // 서버에서 받은 최신 데이터로 업데이트
-      setIsEditing(false); // 읽기 모드로 전환
-      alert("게시글이 성공적으로 수정되었습니다.");
-    } catch (error) {
-      console.error("게시글 수정 실패:", error);
-      alert("게시글 수정에 실패했습니다.");
-    }
+    // 첨부파일 삭제
+    const handleFileDelete = (indexToDelete: number) => {
+    setEditFiles(editFiles.filter((_, idx) => idx !== indexToDelete));
   };
 
-  // 6. ✅ 취소 버튼 핸들러
+   // 새 첨부파일 선택
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    setNewFiles(selectedFiles);
+
+    const tempFiles = selectedFiles.map(file => ({ url: URL.createObjectURL(file), fileOriginalName: file.name }));
+    setEditFiles(tempFiles); // 선택한 파일로 교체
+    e.target.value = '';
+  };
+
+   // 취소
   const handleCancel = () => {
-    // 기존 데이터로 복원하고 읽기 모드로 전환
     if (post) {
       setEditTitle(post.title);
       setEditContent(post.content);
+      setEditFiles(post.files || []);
+      setEditHashtags(post.hashtags || []);
     }
     setIsEditing(false);
   };

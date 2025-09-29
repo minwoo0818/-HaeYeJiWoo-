@@ -29,5 +29,6 @@ public class PostUpdateDto {
     // 5-1. 기존 첨부파일 중 삭제할 파일의 ID 목록
     private List<Long> fileIdsToDelete;
 
+//    private List<MultipartFile> fileIdsToUpdate;
 
 }

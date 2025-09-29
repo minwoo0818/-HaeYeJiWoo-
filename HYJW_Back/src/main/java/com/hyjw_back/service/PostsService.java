@@ -4,6 +4,7 @@ import com.hyjw_back.constant.CategoryId;
 import com.hyjw_back.dto.*;
 import com.hyjw_back.entity.*;
 import com.hyjw_back.entity.repository.*;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +45,8 @@ public class PostsService {
 
     @Autowired
     private FilesRepository filesRepository;
+
+    private final EntityManager em; // 2. 필드 주입 확인 (RequiredArgsConstructor를 사용하므로 이 형태가 맞습니다)
 
     //========================================== 첨부파일포함 ==========================================
     @Transactional
@@ -469,6 +472,82 @@ public class PostsService {
         );
 
         // 4. 변경된 엔티티 -> DTO 변환 후 반환
+        // 2. 해시태그 업데이트: 기존 연결 DB에서 삭제 후 새로 저장
+        postHashtagRepository.deleteByPost(postEntity); // ⭐️ DB에서 기존 연결 명시적 삭제
+        em.flush();
+        postEntity.getPostHashtags().clear();
+
+        if (postUpdateDto.getHashtags() != null) {
+            postUpdateDto.getHashtags().forEach(tagName -> {
+                Hashtags hashtag = hashtagRepository.findByTag(tagName)
+                        .orElseGet(() -> {
+                            Hashtags newHashtag = new Hashtags();
+                            newHashtag.setTag(tagName);
+                            return hashtagRepository.save(newHashtag);
+                        });
+
+                PostHashtags postHashtag = new PostHashtags();
+                postHashtag.setPost(postEntity);
+                postHashtag.setHashtag(hashtag);
+
+                postHashtagRepository.save(postHashtag);
+                postEntity.getPostHashtags().add(postHashtag);
+            });
+        }
+
+        // 3-1. 기존 파일 삭제 처리 (서버 파일 및 DB 레코드)
+        if (postUpdateDto.getFileIdsToDelete() != null && !postUpdateDto.getFileIdsToDelete().isEmpty()) {
+            postUpdateDto.getFileIdsToDelete().forEach(fileId -> {
+                Files fileEntity = filesRepository.findById(fileId)
+                        .orElseThrow(() -> new EntityNotFoundException("삭제할 파일을 찾을 수 없습니다. File ID: " + fileId));
+
+                String filePath = itemImgLocation + fileEntity.getUrl().replace("/files/", "");
+
+                try {
+                    File deleteFile = new File(filePath);
+                    if (deleteFile.exists() && deleteFile.delete()) {
+                        System.out.println("서버 파일 삭제 성공: " + filePath);
+                    }
+                } catch (Exception e) {
+                    System.err.println("파일 삭제 중 오류 발생: " + e.getMessage());
+                }
+                filesRepository.delete(fileEntity);
+            });
+        }
+
+        // 3-2. 새로 추가된 파일 처리 (서버 저장 및 DB 레코드 추가)
+        if (postUpdateDto.getNewFiles() != null && !postUpdateDto.getNewFiles().isEmpty()) {
+            for (MultipartFile newFile : postUpdateDto.getNewFiles()) {
+                if (newFile.isEmpty()) continue;
+
+                try {
+                    String originalFileName = newFile.getOriginalFilename();
+                    String extension = originalFileName != null && originalFileName.contains(".") ?
+                            originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
+                    String savedFileName = UUID.randomUUID().toString() + extension;
+
+                    File destinationFile = new File(itemImgLocation + savedFileName);
+                    if (!destinationFile.getParentFile().exists()) {
+                        destinationFile.getParentFile().mkdirs();
+                    }
+                    newFile.transferTo(destinationFile);
+
+                    Files files = new Files();
+                    files.setFileOriginalName(originalFileName);
+                    files.setUrl("/files/" + savedFileName);
+                    files.setFileType(extension.replace(".", ""));
+                    files.setPost(postEntity);
+
+                    filesRepository.save(files);
+                    postEntity.getFiles().add(files);
+
+                } catch (IOException | IllegalStateException e) {
+                    throw new RuntimeException("파일 저장에 실패했습니다: " + newFile.getOriginalFilename(), e);
+                }
+            }
+        }
+
+        // 4. 변경된 엔티티를 DTO로 변환 후 반환
         return new PostDetailDto(postEntity);
         // PostDetailDto 생성자에 Posts 엔티티를 받아 DTO로 변환하는 로직이 있다고 가정
     }

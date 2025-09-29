@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
@@ -113,7 +114,12 @@ public class PostController {
     @PutMapping("/{id}")
     public ResponseEntity<PostDetailDto> updatePost(
             @PathVariable("id") Long postId,
-            @RequestBody PostUpdateDto postUpdateDto) { // 수정된 데이터를 DTO로 받음
+            // ⭐️ DTO는 @RequestPart로 받습니다 (Content-Type: application/json 부분)
+            @RequestPart("postUpdateDto") PostUpdateDto postUpdateDto,
+            // ⭐️ 파일 목록은 @RequestParam으로 받습니다 (필수가 아닐 수 있으므로 required = false)
+            @RequestParam(value = "newFiles", required = false) List<MultipartFile> newFiles) {
+
+        postUpdateDto.setNewFiles(newFiles);
 
         PostDetailDto updatedPost = postsService.updatePost(postId, postUpdateDto);
         return ResponseEntity.ok(updatedPost); // 200 OK와 수정된 DTO 반환
