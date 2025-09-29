@@ -22,32 +22,54 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+
     private final JwtService jwtService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
         String uri = request.getRequestURI();
-        System.out.println("JwtFilter 요청 URI: " + uri);
 
-        String jwtToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (jwtToken != null) {
-            String email = jwtService.parseToken(request);
-            if (email != null) {
-                Users user = jwtService.loadUserByEmail(email);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                user,
-                                null,
-                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().name()))
-                        );
-//                authentication.setDetails(user); // 선택 사항
-//                authentication.setAuthenticated(true);
-                SecurityContextHolder.getContext().setAuthentication(authentication);    }
+        // 🔹 공개 엔드포인트는 그냥 패스
+        if (uri.startsWith("/posts")
+                || uri.startsWith("/comments")
+                || uri.startsWith("/users")
+                || uri.startsWith("/images")
+                || uri.startsWith("/files")
+                || uri.equals("/favicon.ico")) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            try {
+                String token = authHeader.substring(7); // "Bearer " 이후 토큰만 추출
+                String email = jwtService.parseToken(request);
+
+                if (email != null) {
+                    Users user = jwtService.loadUserByEmail(email);
+
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().name()))
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (Exception e) {
+                // 토큰이 잘못됐으면 401 반환
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+        }
+
+        // Authorization 헤더 없으면 그냥 다음 필터로 넘김
         filterChain.doFilter(request, response);
     }
-
 }
+
