@@ -5,6 +5,7 @@ import com.hyjw_back.service.CommentsService;
 import com.hyjw_back.service.PostsService;
 import jakarta.persistence.Id;
 import jakarta.persistence.PostUpdate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.security.Principal;
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/posts")
-@CrossOrigin(origins = "http://localhost:5174") //프론트 URL 허용
+@CrossOrigin(origins = "http://localhost:5173") //프론트 URL 허용
 public class PostController {
 
     @Autowired
