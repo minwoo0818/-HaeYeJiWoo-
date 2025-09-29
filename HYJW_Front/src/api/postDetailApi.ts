@@ -82,7 +82,15 @@ export const addComment = async (
 
 
 export const deleteComment = async (commentId: number): Promise<void> => {
-    await axios.delete(`${BASE_URL}/comments/${commentId}`);
+    const token = sessionStorage.getItem("jwt");
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
+    await axios.delete(`${BASE_URL}/comments/${commentId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const updateComment = async (commentId: number, content: string): Promise<Comment> => {
@@ -187,6 +195,10 @@ export const getPostLikesCount = async (postId: number): Promise<number> => {
 // 게시글 수정 (PUT 요청) 함수
 export const updatePost = async (postId: number, updatedPost: Post): Promise<Post> => {
   try {
+    const token = sessionStorage.getItem("jwt");
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
     const formData = new FormData();
 
     // 문자열 데이터 추가
@@ -218,6 +230,7 @@ export const updatePost = async (postId: number, updatedPost: Post): Promise<Pos
       {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
       }
     );
