@@ -322,7 +322,7 @@ export default function PostDetail() {
                 return (
                   <div key={`${file.url}-${index}`} style={{marginBottom:8}}>
                     {isImage ? (
-                      <img src={file.url} alt={name} style={{maxWidth:'100%'}} />
+                      <img src={`http://localhost:8080${file.url}`} alt={name} style={{maxWidth:'100%'}} />
                     ) : (
                       <a href={file.url} target="_blank" rel="noopener noreferrer">{name}</a>
                     )}
