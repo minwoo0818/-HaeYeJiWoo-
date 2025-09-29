@@ -56,7 +56,7 @@ export const addComment = async (payload: AddCommentPayload): Promise<Comment> =
     console.log(response);
     console.log(payload);
     return response.data;
-};    
+};
 
 export const deleteComment = async (commentId: number): Promise<void> => {
     await axios.delete(`${BASE_URL}/comments/${commentId}`);
@@ -74,16 +74,55 @@ export const updateComment = async (commentId: number, content: string): Promise
 
 // Post Like APIs
 export const likePost = async (postId: number): Promise<void> => {
-    await axios.post(`${BASE_URL}/posts/${postId}/like`);
+    let token = sessionStorage.getItem("jwt");
+    console.log("Token from sessionStorage (raw):", token); // Added console.log
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
+    // Remove "Bearer " prefix if it exists
+    if (token.startsWith("Bearer ")) {
+        token = token.substring(7);
+    }
+    console.log("Token from sessionStorage (cleaned):", token); // Added console.log
+
+    await axios.post(`${BASE_URL}/posts/${postId}/like`, {}, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const unlikePost = async (postId: number): Promise<void> => {
-    await axios.delete(`${BASE_URL}/posts/${postId}/like`);
+    let token = sessionStorage.getItem("jwt");
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
+    // Remove "Bearer " prefix if it exists
+    if (token.startsWith("Bearer ")) {
+        token = token.substring(7);
+    }
+    await axios.delete(`${BASE_URL}/posts/${postId}/like`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 };
 
 export const getPostLikeStatus = async (postId: number): Promise<boolean> => {
     try {
-        const response = await axios.get(`${BASE_URL}/posts/${postId}/like/status`);
+        let token = sessionStorage.getItem("jwt");
+        if (!token) {
+            throw new Error("Authentication token not found.");
+        }
+        // Remove "Bearer " prefix if it exists
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        const response = await axios.get(`${BASE_URL}/posts/${postId}/like/status`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
         // return response.status === 200;
         return response.data;
     } catch (error) {
@@ -95,7 +134,19 @@ export const getPostLikeStatus = async (postId: number): Promise<boolean> => {
 };
 
 export const getPostLikesCount = async (postId: number): Promise<number> => {
-    const response = await axios.get(`${BASE_URL}/posts/${postId}/likes/count`);
+    let token = sessionStorage.getItem("jwt");
+    if (!token) {
+        throw new Error("Authentication token not found.");
+    }
+    // Remove "Bearer " prefix if it exists
+    if (token.startsWith("Bearer ")) {
+        token = token.substring(7);
+    }
+    const response = await axios.get(`${BASE_URL}/posts/${postId}/likes/count`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     return response.data.count; // Assuming backend returns { count: number }
 }
 // 게시글 수정 (PUT 요청) 함수

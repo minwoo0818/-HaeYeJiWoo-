@@ -1,6 +1,7 @@
 package com.hyjw_back.controller;
 
 import com.hyjw_back.dto.*;
+import com.hyjw_back.entity.Users;
 import com.hyjw_back.service.CommentsService;
 import com.hyjw_back.service.PostsService;
 import jakarta.persistence.Id;
@@ -12,13 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import java.security.Principal;
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/posts")
-@CrossOrigin(origins = "http://localhost:5173") //프론트 URL 허용
+
 public class PostController {
 
     @Autowired
@@ -148,25 +152,28 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/like")
-    public ResponseEntity<Void> likePost(@PathVariable Long postId, Principal principal) {
-        // 임시: 인증 기능이 없으므로 하드코딩된 사용자 이메일 사용 (테스트용, 실제 구현 시 변경 필요)
-        String userEmail = "testuser@example.com"; // 실제 사용자 이메일로 대체 필요
+    public ResponseEntity<Void> likePost(@PathVariable Long postId, Authentication authentication) {
+        //String userEmail = authentication.getName();
+        Users user = (Users) authentication.getPrincipal();
+        String userEmail = user.getEmail();
         postsService.addLike(postId, userEmail);
+        System.out.println(userEmail);
+
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{postId}/like")
-    public ResponseEntity<Void> unlikePost(@PathVariable Long postId, Principal principal) {
-        // 임시: 인증 기능이 없으므로 하드코딩된 사용자 이메일 사용 (테스트용, 실제 구현 시 변경 필요)
-        String userEmail = "testuser@example.com"; // 실제 사용자 이메일로 대체 필요
+    public ResponseEntity<Void> unlikePost(@PathVariable Long postId, Authentication authentication) {
+        Users user = (Users) authentication.getPrincipal();
+        String userEmail = user.getEmail();
         postsService.removeLike(postId, userEmail);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{postId}/like/status")
-    public ResponseEntity<Boolean> getPostLikeStatus(@PathVariable Long postId, Principal principal) {
-        // 임시: 인증 기능이 없으므로 하드코딩된 사용자 이메일 사용 (테스트용, 실제 구현 시 변경 필요)
-        String userEmail = "testuser@example.com"; // 실제 사용자 이메일로 대체 필요
+    public ResponseEntity<Boolean> getPostLikeStatus(@PathVariable Long postId, Authentication authentication) {
+        Users user = (Users) authentication.getPrincipal();
+        String userEmail = user.getEmail();
         boolean isLiked = postsService.getPostLikeStatus(postId, userEmail);
         return ResponseEntity.ok(isLiked);
     }
