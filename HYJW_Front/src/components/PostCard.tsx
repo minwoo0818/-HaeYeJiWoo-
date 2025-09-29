@@ -3,8 +3,7 @@ import type { Post } from "../types/PostType";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { likePost, unlikePost, getPostLikeStatus } from "../api/postDetailApi";
+import { likePost, unlikePost, getPostLikeStatus, deletePost } from "../api/postDetailApi";
 import { useAuthStore } from "../authStore";
 
 interface PostCardProps {
@@ -47,7 +46,7 @@ export function PostCard({ post, onDelete }: PostCardProps) {
     e.stopPropagation(); // 카드 클릭 이벤트 방지
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
-      await axios.delete(`/api/posts/${post.id}`);
+      await deletePost(post.id);
       onDelete(post.id); // 부모 상태 갱신
     } catch (err) {
       console.error(err);
