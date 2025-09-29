@@ -13,7 +13,6 @@ import {
   ListItemText,
   Dialog,
 } from "@mui/material";
-import { Token } from "@mui/icons-material";
 
 export default function AdminPage() {
   const [open, setOpen] = useState(false);
@@ -33,7 +32,7 @@ export default function AdminPage() {
     const fetchSettings = async () => {
       const token = sessionStorage.getItem("jwt");
       try {
-        const res = await fetch("http://localhost:8080/admin/main", {
+        const res = await fetch("/admin/main", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -72,7 +71,7 @@ export default function AdminPage() {
     const token = sessionStorage.getItem("jwt");
 
     try {
-      await fetch("http://localhost:8080/admin/main", {
+      await fetch("/api/admin/main", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
