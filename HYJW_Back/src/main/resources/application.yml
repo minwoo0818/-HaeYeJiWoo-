@@ -22,5 +22,5 @@ spring:
 #uploadPath: file:///C:/typeapp/-HaYeJiWoo-/images/
 #itemImgLocation: C:/typeapp/-HaYeJiWoo-/images
 # 지수컴퓨타 경로
-uploadPath: file:C:/-HaeYeJiWoo-/images/
-itemImgLocation: C:/-HaeYeJiWoo-/images
+uploadPath: file:C:///-HaeYeJiWoo-/
+itemImgLocation: C:/-HaeYeJiWoo-/

@@ -189,7 +189,7 @@ function ResponsiveAppBar() {
                   <MenuItem onClick={() => handleClick("/admin/table")}>
                     데이터 조회
                   </MenuItem>
-                  <MenuItem onClick={() => handleClick("/admin/postList")}>
+                  <MenuItem onClick={() => handleClick("/admin/postlist")}>
                     삭제이력 관리
                   </MenuItem>
                 </Menu>

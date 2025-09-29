@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/images/**", "/users/login", "/users/checkEmail", "/users/checkNickname",
                                 "/users/signup", "users/**", "/postdetail/**", "/posts/**", "/comments/**",
-                                "/comments/**","/files/**")
+                                "/comments/**","/files/**","/favicon.ico")
                         .permitAll()
                         .anyRequest().authenticated())
 

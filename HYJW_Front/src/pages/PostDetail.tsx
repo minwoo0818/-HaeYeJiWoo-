@@ -547,7 +547,7 @@ export default function PostDetail () {
                   // console.log("확인", file);
                   return (
                     <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      {file.fileType && file.fileType.startsWith('image/') ? (
+                      {file.fileType && file.fileType.startsWith('/images/') ? (
                         <>
                           <a
                             href={`${BASE_URL}${file.url}`}
@@ -567,7 +567,7 @@ export default function PostDetail () {
                           <button
                             onClick={() => {
                               const link = document.createElement('a');
-                              link.href = `${BASE_URL}${file.url}`;
+                              link.href = `http://localhost:8080${file.url}`;
                               link.download = file.fileOriginalName || 'download';
                               document.body.appendChild(link);
                               link.click();
@@ -579,7 +579,7 @@ export default function PostDetail () {
                           </button>
                           {showImageMap[index] && (
                             <img
-                              src={`${BASE_URL}${file.url}`}
+                              src={`http://localhost:8080${file.url}`}
                               alt={file.fileOriginalName}
                               style={{ maxWidth: "100%", height: "auto", display: "block", marginTop: "8px", border: "1px solid #eee" }}
                             />
@@ -588,7 +588,7 @@ export default function PostDetail () {
                       ) : (
                         <>
                           <a
-                            href={`${BASE_URL}${file.url}`}
+                            href={`http://localhost:8080${file.url}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -601,7 +601,7 @@ export default function PostDetail () {
                           <button
                             onClick={() => {
                               const link = document.createElement('a');
-                              link.href = `${BASE_URL}${file.url}`;
+                              link.href = `http://localhost:8080${file.url}`;
                               link.download = file.fileOriginalName || 'download';
                               document.body.appendChild(link);
                               link.click();
