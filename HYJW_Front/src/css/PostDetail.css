@@ -304,3 +304,11 @@ hr {
     border: none;
     border-top: 1px solid #eee; /* 얇은 구분선 */
 }
+
+.pd-post-num {
+  margin-left: 0px;
+}
+
+.pd-view {
+  margin-right: 10px;
+}
