@@ -28,9 +28,9 @@ jwt:
 #itemImgLocation: C:/typeapp/-HaYeJiWoo-/images
 # 지수컴퓨타 경로
 #uploadPath: file:C:///-HaeYeJiWoo-/
-#itemImgLocation: C:/-HaeYeJiWoo-/
+itemImgLocation: C:\-HaeYeJiWoo-\files
 #uploadPath: file:C:/-HaeYeJiWoo-/images/
 #itemImgLocation: C:/-HaeYeJiWoo-/images
 
 #민우 컴퓨터 경로
-itemImgLocation: D:\CodeHows\-HaeYeJiWoo-\files
+#itemImgLocation: D:\CodeHows\-HaeYeJiWoo-\files
