@@ -10,8 +10,13 @@ interface UserDto {
   userEmail: string;
 }
 
-export const getUser = async (): Promise<BackendUser[]> => {
-  const response = await axios.get(`${BASE_URL}/users/getuserinfo`);
+export const getUser = async (token: string): Promise<BackendUser[]> => {
+
+  const response = await axios.get(`${BASE_URL}/users/getuserinfo`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   return response.data;
 };
 

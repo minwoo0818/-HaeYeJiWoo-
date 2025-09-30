@@ -101,4 +101,10 @@ public class UserController {
         return ResponseEntity.ok(new UserDto(user));
     }
 
+    @GetMapping("getuserinfo")
+    public ResponseEntity<?> getUser() {
+        List<UserDto> userDto = usersService.getUser();
+        return ResponseEntity.ok(userDto);
+    }
+
 }

@@ -69,4 +69,17 @@ public class UsersService {
         return usersRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
     }
+
+    public List<UserDto> getUserinfo() {
+        List<Users> userInfo = usersRepository.findAll();
+        List<UserDto> userDtoList = new ArrayList<>();
+        for (Users user : userInfo) {
+            UserDto userDto = new UserDto();
+            userDto.setUserId(user.getUserId());
+            userDto.setUserNickname(user.getUserNickname());
+            userDto.setEmail(user.getEmail());
+            userDtoList.add(userDto);
+        }
+        return userDtoList;
+    }
 }

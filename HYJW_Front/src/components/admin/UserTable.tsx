@@ -10,14 +10,20 @@ import {
 import { useEffect, useState } from "react";
 import type { BackendUser } from "../../types/PostType";
 import { getUser } from "../../api/UserApi";
+import { useAuthStore } from "../../authStore";
+
 export default function UserTable() {
   const [users, setUsers] = useState<BackendUser[]>([]);
+  const token = useAuthStore((state) => state.token);
+
   const fetchUser = async () => {
     try {
-      const data = await getUser();
-      setUsers(data);
+      if (token) {
+        const data = await getUser(token);
+        setUsers(data);
+      }
     } catch (error) {
-      console.error("Failed to fetch comments:", error);
+      console.error("Failed to fetch users:", error);
     }
   };
 
